@@ -1,8 +1,8 @@
-# AppSuit-Android 설계 명세
+# AppCert 설계 명세
 
 - 문서 유형: 졸업 프로젝트(작품) 설계 명세
 - 작성일: 2026-09-02
-- 프로젝트: AppSuit-Android — Android 애플리케이션 런타임 자기보호(RASP) SDK
+- 프로젝트: AppCert — Android 애플리케이션 런타임 자기보호(RASP) SDK
 - 저자: 김건휘 (해킹보안학과)
 
 ## 1. 개요
@@ -28,14 +28,14 @@ Self-Protection) SDK를 개발한다. 상용 제품(예: Stealien AppSuit)이 �
 ## 2. 아키텍처
 
 ```
-appsuit-android/
+appcert/
 ├─ sdk/                         # Android 라이브러리 모듈 → AAR 산출물
 │  ├─ src/main/kotlin/
-│  │  ├─ AppSuit.kt             # 공개 API (init/scan/callback)
+│  │  ├─ AppCert.kt             # 공개 API (init/scan/callback)
 │  │  ├─ Config.kt              # 탐지 정책 · 응답 정책
 │  │  └─ Threat.kt              # 탐지 결과 타입
-│  └─ src/main/cpp/             # NDK 네이티브 코어 (실제 탐지)
-│     ├─ jni_bridge.cpp         # JNI 진입점, Kotlin ↔ native
+│  └─ src/main/cpp/             # NDK 네이티브 코어 (실제 탐지, C-only)
+│     ├─ jni_bridge.c           # JNI 진입점(RegisterNatives), Kotlin ↔ native
 │     ├─ root_detect.c
 │     ├─ antidebug.c
 │     ├─ frida_detect.c
@@ -43,21 +43,34 @@ appsuit-android/
 │     ├─ obf.h                  # 컴파일타임 XOR 문자열 난독
 │     ├─ util.c                 # /proc 파싱, syscall 헬퍼
 │     └─ CMakeLists.txt
-├─ demo-app/                    # 샘플 앱: 탐지 라이브 대시보드
+├─ demo-app/                    # 샘플 앱: 탐지 라이브 대시보드 (Compose)
 └─ docs/                        # 계획서 · 중간 · 최종 보고서
 ```
 
-- 언어: Kotlin(SDK 표면) + C(NDK 코어). 탐지 로직은 전부 네이티브에 두고 Java/Kotlin
-  계층은 얇은 브릿지로 한정한다. 이유: Java/Kotlin 바이트코드는 리패키징·후킹으로
+### 2.0 기술 스택
+| 레이어 | 선택 | 근거 |
+|--------|------|------|
+| 빌드 | Gradle(Kotlin DSL) + AGP | Android 표준 |
+| SDK 언어 | Kotlin | 공개 표면 |
+| 네이티브 코어 | C + NDK, CMake | C-only → libc++ 링크 불필요, `.so` 경량. CMake는 현행 기본 |
+| JNI 바인딩 | 동적 `RegisterNatives` | 심볼명 후킹 난이도↑(하드닝) |
+| 주기 탐지 | `ScheduledExecutorService`(java.util.concurrent) | stdlib, 의존성 0 |
+| demo-app UI | Jetpack Compose, 단일 Activity | 대시보드 데모용, 보일러플레이트 최소 |
+| SDK 의존성 | 없음(Kotlin stdlib + Android SDK + libc/liblog) | RASP 라이브러리 공격면·통합부담 최소화. DI/coroutines 미사용(YAGNI) |
+| 테스트 | JUnit + androidTest + native assert 자가점검 | 추가 프레임워크 없음 |
+| 산출 | AAR | 표준 배포 형태 |
+
+- 언어 원칙: Kotlin(SDK 표면) + C(NDK 코어). 탐지 로직은 전부 네이티브에 두고
+  Kotlin 계층은 얇은 브릿지로 한정한다. 이유: Kotlin/Java 바이트코드는 리패키징·후킹으로
   무력화가 쉬운 반면, 네이티브 코드는 우회 난이도가 높다.
-- 빌드: Gradle + CMake/NDK.
-- 가정: minSdk 24(Android 7.0), targetSdk 최신 안정 버전. ABI는 arm64-v8a, armeabi-v7a.
+- 버전 가정: minSdk 24(Android 7.0), compileSdk/targetSdk 35(Android 15), NDK r26+.
+  ABI는 arm64-v8a, armeabi-v7a(+에뮬레이터 테스트용 x86_64).
 
 ### 2.1 모듈 경계와 책임
 | 모듈 | 책임 | 인터페이스 | 의존 |
 |------|------|-----------|------|
-| `AppSuit`(Kotlin) | 공개 API, 생명주기, 주기 탐지 스케줄, 콜백 디스패치 | `init/scan/stop` | JNI 브릿지 |
-| `jni_bridge`(C++) | Kotlin ↔ native 변환, 결과 집계 | `nativeScan()` | 탐지 모듈들 |
+| `AppCert`(Kotlin) | 공개 API, 생명주기, 주기 탐지 스케줄, 콜백 디스패치 | `init/scan/stop` | JNI 브릿지 |
+| `jni_bridge`(C) | Kotlin ↔ native 변환, 결과 집계 | `nativeScan()` | 탐지 모듈들 |
 | `root_detect` 등 각 탐지 모듈(C) | 카테고리별 다중 중복 탐지, 점수 반환 | `detect_*() -> score/detail` | `util`, `obf` |
 | `util`/`obf`(C) | /proc 파싱, 문자열 난독 | 헬퍼 함수 | 없음 |
 
@@ -65,11 +78,11 @@ appsuit-android/
 
 ## 3. 공개 API (SDK 표면)
 
-- `AppSuit.init(context: Context, config: Config)`
+- `AppCert.init(context: Context, config: Config)`
   - 네이티브 초기화, 기대 서명 해시 로드, 백그라운드 주기 탐지 시작
-- `AppSuit.scan(): List<Threat>`
+- `AppCert.scan(): List<Threat>`
   - 온디맨드 1회 스캔. 활성화된 모든 카테고리 검사 후 위협 목록 반환
-- `AppSuit.stop()`
+- `AppCert.stop()`
   - 주기 탐지 중지
 - `Config`
   - `enabledChecks: Set<Check>` — ROOT / DEBUGGER / FRIDA / INTEGRITY
@@ -147,7 +160,7 @@ appsuit-android/
 - 탐지-우회는 본질적으로 창과 방패 — 완전 방어가 아니라 "우회 난이도 상승"이 목표임을
   보고서에 명확히 한다.
 - cowork/OneDrive 폴더는 셸 바이너리·git 쓰기가 차단되므로 프로젝트 루트를
-  `C:\dev\appsuit-android`로 둔다.
+  `C:\dev\appcert`로 둔다.
 
 ## 10. 참조 매핑
 - OWASP MASVS: RESILIENCE 요구사항(MASVS-RESILIENCE) — 루팅/디버그/후킹/무결성 대응
