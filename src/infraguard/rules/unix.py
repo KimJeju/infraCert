@@ -113,7 +113,7 @@ def u04(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     return NativeOutcome("GOOD" if po else "MANUAL", (po[2] if po else "/etc/shadow 확인 불가"))
 
 
-@register("U-06", "root 계정 su 제한", "하", UNIX)
+@register("U-06", "사용자 계정 su 기능 제한", "상", UNIX)
 def u06(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     if env.os == "aix":
         out, ok = _sh(conn, "lssec -f /etc/security/user -s root -a sugroups 2>/dev/null")
@@ -125,8 +125,8 @@ def u06(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     return NativeOutcome("GOOD" if "pam_wheel" in out else "VULN", out.strip() or "pam_wheel 미설정")
 
 
-@register("U-45", "UMASK 설정 관리", "중", UNIX)
-def u45(conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
+@register("U-30", "UMASK 설정 관리", "중", UNIX)
+def u30(conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
     # 시스템 기본 정책(설정파일)만 본다. 점검 계정 세션의 umask(USERGROUPS_ENAB 등)는 판정에 섞지 않는다.
     out, _ = _sh(conn, "grep -HiE '^\\s*umask' /etc/profile /etc/bashrc /etc/bash.bashrc "
                        "/etc/login.defs /etc/csh.cshrc /etc/profile.d/*.sh /etc/security/user 2>/dev/null")

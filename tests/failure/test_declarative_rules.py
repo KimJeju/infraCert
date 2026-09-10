@@ -3,7 +3,7 @@
 - 평가기에 eval/exec 없음(정적).
 - 화이트리스트 밖 연산자는 로드 단계에서 거부.
 - 추출 실패는 missing 판정으로 드러남, 규칙 미해당은 MANUAL.
-- 실제 룰팩 YAML(U-09/U-10/U-05)이 가짜 서버 출력으로 기대 판정을 낸다(파이썬 룰과 동일 결과).
+- 실제 룰팩 YAML(U-16/U-18/U-05, KISA 2026 번호)이 가짜 서버 출력으로 기대 판정을 낸다.
 - manifest.rule_files 에 미등록/해시불일치 파일은 무결성 실패로 실행을 막는다.
 """
 import ast
@@ -112,19 +112,19 @@ def _load_rule(rid: str) -> RuleSpec:
     return declarative.load_file(PACK / "rules" / f"{rid}.yaml")
 
 
-def test_u09_yaml_matches_python_behaviour():
-    good = evaluate(_load_rule("U-09"), _Conn({"/etc/passwd": "-rw-r--r-- 1 root root 1515 Sep 9 /etc/passwd\n"}), ENV)
-    bad = evaluate(_load_rule("U-09"), _Conn({"/etc/passwd": "-rw-rw-r-- 1 root root 1515 Sep 9 /etc/passwd\n"}), ENV)
-    other = evaluate(_load_rule("U-09"), _Conn({"/etc/passwd": "-rw-r--r-- 1 bin root 1515 Sep 9 /etc/passwd\n"}), ENV)
-    none = evaluate(_load_rule("U-09"), _Conn({}), ENV)
+def test_u16_yaml_matches_python_behaviour():
+    good = evaluate(_load_rule("U-16"), _Conn({"/etc/passwd": "-rw-r--r-- 1 root root 1515 Sep 9 /etc/passwd\n"}), ENV)
+    bad = evaluate(_load_rule("U-16"), _Conn({"/etc/passwd": "-rw-rw-r-- 1 root root 1515 Sep 9 /etc/passwd\n"}), ENV)
+    other = evaluate(_load_rule("U-16"), _Conn({"/etc/passwd": "-rw-r--r-- 1 bin root 1515 Sep 9 /etc/passwd\n"}), ENV)
+    none = evaluate(_load_rule("U-16"), _Conn({}), ENV)
     assert (good.verdict_raw, bad.verdict_raw, other.verdict_raw, none.verdict_raw) == ("GOOD", "VULN", "VULN", "NA")
     assert "기준" in good.evidence
 
 
-def test_u10_yaml_debian_shadow_group_exception():
-    deb = evaluate(_load_rule("U-10"), _Conn({"/etc/shadow": "-rw-r----- 1 root shadow 921 Sep 9 /etc/shadow\n"}), ENV)
-    strict = evaluate(_load_rule("U-10"), _Conn({"/etc/shadow": "-r-------- 1 root root 921 Sep 9 /etc/shadow\n"}), ENV)
-    loose = evaluate(_load_rule("U-10"), _Conn({"/etc/shadow": "-rw-r----- 1 root root 921 Sep 9 /etc/shadow\n"}), ENV)
+def test_u18_yaml_debian_shadow_group_exception():
+    deb = evaluate(_load_rule("U-18"), _Conn({"/etc/shadow": "-rw-r----- 1 root shadow 921 Sep 9 /etc/shadow\n"}), ENV)
+    strict = evaluate(_load_rule("U-18"), _Conn({"/etc/shadow": "-r-------- 1 root root 921 Sep 9 /etc/shadow\n"}), ENV)
+    loose = evaluate(_load_rule("U-18"), _Conn({"/etc/shadow": "-rw-r----- 1 root root 921 Sep 9 /etc/shadow\n"}), ENV)
     assert (deb.verdict_raw, strict.verdict_raw, loose.verdict_raw) == ("GOOD", "GOOD", "VULN")
 
 
@@ -144,7 +144,7 @@ def test_real_pack_declarative_rules_registered_with_kind():
     pk = loader.load(PACK)
     assert pk.runnable, pk.problems
     kinds = {rid: pk.rules[rid].kind for rid in pk.native}
-    assert kinds["U-09"] == "yaml" and kinds["U-01"] == "python"
+    assert kinds["U-16"] == "yaml" and kinds["U-01"] == "python"
     assert all(rid in REGISTRY for rid in pk.native)
 
 

@@ -1,5 +1,5 @@
-# U-12 /etc/(x)inetd.conf 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
-id: U-12
+# U-20 /etc/(x)inetd.conf 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-20
 name: /etc/(x)inetd.conf 소유자 및 권한
 severity: 상
 category: 파일및디렉터리

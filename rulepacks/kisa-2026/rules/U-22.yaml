@@ -1,16 +1,16 @@
-# U-09 /etc/passwd 파일 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
-id: U-09
-name: /etc/passwd 파일 소유자 및 권한
+# U-22 /etc/services 파일 소유자 및 권한
+id: U-22
+name: /etc/services 파일 소유자 및 권한
 severity: 상
 category: 파일및디렉터리
 platforms: [linux, aix, solaris, hpux]
 collect:
   - key: ls
-    cmd: "ls -ld /etc/passwd 2>/dev/null | head -1"
+    cmd: "ls -ld /etc/services 2>/dev/null | head -1"
 extract:
   - from: ls
     regex: '^(?P<perm>\S{10})\s+\S+\s+(?P<owner>\S+)\s+(?P<group>\S+)'
-    missing: NA                       # 파일 없음/읽기 불가 → 해당없음 (추측 안 함)
+    missing: NA
 verdict:
   - when: {owner: {ne: root}}
     then: VULN

@@ -1,12 +1,12 @@
-# U-10 /etc/shadow 파일 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
-id: U-10
-name: /etc/shadow 파일 소유자 및 권한
+# U-18 /etc/shadow 파일 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-18
+name: "/etc/shadow (AIX: /etc/security/passwd) 소유자 및 권한"
 severity: 상
 category: 파일및디렉터리
-platforms: [linux, solaris, hpux]
+platforms: [linux, aix, solaris, hpux]
 collect:
   - key: ls
-    cmd: "ls -ld /etc/shadow 2>/dev/null | head -1"
+    cmd: "ls -ld /etc/shadow /etc/security/passwd 2>/dev/null | head -1"
 extract:
   - from: ls
     regex: '^(?P<perm>\S{10})\s+\S+\s+(?P<owner>\S+)\s+(?P<group>\S+)'

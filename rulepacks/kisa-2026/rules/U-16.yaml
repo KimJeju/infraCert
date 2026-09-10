@@ -1,12 +1,12 @@
-# U-13 /etc/(r)syslog.conf 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
-id: U-13
-name: /etc/(r)syslog.conf 소유자 및 권한
+# U-16 /etc/passwd 파일 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-16
+name: /etc/passwd 파일 소유자 및 권한
 severity: 상
 category: 파일및디렉터리
 platforms: [linux, aix, solaris, hpux]
 collect:
   - key: ls
-    cmd: "ls -ld /etc/syslog.conf /etc/rsyslog.conf /etc/syslog-ng/syslog-ng.conf 2>/dev/null | head -1"
+    cmd: "ls -ld /etc/passwd 2>/dev/null | head -1"
 extract:
   - from: ls
     regex: '^(?P<perm>\S{10})\s+\S+\s+(?P<owner>\S+)\s+(?P<group>\S+)'

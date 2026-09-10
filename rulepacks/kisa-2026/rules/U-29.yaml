@@ -1,0 +1,22 @@
+# U-29 /etc/hosts.lpd 소유자 및 권한 — 파일이 없으면 양호
+id: U-29
+name: /etc/hosts.lpd 파일 소유자 및 권한
+severity: 하
+category: 파일및디렉터리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: ls
+    cmd: "ls -ld /etc/hosts.lpd 2>/dev/null | head -1"
+extract:
+  - from: ls
+    regex: '^(?P<perm>\S{10})\s+\S+\s+(?P<owner>\S+)'
+verdict:
+  - when: {ls: {absent: true}}
+    then: GOOD                       # 미존재 = 양호(가이드)
+  - when: {owner: {ne: root}}
+    then: VULN
+  - when: {perm: {mode_le: "600"}}
+    then: GOOD
+  - else: VULN
+evidence: [ls]
+note: "기준: 미존재 또는 소유자 root·권한 600 이하"
