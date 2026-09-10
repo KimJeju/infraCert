@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "infraguard"
+version = "0.1.0"
+description = "인프라 진단 실행·표준화 플랫폼 (고객사 PC 반입형 데스크톱)"
+requires-python = ">=3.11"
+dependencies = [
+    "PySide6>=6.7",
+    "pydantic>=2.7",
+    "PyYAML>=6.0",
+    "paramiko>=3.4",
+    "openpyxl>=3.1",
+    "Jinja2>=3.1",
+    "charset-normalizer>=3.3",
+    "pyte>=0.8.2",
+]
+
+[project.optional-dependencies]
+winrm = ["pywinrm>=0.4"]
+netdev = ["netmiko>=4.3"]
+dev = ["pytest>=8", "pytest-cov", "pytest-qt", "ruff", "mypy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "S"]
+ignore = ["S101"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

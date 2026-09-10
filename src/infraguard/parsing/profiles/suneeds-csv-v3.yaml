@@ -1,0 +1,13 @@
+name: suneeds-csv-v3
+description: 분야/점검방식/판단기준 포함 8컬럼 변형
+format: csv
+match:
+  header_all: ["항목코드", "진단항목", "분야", "중요도", "점검방식"]
+encoding_candidates: [utf-8-sig, utf-8, cp949, euc-kr]
+columns:
+  rule_id: 항목코드
+  name: 진단항목
+  severity: 중요도
+  verdict: 진단결과
+  evidence: 진단내용
+extra_columns: [분야, 점검방식, 판단기준]

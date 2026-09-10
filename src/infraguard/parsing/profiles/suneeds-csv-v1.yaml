@@ -1,0 +1,12 @@
+name: suneeds-csv-v1
+description: 자체제작 계열 표준 CSV (result() 함수 산출)
+format: csv
+match:
+  header_all: ["항목코드", "점검항목", "중요도", "결과", "코멘트"]
+encoding_candidates: [utf-8-sig, utf-8, cp949, euc-kr]
+columns:
+  rule_id: 항목코드
+  name: 점검항목
+  severity: 중요도
+  verdict: 결과
+  evidence: 코멘트

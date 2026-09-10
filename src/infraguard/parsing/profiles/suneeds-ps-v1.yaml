@@ -1,0 +1,13 @@
+name: suneeds-ps-v1
+description: PowerShell Export-Csv 산출 (상태/점검근거/조치권고)
+format: csv
+match:
+  header_all: ["항목코드", "중요도", "점검항목", "상태"]
+encoding_candidates: [utf-8-sig, utf-8, cp949]
+columns:
+  rule_id: 항목코드
+  name: 점검항목
+  severity: 중요도
+  verdict: 상태
+  evidence: 점검근거
+extra_columns: [분류, 조치권고]

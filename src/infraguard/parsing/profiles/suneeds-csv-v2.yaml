@@ -1,0 +1,13 @@
+name: suneeds-csv-v2
+description: 진단항목/진단결과/진단내용 5컬럼 변형
+format: csv
+match:
+  header_all: ["항목코드", "진단항목", "중요도"]
+  header_any: ["진단결과", "진단결과(양호/취약)"]
+encoding_candidates: [utf-8-sig, utf-8, cp949, euc-kr]
+columns:
+  rule_id: 항목코드
+  name: 진단항목
+  severity: 중요도
+  verdict: [진단결과, "진단결과(양호/취약)"]
+  evidence: [진단내용, "진단 내용"]

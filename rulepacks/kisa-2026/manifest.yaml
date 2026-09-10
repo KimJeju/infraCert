@@ -1,0 +1,651 @@
+name: kisa-2026
+version: 2026.09.01
+license: internal
+description: KISA 2026 주요정보통신기반시설 기술적 취약점 점검
+bundles:
+- id: aix-unix
+  description: AIX U-01~U-67 (ksh, 읽기전용)
+  script: scripts/aix_infra_scripts_2026.sh
+  sha256: c086fd52b94d9fff5c7d6b5596fe69c1b0e3e2504ef836519b0d95fe03fffcc1
+  interpreter: ksh
+  platforms:
+  - aix
+  side_effects: read
+  parser: report_txt
+  timeout: 1800
+  provides:
+  - U-01
+  - U-02
+  - U-03
+  - U-04
+  - U-05
+  - U-06
+  - U-07
+  - U-08
+  - U-09
+  - U-10
+  - U-11
+  - U-12
+  - U-13
+  - U-14
+  - U-15
+  - U-16
+  - U-17
+  - U-18
+  - U-19
+  - U-20
+  - U-21
+  - U-22
+  - U-23
+  - U-24
+  - U-25
+  - U-26
+  - U-27
+  - U-28
+  - U-29
+  - U-30
+  - U-31
+  - U-32
+  - U-33
+  - U-34
+  - U-35
+  - U-36
+  - U-37
+  - U-38
+  - U-39
+  - U-40
+  - U-41
+  - U-42
+  - U-43
+  - U-44
+  - U-45
+  - U-46
+  - U-47
+  - U-48
+  - U-49
+  - U-50
+  - U-51
+  - U-52
+  - U-53
+  - U-54
+  - U-55
+  - U-56
+  - U-57
+  - U-58
+  - U-59
+  - U-60
+  - U-61
+  - U-62
+  - U-63
+  - U-64
+  - U-65
+  - U-66
+  - U-67
+- id: oracle-db
+  description: Oracle 19c D-01~D-26 (sqlplus / as sysdba)
+  script: scripts/oracle_infra_script_2026.sh
+  sha256: 3d3198e5eb5b8ed1c9f7c6f537c1111fcf1fd032df8334e8b3c994004848c591
+  extra_files:
+  - scripts/oracle_infra_script_2026.sql
+  interpreter: ksh
+  platforms:
+  - linux
+  - aix
+  - solaris
+  side_effects: read
+  parser: report_txt
+  timeout: 1800
+  provides:
+  - D-01
+  - D-02
+  - D-03
+  - D-04
+  - D-05
+  - D-06
+  - D-07
+  - D-08
+  - D-09
+  - D-10
+  - D-11
+  - D-12
+  - D-13
+  - D-14
+  - D-15
+  - D-16
+  - D-17
+  - D-18
+  - D-19
+  - D-20
+  - D-21
+  - D-22
+  - D-23
+  - D-24
+  - D-25
+  - D-26
+- id: web-was
+  description: Tomcat/OHS/WebLogic WEB-01~WEB-26
+  script: scripts/web_infra_script_2026.sh
+  sha256: 9dedb4d92c3cf0bdc5155f878e2a9e651b87394dabb1467d4658b30ad72282d7
+  interpreter: ksh
+  platforms:
+  - linux
+  - aix
+  - solaris
+  side_effects: read
+  parser: report_txt
+  timeout: 1800
+  provides:
+  - WEB-01
+  - WEB-02
+  - WEB-03
+  - WEB-04
+  - WEB-05
+  - WEB-06
+  - WEB-07
+  - WEB-08
+  - WEB-09
+  - WEB-10
+  - WEB-11
+  - WEB-12
+  - WEB-13
+  - WEB-14
+  - WEB-15
+  - WEB-16
+  - WEB-17
+  - WEB-18
+  - WEB-19
+  - WEB-20
+  - WEB-21
+  - WEB-22
+  - WEB-23
+  - WEB-24
+  - WEB-25
+  - WEB-26
+native: &id001
+- U-01
+- U-02
+- U-03
+- U-04
+- U-05
+- U-06
+- U-09
+- U-10
+- U-11
+- U-12
+- U-13
+- U-15
+- U-45
+- U-64
+rules:
+- id: D-01
+  name: 기본 계정의 비밀번호/정책 변경
+  severity: 상
+  category: DBMS
+- id: D-02
+  name: 불필요(데모/샘플) 계정 제거
+  severity: 상
+  category: DBMS
+- id: D-03
+  name: 비밀번호 사용기간/복잡도 (DEFAULT 프로파일 기준)
+  severity: 상
+  category: DBMS
+- id: D-04
+  name: DBA(관리자) 권한 최소화
+  severity: 상
+  category: DBMS
+- id: D-05
+  name: 비밀번호 재사용 제약 (DEFAULT 프로파일)
+  severity: 중
+  category: DBMS
+- id: D-06
+  name: 사용자 계정 개별 부여
+  severity: 중
+  category: DBMS
+- id: D-08
+  name: 안전한 암호화 알고리즘 (SHA-2 이상; password_versions 에 12C 포함)
+  severity: 상
+  category: DBMS
+- id: D-09
+  name: 로그인 실패 잠금 (DEFAULT 프로파일 FAILED_LOGIN_ATTEMPTS)
+  severity: 중
+  category: DBMS
+- id: D-11
+  name: 시스템 테이블 비인가 접근 제한 (가이드 쿼리)
+  severity: 상
+  category: DBMS
+- id: D-17
+  name: Audit Table(AUD$) 접근 제한
+  severity: 하
+  category: DBMS
+- id: D-18
+  name: DBA Role 이 PUBLIC 에 부여되지 않을 것
+  severity: 상
+  category: DBMS
+- id: D-19
+  name: OS_ROLES / REMOTE_OS_AUTHENT / REMOTE_OS_ROLES = FALSE
+  severity: 상
+  category: DBMS
+- id: D-20
+  name: 인가되지 않은 Object Owner 제한 (가이드 쿼리)
+  severity: 하
+  category: DBMS
+- id: D-21
+  name: 인가되지 않은 GRANT OPTION 제한 (가이드 쿼리)
+  severity: 중
+  category: DBMS
+- id: D-22
+  name: RESOURCE_LIMIT = TRUE
+  severity: 하
+  category: DBMS
+- id: D-25
+  name: 보안 패치/버전
+  severity: 상
+  category: DBMS
+- id: D-26
+  name: 감사 기록 설정 (audit_trail / Unified Auditing)
+  severity: 상
+  category: DBMS
+- id: U-01
+  name: root 계정 원격 접속 제한
+  severity: 상
+  category: Unix
+- id: U-02
+  name: 비밀번호 관리정책 설정
+  severity: 상
+  category: Unix
+- id: U-03
+  name: 계정 잠금 임계값 설정
+  severity: 상
+  category: Unix
+- id: U-04
+  name: 비밀번호 파일 보호
+  severity: 상
+  category: Unix
+- id: U-05
+  name: root 이외의 UID 0 금지
+  severity: 상
+  category: Unix
+- id: U-06
+  name: 사용자 계정 su 기능 제한
+  severity: 상
+  category: Unix
+- id: U-07
+  name: 불필요한 계정 제거
+  severity: 하
+  category: Unix
+- id: U-08
+  name: 관리자 그룹에 최소한의 계정 포함
+  severity: 중
+  category: Unix
+- id: U-09
+  name: 계정이 존재하지 않는 GID 금지
+  severity: 하
+  category: Unix
+- id: U-10
+  name: 동일한 UID 금지
+  severity: 중
+  category: Unix
+- id: U-11
+  name: 사용자 Shell 점검
+  severity: 하
+  category: Unix
+- id: U-12
+  name: 세션 종료 시간 설정
+  severity: 하
+  category: Unix
+- id: U-13
+  name: 안전한 비밀번호 암호화 알고리즘 사용
+  severity: 중
+  category: Unix
+- id: U-14
+  name: root 홈, 패스 디렉터리 권한 및 PATH 설정
+  severity: 상
+  category: Unix
+- id: U-15
+  name: 파일 및 디렉터리 소유자 설정
+  severity: 상
+  category: Unix
+- id: U-16
+  name: /etc/passwd 파일 소유자 및 권한 설정(644 이하)
+  severity: 상
+  category: Unix
+- id: U-17
+  name: 시스템 시작 스크립트 권한 설정
+  severity: 상
+  category: Unix
+- id: U-18
+  name: /etc/security/passwd 소유자 및 권한(400 이하)
+  severity: 상
+  category: Unix
+- id: U-19
+  name: /etc/hosts 소유자 및 권한(644 이하)
+  severity: 상
+  category: Unix
+- id: U-20
+  name: /etc/inetd.conf 소유자 및 권한(600 이하)
+  severity: 상
+  category: Unix
+- id: U-21
+  name: /etc/syslog.conf 소유자 및 권한(644 이하)
+  severity: 상
+  category: Unix
+- id: U-22
+  name: /etc/services 소유자 및 권한(644 이하)
+  severity: 상
+  category: Unix
+- id: U-23
+  name: SUID, SGID, Sticky bit 설정 파일 점검
+  severity: 상
+  category: Unix
+- id: U-24
+  name: 사용자, 시스템 환경변수 파일 소유자 및 권한 설정
+  severity: 상
+  category: Unix
+- id: U-25
+  name: world writable 파일 점검
+  severity: 상
+  category: Unix
+- id: U-26
+  name: /dev에 존재하지 않는 device 파일 점검
+  severity: 상
+  category: Unix
+- id: U-27
+  name: \$HOME/.rhosts, hosts.equiv 사용 금지
+  severity: 상
+  category: Unix
+- id: U-28
+  name: 접속 IP 및 포트 제한
+  severity: 상
+  category: Unix
+- id: U-29
+  name: /etc/hosts.lpd 소유자 및 권한(600 이하/미존재 양호)
+  severity: 하
+  category: Unix
+- id: U-30
+  name: UMASK 설정 관리
+  severity: 중
+  category: Unix
+- id: U-31
+  name: 홈 디렉토리 소유자 및 권한 설정
+  severity: 중
+  category: Unix
+- id: U-32
+  name: 홈 디렉토리로 지정한 디렉토리의 존재 관리
+  severity: 중
+  category: Unix
+- id: U-33
+  name: 숨겨진 파일 및 디렉토리 검색 및 제거
+  severity: 하
+  category: Unix
+- id: U-34
+  name: Finger 서비스 비활성화
+  severity: 상
+  category: Unix
+- id: U-35
+  name: 공유 서비스에 대한 익명 접근 제한 설정
+  severity: 상
+  category: Unix
+- id: U-36
+  name: r 계열 서비스 비활성화(rlogin/rsh/rexec)
+  severity: 상
+  category: Unix
+- id: U-37
+  name: crontab 설정파일 권한 설정
+  severity: 상
+  category: Unix
+- id: U-38
+  name: DoS 취약 서비스 비활성화(echo/discard/daytime/chargen)
+  severity: 상
+  category: Unix
+- id: U-39
+  name: 불필요한 NFS 서비스 비활성화
+  severity: 상
+  category: Unix
+- id: U-40
+  name: NFS 접근 통제
+  severity: 상
+  category: Unix
+- id: U-41
+  name: 불필요한 automountd 제거
+  severity: 상
+  category: Unix
+- id: U-42
+  name: 불필요한 RPC 서비스 비활성화
+  severity: 상
+  category: Unix
+- id: U-43
+  name: NIS, NIS+ 점검
+  severity: 상
+  category: Unix
+- id: U-44
+  name: tftp, talk 서비스 비활성화
+  severity: 상
+  category: Unix
+- id: U-45
+  name: 메일 서비스 버전 점검
+  severity: 상
+  category: Unix
+- id: U-46
+  name: 일반 사용자의 메일 서비스 실행 방지
+  severity: 상
+  category: Unix
+- id: U-47
+  name: 스팸 메일 릴레이 제한
+  severity: 상
+  category: Unix
+- id: U-48
+  name: expn, vrfy 명령어 제한
+  severity: 중
+  category: Unix
+- id: U-49
+  name: DNS 보안 버전 패치
+  severity: 상
+  category: Unix
+- id: U-50
+  name: DNS Zone Transfer 설정
+  severity: 상
+  category: Unix
+- id: U-51
+  name: DNS 서비스의 취약한 동적 업데이트 설정 금지
+  severity: 중
+  category: Unix
+- id: U-52
+  name: Telnet 서비스 비활성화
+  severity: 중
+  category: Unix
+- id: U-53
+  name: FTP 서비스 정보 노출 제한
+  severity: 하
+  category: Unix
+- id: U-54
+  name: 암호화되지 않는 FTP 서비스 비활성화
+  severity: 중
+  category: Unix
+- id: U-55
+  name: FTP 계정 Shell 제한
+  severity: 중
+  category: Unix
+- id: U-56
+  name: FTP 서비스 접근 제어 설정
+  severity: 하
+  category: Unix
+- id: U-57
+  name: Ftpusers 파일 설정
+  severity: 중
+  category: Unix
+- id: U-58
+  name: 불필요한 SNMP 서비스 구동 점검
+  severity: 중
+  category: Unix
+- id: U-59
+  name: 안전한 SNMP 버전 사용
+  severity: 상
+  category: Unix
+- id: U-60
+  name: SNMP Community String 복잡성 설정
+  severity: 중
+  category: Unix
+- id: U-61
+  name: SNMP Access Control 설정
+  severity: 상
+  category: Unix
+- id: U-62
+  name: 로그인 시 경고 메시지 설정
+  severity: 하
+  category: Unix
+- id: U-63
+  name: sudo 명령어 접근 관리
+  severity: 중
+  category: Unix
+- id: U-64
+  name: 주기적 보안 패치 및 벤더 권고사항 적용
+  severity: 상
+  category: Unix
+- id: U-65
+  name: NTP 및 시각 동기화 설정
+  severity: 중
+  category: Unix
+- id: U-66
+  name: 정책에 따른 시스템 로깅 설정
+  severity: 중
+  category: Unix
+- id: U-67
+  name: 로그 디렉터리 소유자 및 권한 설정
+  severity: 중
+  category: Unix
+- id: WEB-01
+  name: 기본 관리자 계정/관리자 페이지
+  severity: ''
+  category: WEB
+- id: WEB-02
+  name: 취약한 비밀번호 (평문여부만 자동, 복잡도는 수동)
+  severity: ''
+  category: WEB
+- id: WEB-03
+  name: 비밀번호 파일 권한 (tomcat-users.xml <= 600)
+  severity: ''
+  category: WEB
+- id: WEB-04
+  name: 디렉터리 리스팅 (web.xml listings=false)
+  severity: ''
+  category: WEB
+- id: WEB-05
+  name: CGI 매핑
+  severity: ''
+  category: WEB
+- id: WEB-06
+  name: 상위 디렉터리 접근 (allowLinking=true)
+  severity: ''
+  category: WEB
+- id: WEB-07
+  name: 불필요 기본 파일/디렉터리
+  severity: ''
+  category: WEB
+- id: WEB-08
+  name: 업로드/다운로드 용량 제한
+  severity: ''
+  category: WEB
+- id: WEB-09
+  name: 프로세스 권한 (root 구동 금지)
+  severity: ''
+  category: WEB
+- id: WEB-10
+  name: 불필요 프록시 설정
+  severity: ''
+  category: WEB
+- id: WEB-11
+  name: 웹 서비스 경로 설정 (DocumentRoot) - 수동
+  severity: ''
+  category: WEB
+- id: WEB-12
+  name: 링크(심볼릭) 사용 금지 (FollowSymLinks)
+  severity: ''
+  category: WEB
+- id: WEB-13
+  name: 설정 파일(DB연결정보) 노출 - server.xml 권한 600
+  severity: ''
+  category: WEB
+- id: WEB-14
+  name: 설정파일 접근통제 (conf/*)
+  severity: ''
+  category: WEB
+- id: WEB-15
+  name: 불필요 스크립트 매핑 - 수동
+  severity: ''
+  category: WEB
+- id: WEB-16
+  name: 헤더 정보 노출 (Connector server= / showServerInfo=false)
+  severity: ''
+  category: WEB
+- id: WEB-17
+  name: 가상 디렉터리 (Context path)
+  severity: ''
+  category: WEB
+- id: WEB-18
+  name: WebDAV 비활성화 (Dav On)
+  severity: ''
+  category: WEB
+- id: WEB-19
+  name: SSI 사용 제한
+  severity: ''
+  category: WEB
+- id: WEB-20
+  name: SSL/TLS 활성화
+  severity: ''
+  category: WEB
+- id: WEB-21
+  name: HTTP->HTTPS 리디렉션
+  severity: ''
+  category: WEB
+- id: WEB-22
+  name: 에러 페이지 관리
+  severity: ''
+  category: WEB
+- id: WEB-23
+  name: LDAP digest 알고리즘
+  severity: ''
+  category: WEB
+- id: WEB-24
+  name: 별도 업로드 경로 - 수동
+  severity: ''
+  category: WEB
+- id: WEB-25
+  name: 패치/버전 - 수동
+  severity: ''
+  category: WEB
+- id: WEB-26
+  name: 로그 디렉터리/파일 권한
+  severity: ''
+  category: WEB
+profiles:
+- id: aix-server
+  name: AIX 서버 (스크립트)
+  bundles:
+  - aix-unix
+- id: oracle-db
+  name: Oracle DB (스크립트)
+  bundles:
+  - oracle-db
+- id: web-was
+  name: WEB/WAS (스크립트)
+  bundles:
+  - web-was
+- id: linux-native
+  name: Linux 네이티브 (SSH 직접점검)
+  native: *id001
+- id: aix-native
+  name: AIX 네이티브 (SSH 직접점검)
+  native:
+  - U-01
+  - U-02
+  - U-03
+  - U-04
+  - U-05
+  - U-06
+  - U-09
+  - U-11
+  - U-12
+  - U-13
+  - U-15
+  - U-45
+  - U-64
