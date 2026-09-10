@@ -15,7 +15,7 @@ UI 명세 U-1~U-9 구현, WSL sshd 상대 E2E(스크립트 번들·네이티브 
 | orchestrator (remote_runner·host_scan·native_runner·results_store) | 완료 |
 | assets (models·store, assets.db) | 완료 |
 | rulepack (manifest 로더: 번들·네이티브·프로파일·무결성·조치형 거부) | 완료 |
-| rules (네이티브 Unix 룰 14종 — SSH 원시명령, 대상에 무설치) | 완료 (확장 중) |
+| rules (네이티브 Unix 룰 34종: YAML 28 + 파이썬 6, KISA 2026 U-01~U-33·U-64) | 완료 (서비스 U-34~63 확장 중) |
 | parsing (legacy_csv 4종 · report_txt 브래킷/파이프 · dispatch) | 완료 |
 | result (masking·engine) | 완료 |
 | reporting.xlsx / html | 완료 |

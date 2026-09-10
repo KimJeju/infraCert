@@ -1,0 +1,18 @@
+# U-09 계정이 존재하지 않는 GID 금지 — 구성원 없고 기본그룹으로도 안 쓰이는 그룹
+id: U-09
+name: 계정이 존재하지 않는 GID 금지
+severity: 하
+category: 계정관리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: orphan
+    cmd: "awk -F: 'NR==FNR {used[$4]=1; next} $4 == \"\" && !($3 in used) && $3 >= 500 {print $1\":\"$3}' /etc/passwd /etc/group 2>/dev/null | head -30"
+extract:
+  - from: orphan
+    lines: n
+verdict:
+  - when: {n: {eq: 0}}
+    then: GOOD
+  - else: MANUAL
+evidence: [orphan]
+note: "구성원·기본그룹 모두 없는 GID≥500 그룹. 시스템/서비스 그룹일 수 있어 수동확인"

@@ -1,0 +1,18 @@
+# U-11 사용자 Shell 점검 — 로그인 불필요 시스템 계정에 로그인 셸 부여 금지
+id: U-11
+name: 사용자 Shell 점검
+severity: 하
+category: 계정관리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: bad
+    cmd: "awk -F: '$1 ~ /^(daemon|bin|sys|adm|listen|nobody|nobody4|noaccess|diag|operator|games|gopher|lp|uucp|nuucp|ftp|news|mail|sshd)$/ && $7 !~ /(nologin|false|\/bin\/sync|\/sbin\/shutdown|\/sbin\/halt|^$)/ {print $1\":\"$7}' /etc/passwd 2>/dev/null"
+extract:
+  - from: bad
+    lines: n
+verdict:
+  - when: {n: {eq: 0}}
+    then: GOOD
+  - else: VULN
+evidence: [bad]
+note: "시스템 계정에 /sbin/nologin 또는 /bin/false 가 아닌 셸이 있으면 취약"

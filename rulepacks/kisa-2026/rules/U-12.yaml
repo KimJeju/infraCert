@@ -1,0 +1,34 @@
+# U-12 세션 종료 시간 설정 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-12
+name: 세션 종료 시간 설정
+severity: 하
+category: 계정관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: tmout
+  cmd: grep -hE '^\s*(export\s+)?TMOUT\s*=' /etc/profile /etc/bashrc /etc/bash.bashrc /etc/profile.d/*.sh /etc/environment 2>/dev/null; grep -hE '^\s*set\s+autologout' /etc/csh.cshrc /etc/csh.login 2>/dev/null
+extract:
+- from: tmout
+  regex: TMOUT\s*=\s*(?P<sec>\d+)
+verdict:
+- when:
+    tmout:
+      absent: true
+  then: VULN
+- when:
+    sec:
+      absent: true
+  then: MANUAL
+- when:
+    sec:
+      le: 600
+      ge: 1
+  then: GOOD
+- else: VULN
+evidence:
+- tmout
+note: '기준: TMOUT 600 이하(설정 없음 취약)'

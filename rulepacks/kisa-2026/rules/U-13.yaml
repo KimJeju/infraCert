@@ -1,0 +1,40 @@
+# U-13 안전한 비밀번호 암호화 알고리즘 사용 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-13
+name: 안전한 비밀번호 암호화 알고리즘 사용
+severity: 중
+category: 계정관리
+platforms:
+- linux
+collect:
+- key: enc
+  cmd: grep -hE '^\s*ENCRYPT_METHOD' /etc/login.defs 2>/dev/null; grep -hE 'pam_unix\.so.*(sha512|sha256|yescrypt|md5)' /etc/pam.d/common-password /etc/pam.d/system-auth /etc/pam.d/password-auth 2>/dev/null
+extract:
+- from: enc
+  regex: (?i)ENCRYPT_METHOD\s+(?P<method>\w+)
+verdict:
+- when:
+    enc:
+      absent: true
+  then: MANUAL
+- when:
+    method:
+      in:
+      - SHA512
+      - SHA256
+      - YESCRYPT
+      - sha512
+      - sha256
+      - yescrypt
+  then: GOOD
+- when:
+    method:
+      exists: true
+  then: VULN
+- when:
+    enc:
+      regex: sha512|sha256|yescrypt
+  then: GOOD
+- else: VULN
+evidence:
+- enc
+note: '기준: SHA-256 이상(SHA512/YESCRYPT 권장). MD5/DES 취약'

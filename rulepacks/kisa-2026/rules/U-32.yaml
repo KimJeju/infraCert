@@ -1,0 +1,32 @@
+# U-32 홈 디렉토리로 지정한 디렉토리의 존재 관리 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-32
+name: 홈 디렉토리로 지정한 디렉토리의 존재 관리
+severity: 중
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'awk -F: ''$7 !~ /(nologin|false)/ && $6 != "" {print $1":"$6}'' /etc/passwd 2>/dev/null | while IFS=: read u d; do [ -d "$d" ] || echo "$u:$d"; done'
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: 로그인 가능 계정 중 홈 디렉터리가 없는 계정

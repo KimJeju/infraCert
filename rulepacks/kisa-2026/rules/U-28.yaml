@@ -1,0 +1,27 @@
+# U-28 접속 IP 및 포트 제한 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-28
+name: 접속 IP 및 포트 제한
+severity: 상
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+manual: true
+collect:
+- key: wrap
+  cmd: grep -vE '^\s*#|^\s*$' /etc/hosts.deny /etc/hosts.allow 2>/dev/null
+- key: fw
+  cmd: (command -v nft >/dev/null && nft list ruleset 2>/dev/null | head -30) || (command -v iptables >/dev/null && iptables -S 2>/dev/null | head -30) || (command -v firewall-cmd >/dev/null && firewall-cmd
+    --state 2>/dev/null) || (command -v ufw >/dev/null && ufw status 2>/dev/null)
+  timeout: 60
+- key: listen
+  cmd: (ss -ltn 2>/dev/null || netstat -an 2>/dev/null | grep LISTEN) | head -30
+verdict:
+- else: MANUAL
+evidence:
+- wrap
+- fw
+- listen
+note: hosts.deny ALL:ALL + hosts.allow 화이트리스트 또는 방화벽 정책이 있어야 양호

@@ -164,8 +164,28 @@ bundles:
 rule_files:
 - path: rules/U-05.yaml
   sha256: 4f4883c245e6ecbbdd0c54fdc71107c6d9d5a84607e637c3bc570017c163cafc
+- path: rules/U-07.yaml
+  sha256: ce4d54ed81024b4ac808730acb9f792408ac70bc7aed11ec372e6a4c1f3e888c
+- path: rules/U-08.yaml
+  sha256: c83b9c14820b85f14888397be9fecf40a71f976a395d58db608bb6df98beef16
+- path: rules/U-09.yaml
+  sha256: 691160f172034d35a735c342e3fc5c2dcb25c104852911277803e055388dd4d6
+- path: rules/U-10.yaml
+  sha256: 0643a7759f80fdb83934a35ae395c55c97a7aa1d64034370185c6c4aac9d6e28
+- path: rules/U-11.yaml
+  sha256: c091cd7b024002e002679038e77c9a3d51c67754e2e397f6d0cdc8178b0f5344
+- path: rules/U-12.yaml
+  sha256: 8d56d525146cea5b51e602a5909868d1651325a170f751b2ba56ea1e6efa1972
+- path: rules/U-13.yaml
+  sha256: e1aa95db4ab21d4974b1fccacff915bd6f71c096c670ee65c6d6082c7dd01354
+- path: rules/U-14.yaml
+  sha256: 8010b179b7627a17b9b9df55ffbf3b1d6acdd5c50b88263600d85afa933104aa
+- path: rules/U-15.yaml
+  sha256: d3ef38896be8ba3e7edc08d4eff0dbcd78e8fb95c13e8e0b56445b14a991dc50
 - path: rules/U-16.yaml
   sha256: a0cf01426ee03688b4206177adff21d12fa2de56d47b624a8eaa262ed1c812c6
+- path: rules/U-17.yaml
+  sha256: 8ea4332b6c8a549117e9237d0a4c0f1ab6043218f0756e7ca343ef4e53a24cff
 - path: rules/U-18.yaml
   sha256: df6dde11cae41dca7b1055acc1521488899a1282048a267964316549eaeba938
 - path: rules/U-19.yaml
@@ -176,10 +196,26 @@ rule_files:
   sha256: 868c776056ef94c83acf109f9df69b6f65265c972af3f46c9a289e76a35c4d0a
 - path: rules/U-22.yaml
   sha256: 83f6ea1de2fbf9cf429ce54530dbcc9b4fdae90428df5b29ac888e2ef0ac9505
+- path: rules/U-23.yaml
+  sha256: bcfeb517062d6061353718f8d01b43cdb0d2c311de7888758167635d1bb0aa27
+- path: rules/U-24.yaml
+  sha256: a9d527d19890444b93916e524c2e462a9018ec2713f30103d38af11d02e830c3
 - path: rules/U-25.yaml
   sha256: dcbee6dc1fca73b63d4f935527cb3859c160b2f8fb4f36316e09cc2c072f532a
+- path: rules/U-26.yaml
+  sha256: e27096474f079398120a84ca3b6918eaa0d3829828579db7b0a29b4d284a5903
+- path: rules/U-27.yaml
+  sha256: 72b6954cf3d2338b095dc88ee0f5ff94faafb18010b2a8329c679b5afe84d3b6
+- path: rules/U-28.yaml
+  sha256: 97855f05936e920ad18b2a59934c9924692a2aa4d9266736bbbf8f92d59766f9
 - path: rules/U-29.yaml
   sha256: 970b96be5395cbcb042e5f98585c03baf2922ac564940f45ebd599aee5bce2f0
+- path: rules/U-31.yaml
+  sha256: 45b166e194c7a355115e23de14e46e8c8d371710e46846591407d756d0dc51d7
+- path: rules/U-32.yaml
+  sha256: a147559df8904780cc54874f7c7343e3845763b9c9f39e5ff047c9784c2fc411
+- path: rules/U-33.yaml
+  sha256: 5ff4c5b0c9dcd07c75dfa8a15407ca66efcd6300d41a5adc1a2461e0321d324e
 - path: rules/U-64.yaml
   sha256: ff1816066f809ec256a424005d81bce956e5adacc453ed9bd833c1c54aead113
 native: &id001
@@ -189,15 +225,33 @@ native: &id001
 - U-04
 - U-05
 - U-06
+- U-07
+- U-08
+- U-09
+- U-10
+- U-11
+- U-12
+- U-13
+- U-14
+- U-15
 - U-16
+- U-17
 - U-18
 - U-19
 - U-20
 - U-21
 - U-22
+- U-23
+- U-24
 - U-25
+- U-26
+- U-27
+- U-28
 - U-29
 - U-30
+- U-31
+- U-32
+- U-33
 - U-64
 rules:
 - id: D-01
@@ -380,6 +434,7 @@ rules:
   name: 접속 IP 및 포트 제한
   severity: 상
   category: Unix
+  manual: true
 - id: U-29
   name: /etc/hosts.lpd 소유자 및 권한(600 이하/미존재 양호)
   severity: 하

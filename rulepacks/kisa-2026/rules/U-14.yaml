@@ -1,0 +1,29 @@
+# U-14 root 홈, 패스 디렉터리 권한 및 PATH 설정 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-14
+name: root 홈, 패스 디렉터리 권한 및 PATH 설정
+severity: 상
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: path
+  cmd: grep -hE '^\s*(export\s+)?PATH\s*=' /etc/profile /etc/environment /root/.profile /root/.bash_profile /root/.bashrc /root/.cshrc /root/.login 2>/dev/null
+- key: home
+  cmd: ls -ld /root / 2>/dev/null
+verdict:
+- when:
+    path:
+      absent: true
+  then: MANUAL
+- when:
+    path:
+      regex: (=|:)\.(:|$)|::|(=|:)\.\s*$
+  then: VULN
+- else: GOOD
+evidence:
+- path
+- home
+note: PATH 항목에 '.'(현재 디렉터리) 또는 빈 항목('::')이 있으면 취약. /root 읽기 불가 시 수동

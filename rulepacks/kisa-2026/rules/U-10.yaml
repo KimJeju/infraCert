@@ -1,0 +1,22 @@
+# U-10 동일한 UID 금지
+id: U-10
+name: 동일한 UID 금지
+severity: 중
+category: 계정관리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: dup
+    cmd: "cut -d: -f3 /etc/passwd 2>/dev/null | sort | uniq -d"
+  - key: who
+    cmd: "for u in $(cut -d: -f3 /etc/passwd 2>/dev/null | sort | uniq -d); do awk -F: -v u=$u '$3==u {print $1\":\"$3}' /etc/passwd; done"
+extract:
+  - from: dup
+    lines: n
+verdict:
+  - when: {dup_ok: {eq: "False"}}
+    then: MANUAL
+  - when: {n: {eq: 0}}
+    then: GOOD
+  - else: VULN
+evidence: [who]
+note: "중복 UID 계정 목록"

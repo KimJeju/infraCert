@@ -1,0 +1,32 @@
+# U-15 파일 및 디렉터리 소유자 설정 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-15
+name: 파일 및 디렉터리 소유자 설정
+severity: 상
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: find / -xdev \( -nouser -o -nogroup \) 2>/dev/null | head -50
+  timeout: 600
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: 소유자/그룹이 존재하지 않는 파일(-xdev, 표본 50)

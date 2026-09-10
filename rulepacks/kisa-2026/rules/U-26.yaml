@@ -1,0 +1,21 @@
+# U-26 /dev에 존재하지 않는 device 파일 점검
+id: U-26
+name: /dev에 존재하지 않는 device 파일 점검
+severity: 상
+category: 파일및디렉터리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: found
+    cmd: "find /dev -type f 2>/dev/null | head -50"
+    timeout: 120
+extract:
+  - from: found
+    lines: n
+verdict:
+  - when: {found_ok: {eq: "False"}, n: {eq: 0}}
+    then: MANUAL
+  - when: {n: {eq: 0}}
+    then: GOOD
+  - else: VULN
+evidence: [found]
+note: "/dev 아래 일반 파일(디바이스 아님)"

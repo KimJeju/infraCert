@@ -1,0 +1,20 @@
+# U-07 불필요한 계정 제거 — "불필요" 는 운영 판단. 기본 미사용 계정 존재 여부를 근거로 수동확인.
+id: U-07
+name: 불필요한 계정 제거
+severity: 하
+category: 계정관리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: unused
+    cmd: "awk -F: '$1 ~ /^(lp|uucp|nuucp|games|news|gopher|ftp|adm|sync|shutdown|halt|operator|printq|guest|imnadm|ipsec|lpd)$/ {print $1\":\"$3\":\"$7}' /etc/passwd 2>/dev/null"
+  - key: lastlog
+    cmd: "lastlog 2>/dev/null | grep -v 'Never' | head -20"
+extract:
+  - from: unused
+    lines: n
+verdict:
+  - when: {n: {eq: 0}}
+    then: GOOD
+  - else: MANUAL
+evidence: [unused]
+note: "기본 미사용 계정 존재 시 운영 필요성 확인 후 제거 여부 판단"

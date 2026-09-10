@@ -1,0 +1,32 @@
+# U-33 숨겨진 파일 및 디렉토리 검색 및 제거 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-33
+name: 숨겨진 파일 및 디렉토리 검색 및 제거
+severity: 하
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: find / -xdev \( -path /proc -o -path /sys -o -path /home -o -path /root \) -prune -o -type f -name '.*' -print 2>/dev/null | grep -vE '/\.(bash|profile|viminfo|lesshst)' | head -50
+  timeout: 600
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: MANUAL
+evidence:
+- found
+note: 홈 밖의 숨김 파일(표본 50). 용도 확인 후 제거 여부 판단

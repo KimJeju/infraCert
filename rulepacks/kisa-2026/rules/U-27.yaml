@@ -1,0 +1,29 @@
+# U-27 $HOME/.rhosts, hosts.equiv 사용 금지 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-27
+name: $HOME/.rhosts, hosts.equiv 사용 금지
+severity: 상
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: files
+  cmd: ls -l /etc/hosts.equiv /root/.rhosts /home/*/.rhosts 2>/dev/null
+- key: plus
+  cmd: grep -lE '^\s*\+' /etc/hosts.equiv /root/.rhosts /home/*/.rhosts 2>/dev/null
+verdict:
+- when:
+    files:
+      absent: true
+  then: GOOD
+- when:
+    plus:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- files
+- plus
+note: r-command 신뢰파일. 미존재 양호, '+' 포함 취약, 그 외 내용 확인

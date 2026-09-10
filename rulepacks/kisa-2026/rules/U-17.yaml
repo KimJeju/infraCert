@@ -1,0 +1,32 @@
+# U-17 시스템 시작 스크립트 권한 설정 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-17
+name: 시스템 시작 스크립트 권한 설정
+severity: 상
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: find /etc/init.d /etc/rc.d /etc/rc*.d /etc/systemd/system /etc/rc.tcpip /etc/inittab -type f \( -perm -0002 -o ! -user root \) 2>/dev/null | head -50
+  timeout: 120
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: 시작 스크립트 중 world-writable 또는 root 소유 아닌 파일

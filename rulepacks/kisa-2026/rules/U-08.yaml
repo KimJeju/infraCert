@@ -1,0 +1,22 @@
+# U-08 관리자 그룹(gid 0)에 최소한의 계정만
+id: U-08
+name: 관리자 그룹에 최소한의 계정 포함
+severity: 중
+category: 계정관리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: grp
+    cmd: "awk -F: '$3 == 0 {print}' /etc/group 2>/dev/null"
+  - key: members
+    cmd: "awk -F: '$3 == 0 && $4 != \"\" {print $4}' /etc/group 2>/dev/null | tr ',' '\n' | grep -vx root"
+extract:
+  - from: members
+    lines: n_extra
+verdict:
+  - when: {grp: {absent: true}}
+    then: MANUAL
+  - when: {n_extra: {eq: 0}}
+    then: GOOD
+  - else: VULN
+evidence: [grp]
+note: "gid 0 그룹 구성원이 root 외 존재하면 취약"

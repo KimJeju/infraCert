@@ -1,0 +1,33 @@
+# U-31 홈 디렉토리 소유자 및 권한 설정 — 선언형 룰(safe_dump 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-31
+name: 홈 디렉토리 소유자 및 권한 설정
+severity: 중
+category: 파일및디렉터리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: find /home -mindepth 1 -maxdepth 1 -type d -perm -0002 2>/dev/null; for d in /home/*; do [ -d "$d" ] || continue; u=${d##*/}; o=$(ls -ld "$d" | awk '{print $3}'); [ "$o" = "$u" ] || echo "$d owner=$o";
+    done
+  timeout: 120
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: 홈 디렉터리 world-writable 또는 소유자≠계정명
