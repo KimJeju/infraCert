@@ -122,6 +122,13 @@ bundles:
   - D-24
   - D-25
   - D-26
+  params:
+  - name: ORACLE_HOME
+    label: ORACLE_HOME
+    example: /u01/app/oracle/product/19.0.0/dbhome_1
+  - name: ORACLE_SID
+    label: ORACLE_SID
+    example: ORCL
 - id: web-was
   description: Tomcat/OHS/WebLogic WEB-01~WEB-26
   script: scripts/web_infra_script_2026.sh
@@ -161,6 +168,16 @@ bundles:
   - WEB-24
   - WEB-25
   - WEB-26
+  params:
+  - name: TOMCAT_HOME
+    label: Tomcat CATALINA_BASE (conf/·logs/·webapps/ 상위)
+    example: /opt/tomcat
+  - name: OHS_CONF_DIR
+    label: OHS/Apache httpd.conf 디렉터리
+    example: /u01/oracle/ohs/config/OHS/ohs1
+  - name: WL_DOMAIN_HOME
+    label: WebLogic DOMAIN_HOME (config/config.xml 상위)
+    example: /u01/oracle/user_projects/domains/base_domain
 rule_files:
 - path: rules/U-05.yaml
   sha256: 4f4883c245e6ecbbdd0c54fdc71107c6d9d5a84607e637c3bc570017c163cafc

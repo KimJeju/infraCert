@@ -29,16 +29,22 @@ from infraguard.transport.ssh import SSHConnection, SSHTarget
 STAGES = ["연결 중", "환경 점검", "실행 중", "산출물 회수", "파싱", "네이티브 점검", "완료"]
 
 
-def build_job(pack: RulePack, profile: Profile, *, timeout: int | None = None) -> HostJob:
-    """룰팩 프로파일 → HostJob. 번들 스크립트는 룰팩에서, 네이티브는 앱 레지스트리에서."""
+def build_job(pack: RulePack, profile: Profile, *, timeout: int | None = None,
+              host_params: dict[str, str] | None = None) -> HostJob:
+    """룰팩 프로파일 → HostJob. 번들 스크립트는 룰팩에서, 네이티브는 앱 레지스트리에서.
+
+    host_params: 호스트에 저장된 파라미터. 번들이 manifest 에 선언한 이름만 환경변수로 넘긴다.
+    """
     bundles = []
+    hp = host_params or {}
     for bid in profile.bundles:
         b = pack.bundles.get(bid)
         if b is None:
             continue
+        env = {n: hp[n] for n in b.param_names if hp.get(n)}
         spec = RunSpec(bundle_id=b.id, script=b.script, args=list(b.args),
                        timeout=timeout or b.timeout, interpreter=b.interpreter,
-                       extra_files=list(b.extra_files))
+                       extra_files=list(b.extra_files), env=env)
         bundles.append((spec, list(b.provides)))
     return HostJob(bundles=bundles, native=list(profile.native),
                    manual_rules=pack.manual_rules(), exclude=set(profile.exclude))

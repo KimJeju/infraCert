@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import logging
 import posixpath
+import re
 import shlex
 import time
 from dataclasses import dataclass, field
@@ -41,6 +42,21 @@ class RunSpec:
     interpreter: str | None = None   # None 이면 shebang 사용
     collect_globs: list[str] = field(default_factory=lambda: ["*"])
     extra_files: list[Path] = field(default_factory=list)   # 동반 업로드(예: oracle .sql)
+    env: dict[str, str] = field(default_factory=dict)       # 스크립트 파라미터(TOMCAT_HOME 등). 원격 환경변수로 전달
+
+
+# 환경변수 이름/값 허용 문자. 셸 인용부호를 피해 원격 명령 조립을 단순·안전하게 유지한다(인젝션 원천 차단).
+_ENV_NAME_RE = re.compile(r"^[A-Z_][A-Z0-9_]*$")
+_ENV_VALUE_RE = re.compile(r"^[A-Za-z0-9_./:@%+=,-]*$")
+
+
+def validate_env(env: dict[str, str]) -> None:
+    """허용되지 않은 문자가 있으면 ValueError. 조용히 잘라내지 않는다."""
+    for k, v in env.items():
+        if not _ENV_NAME_RE.match(k):
+            raise ValueError(f"파라미터 이름 형식 오류: {k!r} (대문자·숫자·_ 만)")
+        if not _ENV_VALUE_RE.match(v):
+            raise ValueError(f"파라미터 {k} 값에 허용되지 않은 문자: {v!r} (경로·식별자 문자만 허용)")
 
 
 @dataclass(slots=True)
@@ -137,7 +153,9 @@ class RemoteRunner:
         script_path = posixpath.join(remote_dir, spec.script.name)
         parts = [spec.interpreter, script_path] if spec.interpreter else [script_path]
         cmd_argv = [p for p in parts if p] + spec.args
-        inner = " ".join(shlex.quote(a) for a in cmd_argv)
+        validate_env(spec.env)                       # 허용 문자만 통과했으므로 인용 없이 안전
+        env_prefix = "".join(f"{k}={v} " for k, v in spec.env.items())
+        inner = env_prefix + " ".join(shlex.quote(a) for a in cmd_argv)
 
         # nohup 백그라운드 + 완료 마커. 세션이 끊겨도 계속 실행된다.
         runner = (

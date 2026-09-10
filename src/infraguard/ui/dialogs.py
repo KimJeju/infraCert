@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QPlainTextEdit,
     QPushButton,
     QSpinBox,
     QVBoxLayout,
@@ -27,6 +28,7 @@ from infraguard.core.ids import new_host_id
 from infraguard.core.models import Platform
 from infraguard.credentials.secret import Secret
 from infraguard.credentials.session import Credential
+from infraguard.orchestrator.remote_runner import validate_env
 
 PLATFORMS = [Platform.LINUX, Platform.UNIX, Platform.WINDOWS, Platform.DBMS,
              Platform.NETWORK, Platform.CLOUD, Platform.PC]
@@ -130,9 +132,11 @@ class HostKeyDialog(QDialog):
 class AssetEditDialog(QDialog):
     """호스트 등록·수정. 비밀번호는 여기서 받지 않는다(진단 시작 시 별도 입력)."""
 
-    def __init__(self, host: Host | None = None, parent: QWidget | None = None) -> None:
+    def __init__(self, host: Host | None = None, parent: QWidget | None = None,
+                 param_hints: list[dict] | None = None) -> None:
         super().__init__(parent)
         self.setWindowTitle("자산 편집" if host else "자산 추가")
+        self._param_hints = param_hints or []
         self._host_id = host.host_id if host else new_host_id()
         h = host or Host(host_id=self._host_id, name="", address="")
 
@@ -170,6 +174,15 @@ class AssetEditDialog(QDialog):
         form.addRow("계정", self.username)
         form.addRow("인증방식", self.auth)
         form.addRow("타임아웃(초)", self.timeout)
+        # 번들 파라미터: 한 줄에 NAME=value. 스크립트가 환경변수로 받는다(TOMCAT_HOME 등).
+        self.params = QPlainTextEdit()
+        self.params.setPlainText("\n".join(f"{k}={v}" for k, v in h.params.items()))
+        self.params.setMaximumHeight(90)
+        hint = "\n".join(f"{p['name']}={p.get('example', '')}   # {p.get('label', '')} [{p.get('bundle', '')}]"
+                         for p in self._param_hints) or "NAME=value (한 줄에 하나)"
+        self.params.setPlaceholderText(hint)
+        self.params.setToolTip("스크립트 번들에 환경변수로 전달됩니다. 경로·식별자 문자만 허용.\n" + hint)
+        form.addRow("번들 파라미터", self.params)
         form.addRow("", self.sudo)
         form.addRow("", self.use_bastion)
         form.addRow("bastion 주소", self.bastion_host)
@@ -182,10 +195,29 @@ class AssetEditDialog(QDialog):
         lay.addLayout(form)
         lay.addWidget(bb)
 
+    def _parse_params(self) -> dict[str, str]:
+        out: dict[str, str] = {}
+        for ln in self.params.toPlainText().splitlines():
+            ln = ln.split("#", 1)[0].strip()
+            if not ln:
+                continue
+            if "=" not in ln:
+                raise ValueError(f"'{ln}' — NAME=value 형식이어야 합니다")
+            k, v = ln.split("=", 1)
+            out[k.strip()] = v.strip()
+        validate_env(out)      # 셸 메타문자·잘못된 이름은 여기서 거부
+        return out
+
     def _validate_accept(self) -> None:
         if not self.address.text().strip():
             self.address.setPlaceholderText("주소는 필수입니다")
             self.address.setStyleSheet("border:1px solid #F85149")
+            return
+        try:
+            self._parse_params()
+        except ValueError as e:
+            self.params.setStyleSheet("border:1px solid #F85149")
+            self.params.setToolTip(str(e))
             return
         self.accept()
 
@@ -200,6 +232,7 @@ class AssetEditDialog(QDialog):
             group=self.group.text().strip() or "서버",
             username=self.username.text().strip() or "root",
             auth_kind=self.auth.currentText(),
+            params=self._parse_params(),
             timeout=self.timeout.value(),
             use_sudo=self.sudo.isChecked(),
             use_bastion=self.use_bastion.isChecked(),

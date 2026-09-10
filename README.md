@@ -31,6 +31,11 @@ UI 명세 U-1~U-9 구현, WSL sshd 상대 E2E(스크립트 번들·네이티브 
 
 두 방식은 한 프로파일에 섞을 수 있다. 결과는 같은 `HostResult` 로 합쳐진다.
 
+번들이 환경변수 파라미터를 받으면(web: `TOMCAT_HOME`·`OHS_CONF_DIR`·`WL_DOMAIN_HOME`, oracle: `ORACLE_HOME`·`ORACLE_SID`)
+manifest 의 `params` 에 선언하고, 자산 편집 "번들 파라미터"에 `NAME=value` 로 호스트별 값을 둔다.
+값은 경로·식별자 문자만 허용된다(셸 메타문자 거부 — 인젝션 경계). 미지정 시 스크립트가 그 제품 점검을 건너뛰고,
+해당 항목은 "미보고(수동확인)"로 드러난다 — 양호로 채워지지 않는다.
+
 ### 네이티브 룰 작성 — 선언형 YAML 우선, 파이썬은 분기가 필요할 때만
 
 단순한 "명령 → 정규식 → 비교" 룰은 `rulepacks/<pack>/rules/<ID>.yaml` 로 쓴다. 코드 변경 없이 룰팩만 바꾸면 된다.

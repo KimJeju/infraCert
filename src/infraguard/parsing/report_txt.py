@@ -35,6 +35,7 @@ PIPE_RE = re.compile(
 )
 DETAIL_RE = re.compile(r"^\s*>>\s?(?P<text>.*)$")
 SUMMARY_RE = re.compile(r"^#\s*점검 요약")
+SKIP_RE = re.compile(r"(?:\\n)?\s*\[skip\]\s*(?P<why>.+)$", re.I)   # 스크립트가 대상 미지정으로 점검 생략
 
 
 def _decode(data: bytes) -> tuple[str, str, bool]:
@@ -91,11 +92,17 @@ def parse_report_bytes(data: bytes, *, artifact: str = "",
         d = DETAIL_RE.match(line)
         if d:
             pending.append(d["text"].rstrip())
+            continue
+        s = SKIP_RE.match(line)
+        if s:
+            res.warnings.append(f"{artifact}: [skip] {s['why'].strip()}")   # 왜 미보고인지 드러낸다
         elif line.startswith("=====") or line.startswith("-----"):
             continue          # 섹션/구분선은 근거 경계가 아니다(구분선 뒤 헤더가 온다)
 
     if not res.findings:
-        res.error = "판정 라인을 찾지 못함 (kisa report txt 형식 아님)"
+        skips = [w for w in res.warnings if "[skip]" in w]
+        res.error = ("점검이 전부 생략됨 — " + "; ".join(s.split("[skip] ", 1)[1] for s in skips)
+                     if skips else "판정 라인을 찾지 못함 (kisa report txt 형식 아님)")
     return res
 
 

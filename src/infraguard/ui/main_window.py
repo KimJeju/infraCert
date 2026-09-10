@@ -258,8 +258,16 @@ class MainWindow(QMainWindow):
         hosts = [self.ctx.assets.get(h) for h in ids]
         return [h for h in hosts if h]
 
+    def _param_hints(self) -> list[dict]:
+        """룰팩의 모든 번들이 선언한 파라미터(중복 제거) — 자산 편집 힌트용."""
+        seen: dict[str, dict] = {}
+        for b in (self.pack.bundles.values() if self.pack else []):
+            for p in b.params:
+                seen.setdefault(str(p.get("name")), {**p, "bundle": b.id})
+        return list(seen.values())
+
     def _add_asset(self) -> None:
-        dlg = AssetEditDialog(parent=self)
+        dlg = AssetEditDialog(parent=self, param_hints=self._param_hints())
         if dlg.exec():
             self.ctx.assets.upsert(dlg.host())
             self._refresh_assets()
@@ -271,7 +279,7 @@ class MainWindow(QMainWindow):
         host = self.ctx.assets.get(hid)
         if not host:
             return
-        dlg = AssetEditDialog(host, parent=self)
+        dlg = AssetEditDialog(host, parent=self, param_hints=self._param_hints())
         if dlg.exec():
             self.ctx.assets.upsert(dlg.host())
             self._refresh_assets()
@@ -438,14 +446,13 @@ class MainWindow(QMainWindow):
         if profile is None:
             QMessageBox.information(self, "진단", "프로파일을 선택하세요.")
             return
-        job = build_job(self.pack, profile, timeout=timeout)
-
         jobs = []
         for h in hosts:
             cred = self.ctx.creds.get(h.cred_id)
             if cred is None:
                 continue
-            jobs.append((h, cred, job))
+            # 호스트별 파라미터(TOMCAT_HOME 등)가 다르므로 job 도 호스트별로 만든다
+            jobs.append((h, cred, build_job(self.pack, profile, timeout=timeout, host_params=h.params)))
 
         self._scan_id = new_scan_id()
         self.ctx.results.start_scan(ScanResult(

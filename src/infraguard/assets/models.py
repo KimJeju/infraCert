@@ -30,9 +30,8 @@ class Host(BaseModel):
     bastion_port: int = 22
     bastion_user: str | None = None
 
-    # 실행
-    script: str | None = None            # 업로드할 스크립트 경로 (Bundle)
-    script_args: list[str] = Field(default_factory=list)
+    # 실행 — 번들 파라미터(환경변수). 예: TOMCAT_HOME=/opt/tomcat, ORACLE_SID=ORCL
+    params: dict[str, str] = Field(default_factory=dict)
     timeout: int = 1800
     use_sudo: bool = False
 

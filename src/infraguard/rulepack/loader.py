@@ -40,7 +40,12 @@ class Bundle:
     side_effects: str = ""            # 반드시 "read"
     args: list[str] = field(default_factory=list)
     extra_files: list[Path] = field(default_factory=list)
+    params: list[dict] = field(default_factory=list)   # [{name, label, required, example}] — 호스트별 환경변수
     description: str = ""
+
+    @property
+    def param_names(self) -> list[str]:
+        return [str(p.get("name")) for p in self.params if p.get("name")]
 
 
 @dataclass(slots=True)
@@ -148,6 +153,7 @@ def load(pack_dir: Path) -> RulePack:
             side_effects=se,
             args=[str(x) for x in (b.get("args") or [])],
             extra_files=[pack_dir / str(x) for x in (b.get("extra_files") or [])],
+            params=[dict(p) for p in (b.get("params") or []) if isinstance(p, dict)],
             description=str(b.get("description") or ""),
         )
         for ef in bundles[bid].extra_files:
