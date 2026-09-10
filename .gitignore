@@ -10,3 +10,7 @@ workspace/
 _sample_report.xlsx
 .venv/
 config.json
+
+# 고객 프로젝트 파생 진단 스크립트 — 로컬 전용. 원격(public)에 절대 올리지 않는다.
+# manifest.yaml 은 참조·해시만 담으므로 커밋 대상.
+rulepacks/*/scripts/
