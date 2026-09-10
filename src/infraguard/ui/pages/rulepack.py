@@ -159,7 +159,8 @@ class RulePackPage(QWidget):
             self.detail.setPlainText(
                 f"{r.id}  {r.name}\n중요도: {r.severity or '-'}   분류: {r.category or '-'}\n"
                 f"수동확인 선언: {'예' if r.manual else '아니오'}\n"
-                f"{'네이티브 룰(앱 동봉, SSH 직접점검)' if rid in self._pack.native else ''}\n"
+                + ({"yaml": "네이티브 룰 — 선언형 YAML (rulepacks/…/rules/, 해시 검증)",
+                    "python": "네이티브 룰 — 파이썬 (앱 동봉, 분기 로직)"}.get(r.kind, "")) + "\n"
                 f"{('조치권고: ' + r.remediation) if r.remediation else ''}"
             )
 

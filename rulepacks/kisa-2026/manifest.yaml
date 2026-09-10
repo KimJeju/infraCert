@@ -161,6 +161,23 @@ bundles:
   - WEB-24
   - WEB-25
   - WEB-26
+rule_files:
+- path: rules/U-05.yaml
+  sha256: 4f4883c245e6ecbbdd0c54fdc71107c6d9d5a84607e637c3bc570017c163cafc
+- path: rules/U-09.yaml
+  sha256: 2fa569f21973d4af9b8a2e246ff7ad86384c9834191c1a484d828621f4b72a6c
+- path: rules/U-10.yaml
+  sha256: 0c0d20efb8f6a8b2fd0a1d69023514735235db08b9460ceabbf80d6ebd0d4b02
+- path: rules/U-11.yaml
+  sha256: c6f0a67d5ffb3987f7f54ef77cc1aa7574c26e0fb38d01b3dcade1add69f50e5
+- path: rules/U-12.yaml
+  sha256: 3635028a8757217d84a5e69c548704395a7b1676ceddfa6600a307aaed08a3db
+- path: rules/U-13.yaml
+  sha256: 93d9f8fb31b6e406866b155d88379f5f40f6df0eec5de5aea97f32f6143f1ee3
+- path: rules/U-15.yaml
+  sha256: fc7b1ae40ffc45ddd77a3bebcc483a0e7e72804e8d075f3bd9417ae1cda12a56
+- path: rules/U-64.yaml
+  sha256: ff1816066f809ec256a424005d81bce956e5adacc453ed9bd833c1c54aead113
 native: &id001
 - U-01
 - U-02

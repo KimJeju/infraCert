@@ -1,0 +1,21 @@
+# U-15 world writable 파일 점검 — -xdev 로 로컬 FS 한정, 표본 50개
+id: U-15
+name: world writable 파일 점검
+severity: 상
+category: 파일및디렉터리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: ww
+    cmd: "find / -xdev -type f -perm -0002 2>/dev/null | head -50"
+    timeout: 600
+extract:
+  - from: ww
+    lines: n
+verdict:
+  - when: {ww_ok: {eq: "False"}, n: {eq: 0}}
+    then: MANUAL                      # find 실패/권한 부족
+  - when: {n: {eq: 0}}
+    then: GOOD
+  - else: VULN
+evidence: [ww]
+note: "world-writable 일반파일(-xdev, 표본 50)"

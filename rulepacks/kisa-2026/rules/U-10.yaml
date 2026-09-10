@@ -1,0 +1,23 @@
+# U-10 /etc/shadow 파일 소유자 및 권한 — 선언형 룰. 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-10
+name: /etc/shadow 파일 소유자 및 권한
+severity: 상
+category: 파일및디렉터리
+platforms: [linux, solaris, hpux]
+collect:
+  - key: ls
+    cmd: "ls -ld /etc/shadow 2>/dev/null | head -1"
+extract:
+  - from: ls
+    regex: '^(?P<perm>\S{10})\s+\S+\s+(?P<owner>\S+)\s+(?P<group>\S+)'
+    missing: NA                       # 파일 없음/읽기 불가 → 해당없음 (추측 안 함)
+verdict:
+  - when: {owner: {ne: root}}
+    then: VULN
+  - when: {group: {eq: shadow}, perm: {mode_le: "640"}}   # Debian 계열 표준(root:shadow 640)
+    then: GOOD
+  - when: {perm: {mode_le: "400"}}
+    then: GOOD
+  - else: VULN
+evidence: [ls]
+note: "기준: 소유자 root, 권한 400 이하"

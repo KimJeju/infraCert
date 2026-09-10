@@ -1,0 +1,18 @@
+# U-64 주기적 보안패치 — 자동판정 불가. 버전 정보만 수집해 수동확인으로 넘긴다.
+id: U-64
+name: 주기적 보안패치 및 벤더 권고사항 적용
+severity: 상
+category: 패치관리
+platforms: [linux, aix, solaris, hpux]
+manual: true
+collect:
+  - key: ver
+    cmd: "uname -srm; oslevel -s 2>/dev/null; cat /etc/os-release 2>/dev/null | head -3"
+    timeout: 60
+  - key: recent
+    cmd: "(rpm -qa --last 2>/dev/null | head -5) || (ls -lt /var/lib/dpkg/info/*.list 2>/dev/null | head -5)"
+    timeout: 120
+verdict:
+  - else: MANUAL
+evidence: [ver, recent]
+note: "※ 최신 패치 적용 여부는 벤더 공지 대조 필요"

@@ -1,0 +1,22 @@
+# U-05 root 이외의 UID 0 금지
+id: U-05
+name: root 이외의 UID 0 금지
+severity: 상
+category: 계정관리
+platforms: [linux, aix, solaris, hpux]
+collect:
+  - key: uid0
+    cmd: "awk -F: '$3 == 0 {print $1}' /etc/passwd 2>/dev/null"
+  - key: extra
+    cmd: "awk -F: '$3 == 0 && $1 != \"root\" {print $1}' /etc/passwd 2>/dev/null"
+extract:
+  - from: extra
+    lines: n_extra
+verdict:
+  - when: {uid0_ok: {eq: "False"}}
+    then: MANUAL                      # /etc/passwd 읽기 실패
+  - when: {n_extra: {eq: 0}}
+    then: GOOD
+  - else: VULN
+evidence: [uid0]
+note: "UID 0 계정 목록. root 외 존재 시 취약"

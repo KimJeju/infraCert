@@ -31,6 +31,38 @@ UI 명세 U-1~U-9 구현, WSL sshd 상대 E2E(스크립트 번들·네이티브 
 
 두 방식은 한 프로파일에 섞을 수 있다. 결과는 같은 `HostResult` 로 합쳐진다.
 
+### 네이티브 룰 작성 — 선언형 YAML 우선, 파이썬은 분기가 필요할 때만
+
+단순한 "명령 → 정규식 → 비교" 룰은 `rulepacks/<pack>/rules/<ID>.yaml` 로 쓴다. 코드 변경 없이 룰팩만 바꾸면 된다.
+
+```yaml
+id: U-09
+name: /etc/passwd 파일 소유자 및 권한
+severity: 상
+platforms: [linux, aix, solaris, hpux]
+collect:                                   # 상수 명령만. 변수 치환 없음(인젝션 차단)
+  - key: ls
+    cmd: "ls -ld /etc/passwd 2>/dev/null | head -1"
+extract:                                   # 이름 있는 그룹 → 변수. lines: 로 줄 수도 가능
+  - from: ls
+    regex: '^(?P<perm>\S{10})\s+\S+\s+(?P<owner>\S+)\s+(?P<group>\S+)'
+    missing: NA                            # 미매치 시 판정을 명시 — 추측하지 않는다
+verdict:                                   # 위에서 아래로 첫 매치. when 안은 전부 AND
+  - when: {owner: {ne: root}}
+    then: VULN
+  - when: {perm: {mode_le: "644"}}
+    then: GOOD
+  - else: VULN
+evidence: [ls]
+note: "기준: 소유자 root, 권한 644 이하"
+```
+
+- 연산자 화이트리스트: `eq ne in contains regex exists absent ge le gt lt mode_le`. **문자열 조건식·eval 없음** — 룰팩이 코드 실행 경로가 되지 않는다(정적 테스트 강제).
+- 판정 어휘는 `GOOD / VULN / MANUAL / NA` 만. Status 확정은 여전히 `core.decision.decide()`.
+- 어느 `when` 에도 안 걸리면 `MANUAL`(추측 금지). 수집값 변수 `<key>`, 성공 여부 `<key>_ok`.
+- 룰 파일은 `manifest.yaml` 의 `rule_files` 에 SHA-256 으로 등록돼야 한다. 미등록·불일치는 실행 차단.
+- OS 분기·PAM 파싱처럼 선언형으로 어색한 룰은 `src/infraguard/rules/*.py` 에 파이썬으로 두고 같은 id 로 등록한다. 스키마 정본은 `rules/declarative.py` 의 pydantic 모델.
+
 ## 로컬 E2E 환경 (WSL)
 
 WSL Ubuntu 에 sshd 를 :2222 로 띄우고 테스트 계정 `igtest` 로 검증했다. (`wsl -u root` 로 설정)

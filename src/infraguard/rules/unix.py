@@ -42,38 +42,6 @@ def _mode_bits(perm: str) -> int:
     return bits
 
 
-def _file_perm_rule(paths: str | tuple[str, ...], max_mode: int, owner: str = "root",
-                    group_allow: dict[str, int] | None = None) -> NativeOutcome:
-    """파일 권한 룰 생성기. paths 가 여러 개면 존재하는 첫 파일을 본다(예: syslog/rsyslog).
-
-    group_allow: {그룹명: 허용상한}. 예) /etc/shadow 는 Debian 계열에서 640 root:shadow 가 표준.
-    """
-    cands = (paths,) if isinstance(paths, str) else paths
-
-    def _run(conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
-        for path in cands:
-            po = _perm_owner(conn, path)
-            if po is not None:
-                break
-        else:
-            return NativeOutcome("NA", f"{' / '.join(cands)} 없음 또는 읽기 불가")
-        perm, own, raw = po
-        parts = raw.split()
-        grp = parts[3] if len(parts) > 3 else ""
-        mode = _mode_bits(perm)
-        limit = max_mode
-        note = ""
-        if group_allow and grp in group_allow:
-            limit = max(limit, group_allow[grp])
-            note = f" (그룹 {grp} 예외: {oct(group_allow[grp])} 허용)"
-        ok = (own == owner) and (mode & ~limit) == 0
-        return NativeOutcome(
-            "GOOD" if ok else "VULN",
-            f"{raw}\n기준: 소유자 {owner}, 권한 {oct(max_mode)} 이하{note} / 현재 {oct(mode)}",
-        )
-    return _run
-
-
 # ---------------------------------------------------------------- 계정관리
 @register("U-01", "root 계정 원격 접속 제한", "상", UNIX)
 def u01(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
@@ -145,16 +113,6 @@ def u04(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     return NativeOutcome("GOOD" if po else "MANUAL", (po[2] if po else "/etc/shadow 확인 불가"))
 
 
-@register("U-05", "root 이외의 UID 0 금지", "상", UNIX)
-def u05(conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
-    out, ok = _sh(conn, "awk -F: '$3 == 0 {print $1}' /etc/passwd 2>/dev/null")
-    if not ok:
-        return NativeOutcome("MANUAL", "/etc/passwd 읽기 실패")
-    users = [u for u in out.split() if u]
-    extra = [u for u in users if u != "root"]
-    return NativeOutcome("VULN" if extra else "GOOD", "UID 0 계정: " + ", ".join(users))
-
-
 @register("U-06", "root 계정 su 제한", "하", UNIX)
 def u06(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     if env.os == "aix":
@@ -165,29 +123,6 @@ def u06(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     out, _ = _sh(conn, "grep -E '^\\s*auth.*pam_wheel' /etc/pam.d/su 2>/dev/null; ls -l "
                        "$(command -v su) 2>/dev/null")
     return NativeOutcome("GOOD" if "pam_wheel" in out else "VULN", out.strip() or "pam_wheel 미설정")
-
-
-# ------------------------------------------------------------ 파일·디렉터리
-register("U-09", "/etc/passwd 파일 소유자 및 권한", "상", UNIX)(_file_perm_rule("/etc/passwd", 0o644))
-register("U-10", "/etc/shadow 파일 소유자 및 권한", "상", ("linux", "solaris", "hpux"))(
-    _file_perm_rule("/etc/shadow", 0o400, group_allow={"shadow": 0o640}))
-register("U-11", "/etc/hosts 파일 소유자 및 권한", "상", UNIX)(_file_perm_rule("/etc/hosts", 0o600))
-register("U-12", "/etc/(x)inetd.conf 소유자 및 권한", "상", UNIX)(
-    _file_perm_rule(("/etc/inetd.conf", "/etc/xinetd.conf"), 0o600))
-register("U-13", "/etc/(r)syslog.conf 소유자 및 권한", "상", UNIX)(
-    _file_perm_rule(("/etc/syslog.conf", "/etc/rsyslog.conf", "/etc/syslog-ng/syslog-ng.conf"), 0o644))
-
-
-@register("U-15", "world writable 파일 점검", "상", UNIX)
-def u15(conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
-    # 전체 순회는 오래 걸린다. -xdev 로 로컬 FS 한정, 표본 50개.
-    out, ok = _sh(conn, "find / -xdev -type f -perm -0002 2>/dev/null | head -50", timeout=600)
-    if not ok and not out.strip():
-        return NativeOutcome("MANUAL", "find 실행 실패/권한 부족")
-    files = [f for f in out.splitlines() if f.strip()]
-    if not files:
-        return NativeOutcome("GOOD", "world-writable 일반파일 없음(-xdev)")
-    return NativeOutcome("VULN", f"{len(files)}개(표본):\n" + "\n".join(files))
 
 
 @register("U-45", "UMASK 설정 관리", "중", UNIX)
@@ -201,12 +136,3 @@ def u45(conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
         return NativeOutcome("MANUAL", ev + "\n※ 기본 umask 정책을 운영자에게 확인")
     ok = all((int(v, 8) & 0o022) == 0o022 for v in vals)
     return NativeOutcome("GOOD" if ok else "VULN", ev)
-
-
-@register("U-64", "주기적 보안패치 및 벤더 권고사항 적용", "상", UNIX)
-def u64(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
-    cmd = "oslevel -s 2>/dev/null; instfix -i 2>/dev/null | tail -3" if env.os == "aix" else \
-          "uname -srm; cat /etc/os-release 2>/dev/null | head -3; " \
-          "(rpm -qa --last 2>/dev/null | head -5) || (ls -lt /var/lib/dpkg/info/*.list 2>/dev/null | head -5)"
-    out, _ = _sh(conn, cmd, timeout=120)
-    return NativeOutcome("MANUAL", (out.strip() or "버전 정보 수집 실패") + "\n※ 최신 패치 적용 여부는 벤더 공지 대조 필요")

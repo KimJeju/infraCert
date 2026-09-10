@@ -20,6 +20,7 @@ from infraguard.workspace.layout import app_root
 
 RULEPACKS_DIRNAME = "rulepacks"
 PROFILES_DIRNAME = "profiles"
+RULES_DIRNAME = "rules"
 
 
 class RulePackError(Exception):
@@ -50,6 +51,7 @@ class RuleMeta:
     category: str = ""
     manual: bool = False
     remediation: str = ""
+    kind: str = ""                    # "" | "yaml" | "python"  (네이티브 룰 구현 종류)
 
 
 @dataclass(slots=True)
@@ -146,6 +148,32 @@ def load(pack_dir: Path) -> RulePack:
                 integrity_ok = False
 
     registry = load_all()
+
+    # 선언형(YAML) 룰: rules/*.yaml. manifest 의 rule_files 에 sha256 으로 등록된 파일만 신뢰한다.
+    declared = {str(r.get("path")): str(r.get("sha256") or "").lower()
+                for r in (raw.get("rule_files") or [])}
+    rules_dir = pack_dir / RULES_DIRNAME
+    declarative_kind: dict[str, str] = {}
+    if rules_dir.exists():
+        for f in sorted(rules_dir.glob("*.yaml")):
+            rel = f"{RULES_DIRNAME}/{f.name}"
+            actual = _sha256(f)
+            if rel not in declared:
+                problems.append(f"rule {f.name}: manifest.rule_files 에 미등록 — 무시")
+                integrity_ok = False
+                continue
+            if declared[rel] and declared[rel] != actual:
+                problems.append(f"rule {f.name}: SHA-256 불일치")
+                integrity_ok = False
+        from infraguard.rules.declarative import register_dir
+        specs, rp = register_dir(rules_dir)
+        problems.extend(rp)
+        declarative_kind = {rid: "yaml" for rid in specs}
+        for rel in declared:
+            if not (pack_dir / rel).exists():
+                problems.append(f"rule {rel}: 파일 없음")
+                integrity_ok = False
+
     native: list[str] = []
     for n in raw.get("native") or []:
         nid = str(n if isinstance(n, str) else n.get("id"))
@@ -163,11 +191,13 @@ def load(pack_dir: Path) -> RulePack:
                 category=str(r.get("category") or ""), manual=bool(r.get("manual", False)),
                 remediation=str(r.get("remediation") or ""),
             )
-    # 네이티브 룰 메타는 레지스트리에서 보충
+    # 네이티브 룰 메타는 레지스트리에서 보충. kind 로 선언형/파이썬 구분.
     for nid in native:
+        nr = registry[nid]
+        kind = declarative_kind.get(nid, "python")
         if nid not in rules:
-            nr = registry[nid]
             rules[nid] = RuleMeta(id=nid, name=nr.name, severity=nr.severity, category="native")
+        rules[nid].kind = kind
 
     profiles: dict[str, Profile] = {}
     for p in list(raw.get("profiles") or []) + _load_user_profiles(pack_dir):
