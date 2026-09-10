@@ -95,12 +95,20 @@ def list_packs() -> list[Path]:
     return sorted(p for p in root.iterdir() if (p / "manifest.yaml").exists())
 
 
-def _sha256(p: Path) -> str:
+def file_sha256(p: Path) -> str:
+    """텍스트 자산(스크립트·YAML)의 해시. CRLF→LF 정규화 후 계산.
+
+    체크아웃 줄바꿈 설정(autocrlf)이나 편집기에 따라 같은 파일의 바이트가 달라진다.
+    정규화하지 않으면 다른 PC 에서 클론만 해도 무결성 실패로 룰팩이 막힌다.
+    """
     h = hashlib.sha256()
     with p.open("rb") as fh:
         for chunk in iter(lambda: fh.read(1 << 16), b""):
-            h.update(chunk)
+            h.update(chunk.replace(b"\r\n", b"\n"))
     return h.hexdigest()
+
+
+_sha256 = file_sha256
 
 
 def load(pack_dir: Path) -> RulePack:

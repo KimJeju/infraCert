@@ -14,7 +14,6 @@
 
 from __future__ import annotations
 
-import hashlib
 import sys
 from pathlib import Path
 
@@ -23,12 +22,18 @@ import yaml
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from infraguard.rulepack.loader import file_sha256 as sha256  # noqa: E402  # 로더와 동일 정규화
 from infraguard.rules import load_all  # noqa: E402
 from infraguard.rules.declarative import load_file  # noqa: E402
 
 
-def sha256(p: Path) -> str:
-    return hashlib.sha256(p.read_bytes()).hexdigest()
+def normalize_lf(p: Path) -> bool:
+    """작업본에 CRLF 가 있으면 LF 로 고쳐 쓴다. (해시는 어차피 정규화하지만 diff 오염 방지)"""
+    b = p.read_bytes()
+    if b"\r\n" in b:
+        p.write_bytes(b.replace(b"\r\n", b"\n"))
+        return True
+    return False
 
 
 def rule_key(rid: str) -> tuple[str, int]:
@@ -40,12 +45,15 @@ def main(pack_dir: Path) -> int:
     mf = pack_dir / "manifest.yaml"
     man = yaml.safe_load(mf.read_text(encoding="utf-8")) or {}
 
+    fixed = 0
     for b in man.get("bundles") or []:
+        fixed += normalize_lf(pack_dir / b["script"])
         b["sha256"] = sha256(pack_dir / b["script"])
 
     specs = {}
     rule_files = []
     for f in sorted((pack_dir / "rules").glob("*.yaml")):
+        fixed += normalize_lf(f)
         spec = load_file(f)                     # 스키마 위반이면 여기서 터진다 — 잘못된 룰을 등록하지 않는다
         if spec.id != f.stem:
             raise SystemExit(f"{f.name}: 파일명과 id 불일치 ({spec.id})")
@@ -74,9 +82,10 @@ def main(pack_dir: Path) -> int:
              "rules", "profiles"]
     man = {k: man[k] for k in order if k in man} | {k: v for k, v in man.items() if k not in order}
     mf.write_text(yaml.safe_dump(man, allow_unicode=True, sort_keys=False, width=120),
-                  encoding="utf-8")
+                  encoding="utf-8", newline="\n")
     print(f"{mf}: bundles={len(man.get('bundles') or [])} rule_files={len(rule_files)} "
-          f"native={len(native)} rules={len(man['rules'])}")
+          f"native={len(native)} rules={len(man['rules'])}"
+          + (f"  (CRLF→LF 정규화 {fixed}개)" if fixed else ""))
     return 0
 
 
