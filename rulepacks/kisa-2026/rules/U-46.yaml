@@ -1,0 +1,39 @@
+# U-46 일반 사용자의 메일 서비스 실행 방지 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-46
+name: 일반 사용자의 메일 서비스 실행 방지
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: mta
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(sendmail|postfix|master|exim4?|qmail-send|smtpd)' | sort -u
+- key: sm
+  cmd: ps -e -o comm= 2>/dev/null | grep -x sendmail
+- key: priv
+  cmd: grep -hiE '^[[:space:]]*O[[:space:]]*PrivacyOptions' /etc/mail/sendmail.cf /etc/sendmail.cf 2>/dev/null
+verdict:
+- when:
+    mta:
+      absent: true
+  then: NA
+- when:
+    sm:
+      absent: true
+  then: NA
+- when:
+    priv:
+      regex: (?i)restrictqrun
+  then: GOOD
+- when:
+    priv:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- mta
+- priv
+note: 'sendmail: PrivacyOptions 에 restrictqrun 있어야 양호. postfix/exim 은 해당 없음(N/A)'

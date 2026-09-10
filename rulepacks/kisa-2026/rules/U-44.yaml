@@ -1,0 +1,36 @@
+# U-44 tftp, talk 서비스 비활성화 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-44
+name: tftp, talk 서비스 비활성화
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*tftp[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/tftp ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/tftp && echo ''xinetd: tftp enabled'';
+    systemctl is-active tftp tftp.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: tftp /''; grep -E ''^[[:space:]]*talk[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/talk ] &&
+    grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/talk && echo ''xinetd: talk enabled''; systemctl is-active talk talk.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: talk /''; grep -E ''^[[:space:]]*ntalk[[:space:]]''
+    /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/ntalk ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ntalk && echo ''xinetd: ntalk enabled''; systemctl is-active ntalk ntalk.socket
+    2>/dev/null | grep -x active | sed ''s/^/systemd: ntalk /''; ps -e -o comm= 2>/dev/null | grep -xE ''(tftpd|in.tftpd|talkd|in.talkd|ntalkd|in.ntalkd|atftpd)'' | sort -u | sed ''s/^/proc: /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: tftp/talk/ntalk 활성이면 취약

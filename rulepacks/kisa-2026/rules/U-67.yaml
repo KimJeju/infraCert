@@ -1,0 +1,35 @@
+# U-67 로그 디렉터리 소유자 및 권한 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-67
+name: 로그 디렉터리 소유자 및 권한 설정
+severity: 중
+category: 로그관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: find /var/log /var/adm /var/log/audit -maxdepth 0 ! -user root 2>/dev/null; find /var/log /var/adm /var/log/audit -maxdepth 1 ! -type l -perm -o+w ! -name wtmp ! -name btmp ! -name lastlog 2>/dev/null | head -30
+  timeout: 60
+- key: ls
+  cmd: ls -ld /var/log /var/adm 2>/dev/null
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- ls
+- found
+note: 로그 디렉터리/파일이 root 소유이고 other 쓰기 없음이어야 양호(wtmp/btmp/lastlog 제외)

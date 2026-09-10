@@ -1,0 +1,36 @@
+# U-40 NFS 접근 통제 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-40
+name: NFS 접근 통제
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: nfs
+  cmd: 'grep -E ''^[[:space:]]*nfs-server[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/nfs-server ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/nfs-server && echo
+    ''xinetd: nfs-server enabled''; systemctl is-active nfs-server nfs-server.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: nfs-server /''; ps -e -o comm= 2>/dev/null | grep -xE ''(nfsd|rpc.mountd|mountd)'' | sort
+    -u | sed ''s/^/proc: /'''
+- key: exports
+  cmd: grep -vE '^[[:space:]]*#|^[[:space:]]*$' /etc/exports 2>/dev/null
+- key: open
+  cmd: grep -vE '^[[:space:]]*#' /etc/exports 2>/dev/null | grep -E '\*|no_root_squash|^[[:space:]]*[^[:space:]]+[[:space:]]*$'
+verdict:
+- when:
+    nfs:
+      absent: true
+  then: NA
+- when:
+    exports:
+      absent: true
+  then: NA
+- when:
+    open:
+      exists: true
+  then: VULN
+- else: GOOD
+evidence:
+- exports
+note: NFS 미사용 N/A. exports 에 호스트 제한 없음/'*'/no_root_squash 있으면 취약

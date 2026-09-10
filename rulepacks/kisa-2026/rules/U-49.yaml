@@ -1,0 +1,25 @@
+# U-49 DNS 보안 버전 패치 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-49
+name: DNS 보안 버전 패치
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: named
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(named|named-pkcs11|bind9)' | sort -u
+- key: ver
+  cmd: named -v 2>/dev/null | head -1
+verdict:
+- when:
+    named:
+      absent: true
+  then: NA
+- else: MANUAL
+evidence:
+- named
+- ver
+note: BIND 미구동 N/A. 구동 시 버전을 ISC 공지와 대조(수동)

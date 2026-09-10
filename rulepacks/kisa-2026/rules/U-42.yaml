@@ -1,0 +1,45 @@
+# U-42 불필요한 RPC 서비스 비활성화 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-42
+name: 불필요한 RPC 서비스 비활성화
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*rstatd[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/rstatd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/rstatd && echo ''xinetd:
+    rstatd enabled''; systemctl is-active rstatd rstatd.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: rstatd /''; grep -E ''^[[:space:]]*rusersd[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [
+    -f /etc/xinetd.d/rusersd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/rusersd && echo ''xinetd: rusersd enabled''; systemctl is-active rusersd rusersd.socket 2>/dev/null | grep -x active | sed ''s/^/systemd:
+    rusersd /''; grep -E ''^[[:space:]]*rwalld[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/rwalld ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/rwalld && echo ''xinetd:
+    rwalld enabled''; systemctl is-active rwalld rwalld.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: rwalld /''; grep -E ''^[[:space:]]*sprayd[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [
+    -f /etc/xinetd.d/sprayd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/sprayd && echo ''xinetd: sprayd enabled''; systemctl is-active sprayd sprayd.socket 2>/dev/null | grep -x active | sed ''s/^/systemd:
+    sprayd /''; grep -E ''^[[:space:]]*pcnfsd[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/pcnfsd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/pcnfsd && echo ''xinetd:
+    pcnfsd enabled''; systemctl is-active pcnfsd pcnfsd.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: pcnfsd /''; grep -E ''^[[:space:]]*rquotad[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [
+    -f /etc/xinetd.d/rquotad ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/rquotad && echo ''xinetd: rquotad enabled''; systemctl is-active rquotad rquotad.socket 2>/dev/null | grep -x active | sed ''s/^/systemd:
+    rquotad /''; grep -E ''^[[:space:]]*ttdbserver[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/ttdbserver ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ttdbserver
+    && echo ''xinetd: ttdbserver enabled''; systemctl is-active ttdbserver ttdbserver.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: ttdbserver /''; grep -E ''^[[:space:]]*cmsd[[:space:]]'' /etc/inetd.conf 2>/dev/null
+    | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/cmsd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/cmsd && echo ''xinetd: cmsd enabled''; systemctl is-active cmsd cmsd.socket 2>/dev/null | grep -x active
+    | sed ''s/^/systemd: cmsd /''; ps -e -o comm= 2>/dev/null | grep -xE ''(rstatd|rusersd|rwalld|sprayd|pcnfsd|rquotad|ttdbserver|cmsd|rpc.rstatd|rpc.rusersd|rpc.rwalld|rpc.sprayd|rpc.pcnfsd|rpc.rquotad|rpc.ttdbserverd|rpc.cmsd|kcms_server|cachefsd)''
+    | sort -u | sed ''s/^/proc: /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: rstatd/rusersd/rwalld/sprayd/pcnfsd/rquotad/ttdbserver/cmsd 활성이면 취약

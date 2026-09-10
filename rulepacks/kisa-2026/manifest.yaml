@@ -216,8 +216,74 @@ rule_files:
   sha256: 4e431cc4178ee5d86dd2259287be264b000fae27d59d9772bef9a7e3c65f1d50
 - path: rules/U-33.yaml
   sha256: 65495d412ae282bcef2642a50e02c3383040df0fa409d061164b27501c25da2f
+- path: rules/U-34.yaml
+  sha256: c7e44ab629197ae38dcce54c307c5c7021dc7f74c6c05d82d067622b2fd30ffa
+- path: rules/U-35.yaml
+  sha256: 556d510788d02df08cd9b308f86436e0f4acb5595ac5724b3a3682178d67d70c
+- path: rules/U-36.yaml
+  sha256: 999f65cb37f8c677639d4c98d9a029eff94a56df206c0238ed3246f7213a4485
+- path: rules/U-37.yaml
+  sha256: e94f58007b8272fa208763bbdfb24751aec27e79b20e080be9d5d2e1030a807c
+- path: rules/U-38.yaml
+  sha256: 8c803dbb49fe1620cdda53e7544c0ffd5d48372feea49d783300dc98fc0fac91
+- path: rules/U-39.yaml
+  sha256: 89f7b0a7ec6f6bfc11ffec876f4829640c991f2908ab816ca42f800bb03d2e1e
+- path: rules/U-40.yaml
+  sha256: bc41e7c6759a182f81ff83b525a0441f61ddd17dc3eafbfe24c74ec9cfbb163d
+- path: rules/U-41.yaml
+  sha256: 1ed7b7637482e38ce2f790170bccd830c443383f17dd031c70bd7d391bb2ad95
+- path: rules/U-42.yaml
+  sha256: 8ec7f66dd9a0287418e6485f88004b446041df7f6cfc5d06e6fa45c9512dc38e
+- path: rules/U-43.yaml
+  sha256: e31e0604e1ed111b67ceb78cb0995c4d20c695b3147fe93661cb7ca75b534507
+- path: rules/U-44.yaml
+  sha256: f056816953db543a1395eaea41a055f65bf802f031571efbc8d03fa9815b0849
+- path: rules/U-45.yaml
+  sha256: 0c5c2c945b94565c93848778a3f3ae014ce2a99211d38d848a3a34d009ad6d0c
+- path: rules/U-46.yaml
+  sha256: 119930609a25be883a886e455df6ab0a9980080d8286ed9e7c7a41a85fdb9994
+- path: rules/U-47.yaml
+  sha256: 3765eb6957ebd3d42779480b2b1b1e790dca17f1861b2e2ec7dfea31a7e79aa1
+- path: rules/U-48.yaml
+  sha256: 1f6bda936716d334c8ef7d525cbb4a19e4c25bd04a05756867eba662ef1fc685
+- path: rules/U-49.yaml
+  sha256: 044334aafb5a9a3d0acabde72f2cccf8f97c2ccd19394a76ef83e9b196ce7f61
+- path: rules/U-50.yaml
+  sha256: b08ed048a8fe30d6014caa16355cd43eb6ae05dba85cb4dc4344cfa48576c0ac
+- path: rules/U-51.yaml
+  sha256: f676427a6b6b32542f98e8c7f723ab123a86b900d4f570d410b2c6c41250844c
+- path: rules/U-52.yaml
+  sha256: d90497e27b92fb0feff69facf04e8f9dd7ca8031a3d4c50faa84996cf3beba33
+- path: rules/U-53.yaml
+  sha256: 7e48f6ddb8aae7202ad520a96a341e71f5b32f9c139bd48b44e0207af70b16a2
+- path: rules/U-54.yaml
+  sha256: c4d83a2164a3e5ea95833a712b1ac72bc34c0377e0a5038e6a9dde266052248e
+- path: rules/U-55.yaml
+  sha256: e96ccee61357fbf0366e4dc8807c379b5bbc3034e2c4c75896854fdf008bd791
+- path: rules/U-56.yaml
+  sha256: 06d55f80269b198d6a5d201e4ffc4a7ec5e2e3d84e862030845ac21450e1ce29
+- path: rules/U-57.yaml
+  sha256: 9d5e9b2ba032b880b3ccd720a6412c67576a2078387d185e16f69d66e844c3aa
+- path: rules/U-58.yaml
+  sha256: 87c7f7ae59da86d505f9c1d541eb5622c4eec0013a16c52623e520f3a5efaedc
+- path: rules/U-59.yaml
+  sha256: 92b35d50915b0c519b5f65e29855b01b994a71a8269161805a1c3420c5ac2fab
+- path: rules/U-60.yaml
+  sha256: eed42ae8d78560e816f60fe94467c2be37445d1229ceb85d8a28d77d11544992
+- path: rules/U-61.yaml
+  sha256: 29ec9175a323dac866383ab9e34a9cadf9af7a36e7d86f6cba6e61b1d60bf347
+- path: rules/U-62.yaml
+  sha256: 9a229f0268d3b4a37f8dee9d6dcd4fd698a493c07c43b984505c76406054a727
+- path: rules/U-63.yaml
+  sha256: b01be3638c9181a06a15c16d82ffe23ec608ea0218d45f5b8a7ccc7549b5837d
 - path: rules/U-64.yaml
   sha256: ff1816066f809ec256a424005d81bce956e5adacc453ed9bd833c1c54aead113
+- path: rules/U-65.yaml
+  sha256: 3a72ad5b7ff55c78691fe6785f47c625af67d99082b6b41a72ec8860353d3e03
+- path: rules/U-66.yaml
+  sha256: 95852d0e0452a59670c9b6bf50c12e6c3b494c68c97289c40f96d18f6376a9ef
+- path: rules/U-67.yaml
+  sha256: cc1cb9086065e3c4942193c4dd5637ee5e6fd9539803b374ce938e8c3c9505b2
 native: &id001
 - U-01
 - U-02
@@ -252,7 +318,40 @@ native: &id001
 - U-31
 - U-32
 - U-33
+- U-34
+- U-35
+- U-36
+- U-37
+- U-38
+- U-39
+- U-40
+- U-41
+- U-42
+- U-43
+- U-44
+- U-45
+- U-46
+- U-47
+- U-48
+- U-49
+- U-50
+- U-51
+- U-52
+- U-53
+- U-54
+- U-55
+- U-56
+- U-57
+- U-58
+- U-59
+- U-60
+- U-61
+- U-62
+- U-63
 - U-64
+- U-65
+- U-66
+- U-67
 rules:
 - id: D-01
   name: 기본 계정의 비밀번호/정책 변경
@@ -342,6 +441,7 @@ rules:
   name: root 이외의 UID 0 금지
   severity: 상
   category: Unix
+  manual: false
 - id: U-06
   name: 사용자 계정 su 기능 제한
   severity: 상
@@ -350,86 +450,107 @@ rules:
   name: 불필요한 계정 제거
   severity: 하
   category: Unix
+  manual: false
 - id: U-08
   name: 관리자 그룹에 최소한의 계정 포함
   severity: 중
   category: Unix
+  manual: false
 - id: U-09
   name: 계정이 존재하지 않는 GID 금지
   severity: 하
   category: Unix
+  manual: false
 - id: U-10
   name: 동일한 UID 금지
   severity: 중
   category: Unix
+  manual: false
 - id: U-11
   name: 사용자 Shell 점검
   severity: 하
   category: Unix
+  manual: false
 - id: U-12
   name: 세션 종료 시간 설정
   severity: 하
   category: Unix
+  manual: false
 - id: U-13
   name: 안전한 비밀번호 암호화 알고리즘 사용
   severity: 중
   category: Unix
+  manual: false
 - id: U-14
   name: root 홈, 패스 디렉터리 권한 및 PATH 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-15
   name: 파일 및 디렉터리 소유자 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-16
   name: /etc/passwd 파일 소유자 및 권한 설정(644 이하)
   severity: 상
   category: Unix
+  manual: false
 - id: U-17
   name: 시스템 시작 스크립트 권한 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-18
   name: /etc/security/passwd 소유자 및 권한(400 이하)
   severity: 상
   category: Unix
+  manual: false
 - id: U-19
   name: /etc/hosts 소유자 및 권한(644 이하)
   severity: 상
   category: Unix
+  manual: false
 - id: U-20
   name: /etc/inetd.conf 소유자 및 권한(600 이하)
   severity: 상
   category: Unix
+  manual: false
 - id: U-21
   name: /etc/syslog.conf 소유자 및 권한(644 이하)
   severity: 상
   category: Unix
+  manual: false
 - id: U-22
   name: /etc/services 소유자 및 권한(644 이하)
   severity: 상
   category: Unix
+  manual: false
 - id: U-23
   name: SUID, SGID, Sticky bit 설정 파일 점검
   severity: 상
   category: Unix
+  manual: false
 - id: U-24
   name: 사용자, 시스템 환경변수 파일 소유자 및 권한 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-25
   name: world writable 파일 점검
   severity: 상
   category: Unix
+  manual: false
 - id: U-26
   name: /dev에 존재하지 않는 device 파일 점검
   severity: 상
   category: Unix
+  manual: false
 - id: U-27
   name: \$HOME/.rhosts, hosts.equiv 사용 금지
   severity: 상
   category: Unix
+  manual: false
 - id: U-28
   name: 접속 IP 및 포트 제한
   severity: 상
@@ -439,6 +560,7 @@ rules:
   name: /etc/hosts.lpd 소유자 및 권한(600 이하/미존재 양호)
   severity: 하
   category: Unix
+  manual: false
 - id: U-30
   name: UMASK 설정 관리
   severity: 중
@@ -447,134 +569,167 @@ rules:
   name: 홈 디렉토리 소유자 및 권한 설정
   severity: 중
   category: Unix
+  manual: false
 - id: U-32
   name: 홈 디렉토리로 지정한 디렉토리의 존재 관리
   severity: 중
   category: Unix
+  manual: false
 - id: U-33
   name: 숨겨진 파일 및 디렉토리 검색 및 제거
   severity: 하
   category: Unix
+  manual: false
 - id: U-34
   name: Finger 서비스 비활성화
   severity: 상
   category: Unix
+  manual: false
 - id: U-35
   name: 공유 서비스에 대한 익명 접근 제한 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-36
   name: r 계열 서비스 비활성화(rlogin/rsh/rexec)
   severity: 상
   category: Unix
+  manual: false
 - id: U-37
   name: crontab 설정파일 권한 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-38
   name: DoS 취약 서비스 비활성화(echo/discard/daytime/chargen)
   severity: 상
   category: Unix
+  manual: false
 - id: U-39
   name: 불필요한 NFS 서비스 비활성화
   severity: 상
   category: Unix
+  manual: false
 - id: U-40
   name: NFS 접근 통제
   severity: 상
   category: Unix
+  manual: false
 - id: U-41
   name: 불필요한 automountd 제거
   severity: 상
   category: Unix
+  manual: false
 - id: U-42
   name: 불필요한 RPC 서비스 비활성화
   severity: 상
   category: Unix
+  manual: false
 - id: U-43
   name: NIS, NIS+ 점검
   severity: 상
   category: Unix
+  manual: false
 - id: U-44
   name: tftp, talk 서비스 비활성화
   severity: 상
   category: Unix
+  manual: false
 - id: U-45
   name: 메일 서비스 버전 점검
   severity: 상
   category: Unix
+  manual: false
 - id: U-46
   name: 일반 사용자의 메일 서비스 실행 방지
   severity: 상
   category: Unix
+  manual: false
 - id: U-47
   name: 스팸 메일 릴레이 제한
   severity: 상
   category: Unix
+  manual: false
 - id: U-48
   name: expn, vrfy 명령어 제한
   severity: 중
   category: Unix
+  manual: false
 - id: U-49
   name: DNS 보안 버전 패치
   severity: 상
   category: Unix
+  manual: false
 - id: U-50
   name: DNS Zone Transfer 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-51
   name: DNS 서비스의 취약한 동적 업데이트 설정 금지
   severity: 중
   category: Unix
+  manual: false
 - id: U-52
   name: Telnet 서비스 비활성화
   severity: 중
   category: Unix
+  manual: false
 - id: U-53
   name: FTP 서비스 정보 노출 제한
   severity: 하
   category: Unix
+  manual: false
 - id: U-54
   name: 암호화되지 않는 FTP 서비스 비활성화
   severity: 중
   category: Unix
+  manual: false
 - id: U-55
   name: FTP 계정 Shell 제한
   severity: 중
   category: Unix
+  manual: false
 - id: U-56
   name: FTP 서비스 접근 제어 설정
   severity: 하
   category: Unix
+  manual: false
 - id: U-57
   name: Ftpusers 파일 설정
   severity: 중
   category: Unix
+  manual: false
 - id: U-58
   name: 불필요한 SNMP 서비스 구동 점검
   severity: 중
   category: Unix
+  manual: false
 - id: U-59
   name: 안전한 SNMP 버전 사용
   severity: 상
   category: Unix
+  manual: false
 - id: U-60
   name: SNMP Community String 복잡성 설정
   severity: 중
   category: Unix
+  manual: false
 - id: U-61
   name: SNMP Access Control 설정
   severity: 상
   category: Unix
+  manual: false
 - id: U-62
   name: 로그인 시 경고 메시지 설정
   severity: 하
   category: Unix
+  manual: false
 - id: U-63
   name: sudo 명령어 접근 관리
   severity: 중
   category: Unix
+  manual: false
 - id: U-64
   name: 주기적 보안 패치 및 벤더 권고사항 적용
   severity: 상
@@ -584,14 +739,17 @@ rules:
   name: NTP 및 시각 동기화 설정
   severity: 중
   category: Unix
+  manual: false
 - id: U-66
   name: 정책에 따른 시스템 로깅 설정
   severity: 중
   category: Unix
+  manual: false
 - id: U-67
   name: 로그 디렉터리 소유자 및 권한 설정
   severity: 중
   category: Unix
+  manual: false
 - id: WEB-01
   name: 기본 관리자 계정/관리자 페이지
   severity: ''

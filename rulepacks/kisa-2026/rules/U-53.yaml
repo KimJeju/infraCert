@@ -1,0 +1,30 @@
+# U-53 FTP 서비스 정보 노출 제한 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-53
+name: FTP 서비스 정보 노출 제한
+severity: 하
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: ftp
+  cmd: 'grep -E ''^[[:space:]]*ftp[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/ftp ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ftp && echo ''xinetd: ftp enabled'';
+    systemctl is-active ftp ftp.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: ftp /''; ps -e -o comm= 2>/dev/null | grep -xE ''(vsftpd|proftpd|pure-ftpd|in.ftpd|ftpd|wu-ftpd)'' | sort -u | sed ''s/^/proc: /'''
+- key: banner
+  cmd: grep -hiE '^[[:space:]]*(ftpd_banner|ServerIdent|banner_file)' /etc/vsftpd.conf /etc/vsftpd/vsftpd.conf /etc/proftpd/proftpd.conf /etc/proftpd.conf 2>/dev/null
+verdict:
+- when:
+    ftp:
+      absent: true
+  then: NA
+- when:
+    banner:
+      exists: true
+  then: MANUAL
+- else: VULN
+evidence:
+- ftp
+- banner
+note: FTP 미구동 N/A. 배너 설정 없으면 버전 노출(취약), 있으면 내용 확인

@@ -1,0 +1,28 @@
+# U-35 공유 서비스에 대한 익명 접근 제한 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-35
+name: 공유 서비스에 대한 익명 접근 제한 설정
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: shares
+  cmd: 'grep -vE ''^[[:space:]]*#|^[[:space:]]*$'' /etc/exports 2>/dev/null | sed ''s/^/nfs: /''; grep -iE ''^[[:space:]]*(guest ok|map to guest|public)'' /etc/samba/smb.conf 2>/dev/null | sed ''s/^/smb: /'''
+- key: anon
+  cmd: grep -vE '^[[:space:]]*#' /etc/exports 2>/dev/null | grep -E '\*|no_root_squash|insecure|anonuid'; grep -iE '^[[:space:]]*(guest ok|map to guest)[[:space:]]*=[[:space:]]*(yes|bad user)' /etc/samba/smb.conf 2>/dev/null
+verdict:
+- when:
+    shares:
+      absent: true
+  then: GOOD
+- when:
+    anon:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- shares
+note: 공유 없음 양호. exports '*'/no_root_squash/insecure, smb guest ok 는 취약. 그 외 공유는 접근제어 확인

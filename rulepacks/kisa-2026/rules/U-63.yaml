@@ -1,0 +1,31 @@
+# U-63 sudo 명령어 접근 관리 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-63
+name: sudo 명령어 접근 관리
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: ls
+  cmd: ls -l /etc/sudoers 2>/dev/null; ls -ld /etc/sudoers.d 2>/dev/null
+- key: perm
+  cmd: find /etc/sudoers /etc/sudoers.d -maxdepth 1 -type f \( -perm -o+r -o -perm -o+w -o -perm -g+w -o ! -user root \) 2>/dev/null
+- key: grants
+  cmd: grep -hE '^[[:space:]]*[^#[:space:]].*ALL[[:space:]]*=' /etc/sudoers /etc/sudoers.d/* 2>/dev/null | head -20
+verdict:
+- when:
+    ls:
+      absent: true
+  then: NA
+- when:
+    perm:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- ls
+- grants
+note: sudoers 는 root 소유 440. ALL 권한/NOPASSWD 부여 계정은 필요성 확인(수동). 읽기 불가 시 수동

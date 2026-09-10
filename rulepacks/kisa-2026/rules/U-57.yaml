@@ -1,0 +1,32 @@
+# U-57 Ftpusers 파일 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-57
+name: Ftpusers 파일 설정
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: ftp
+  cmd: 'grep -E ''^[[:space:]]*ftp[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/ftp ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ftp && echo ''xinetd: ftp enabled'';
+    systemctl is-active ftp ftp.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: ftp /''; ps -e -o comm= 2>/dev/null | grep -xE ''(vsftpd|proftpd|pure-ftpd|in.ftpd|ftpd|wu-ftpd)'' | sort -u | sed ''s/^/proc: /'''
+- key: deny
+  cmd: grep -hE '^root$' /etc/ftpusers /etc/vsftpd.ftpusers /etc/vsftpd/ftpusers /etc/vsftpd/user_list /etc/vsftpd.user_list /etc/proftpd/ftpusers 2>/dev/null | head -1
+- key: ls
+  cmd: ls -l /etc/ftpusers /etc/vsftpd/ftpusers /etc/vsftpd/user_list 2>/dev/null
+verdict:
+- when:
+    ftp:
+      absent: true
+  then: NA
+- when:
+    deny:
+      exists: true
+  then: GOOD
+- else: VULN
+evidence:
+- ftp
+- ls
+note: ftpusers(접속 금지 목록)에 root 가 있어야 양호

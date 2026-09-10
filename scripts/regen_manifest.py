@@ -70,8 +70,7 @@ def main(pack_dir: Path) -> int:
         m.setdefault("name", spec.name)
         m.setdefault("severity", spec.severity)
         m.setdefault("category", spec.category)
-        if spec.manual:
-            m["manual"] = True
+        m["manual"] = bool(spec.manual)     # YAML 이 정본. 이전 값이 남아 N/A 를 수동확인으로 덮지 않게 덮어쓴다
     man["rules"] = [meta[k] for k in sorted(meta, key=rule_key)]
 
     for p in man.get("profiles") or []:

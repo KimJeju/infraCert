@@ -1,0 +1,26 @@
+# U-55 FTP 계정 Shell 제한 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-55
+name: FTP 계정 Shell 제한
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: acct
+  cmd: grep -E '^ftp:' /etc/passwd 2>/dev/null
+verdict:
+- when:
+    acct:
+      absent: true
+  then: NA
+- when:
+    acct:
+      regex: (nologin|/bin/false)\s*$
+  then: GOOD
+- else: VULN
+evidence:
+- acct
+note: ftp 계정 셸이 /sbin/nologin 또는 /bin/false 여야 양호

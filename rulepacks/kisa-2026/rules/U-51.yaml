@@ -1,0 +1,29 @@
+# U-51 DNS 서비스의 취약한 동적 업데이트 설정 금지 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-51
+name: DNS 서비스의 취약한 동적 업데이트 설정 금지
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: named
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(named|named-pkcs11|bind9)' | sort -u
+- key: upd
+  cmd: cat /etc/named.conf /etc/bind/named.conf /etc/bind/named.conf.options /etc/bind/named.conf.local 2>/dev/null | grep -vE '^[[:space:]]*(//|#)' | grep -iE 'allow-update' | head -5
+verdict:
+- when:
+    named:
+      absent: true
+  then: NA
+- when:
+    upd:
+      regex: (?i)allow-update\s*\{\s*any
+  then: VULN
+- else: GOOD
+evidence:
+- named
+- upd
+note: allow-update { any; } 이면 취약. 미설정(기본 none)·제한 설정은 양호

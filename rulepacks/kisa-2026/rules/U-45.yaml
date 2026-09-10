@@ -1,0 +1,27 @@
+# U-45 메일 서비스 버전 점검 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-45
+name: 메일 서비스 버전 점검
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: mta
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(sendmail|postfix|master|exim4?|qmail-send|smtpd)' | sort -u
+- key: ver
+  cmd: (command -v postconf >/dev/null && postconf -h mail_version 2>/dev/null | sed 's/^/postfix /'); (command -v sendmail >/dev/null && sendmail -d0.1 -bv root 2>/dev/null < /dev/null | grep -i version | head -1); (command
+    -v exim >/dev/null && exim --version 2>/dev/null | head -1)
+  timeout: 30
+verdict:
+- when:
+    mta:
+      absent: true
+  then: NA
+- else: MANUAL
+evidence:
+- mta
+- ver
+note: MTA 미구동 N/A. 구동 시 버전을 벤더 취약점 공지와 대조(수동)

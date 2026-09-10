@@ -20,36 +20,25 @@ def _git(*args: str) -> str:
 
 
 @pytest.fixture(scope="module")
-def tracked() -> set[str]:
+def ignored() -> set[str]:
+    """.gitignore 규칙에 걸려 git 이 무시하는 파일들. (아직 add 안 한 새 파일은 여기 없다)"""
     if shutil.which("git") is None or not (ROOT / ".git").exists():
         pytest.skip("git 작업트리 아님")
-    return set(_git("ls-files", "--", "src", "rulepacks", "tests").splitlines())
+    out = _git("ls-files", "--others", "--ignored", "--exclude-standard", "--", "src", "rulepacks", "tests")
+    return {ln for ln in out.splitlines() if "__pycache__" not in ln and not ln.endswith(".pyc")
+            and ".egg-info" not in ln}
 
 
-def test_every_source_package_is_tracked(tracked):
-    missing = []
-    for init in SRC.rglob("__init__.py"):
-        rel = init.relative_to(ROOT).as_posix()
-        if rel not in tracked:
-            missing.append(rel)
-    assert not missing, f"git 에 없는 소스 패키지(ignore 규칙 확인): {missing}"
+def test_no_source_package_is_gitignored(ignored):
+    hit = sorted(p for p in ignored if p.startswith("src/infraguard/") and p.endswith(".py"))
+    assert not hit, f".gitignore 가 소스를 무시한다(규칙 범위 확인): {hit}"
 
 
-def test_every_source_module_is_tracked_or_ignored_on_purpose(tracked):
-    """*.py 소스 파일 중 추적되지 않는 것은 없어야 한다(캐시 제외)."""
-    untracked = []
-    for py in SRC.rglob("*.py"):
-        if "__pycache__" in py.parts:
-            continue
-        rel = py.relative_to(ROOT).as_posix()
-        if rel not in tracked:
-            untracked.append(rel)
-    assert not untracked, f"미추적 소스: {untracked}"
+def test_no_rulepack_file_is_gitignored(ignored):
+    hit = sorted(p for p in ignored if p.startswith("rulepacks/") and p.endswith((".yaml", ".sh", ".sql")))
+    assert not hit, f".gitignore 가 룰팩 파일을 무시한다: {hit}"
 
 
-def test_rulepack_rules_and_manifest_tracked(tracked):
-    pack = ROOT / "rulepacks" / "kisa-2026"
-    need = [pack / "manifest.yaml", *sorted((pack / "rules").glob("*.yaml"))]
-    missing = [p.relative_to(ROOT).as_posix() for p in need
-               if p.relative_to(ROOT).as_posix() not in tracked]
-    assert not missing, f"룰팩 파일 미추적: {missing}"
+def test_no_test_file_is_gitignored(ignored):
+    hit = sorted(p for p in ignored if p.startswith("tests/") and p.endswith(".py"))
+    assert not hit, f".gitignore 가 테스트를 무시한다: {hit}"

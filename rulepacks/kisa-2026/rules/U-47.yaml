@@ -1,0 +1,35 @@
+# U-47 스팸 메일 릴레이 제한 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-47
+name: 스팸 메일 릴레이 제한
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: mta
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(sendmail|postfix|master|exim4?|qmail-send|smtpd)' | sort -u
+- key: cfg
+  cmd: (command -v postconf >/dev/null && postconf -h smtpd_relay_restrictions smtpd_recipient_restrictions mynetworks 2>/dev/null); grep -hiE 'promiscuous_relay|relay_entire_domain' /etc/mail/sendmail.mc /etc/mail/sendmail.cf
+    2>/dev/null | head -5; ls -l /etc/mail/access* 2>/dev/null
+  timeout: 30
+verdict:
+- when:
+    mta:
+      absent: true
+  then: NA
+- when:
+    cfg:
+      regex: (?i)promiscuous_relay|relay_entire_domain
+  then: VULN
+- when:
+    cfg:
+      regex: reject_unauth_destination|permit_mynetworks
+  then: GOOD
+- else: MANUAL
+evidence:
+- mta
+- cfg
+note: postfix reject_unauth_destination / sendmail access DB 로 릴레이 제한. promiscuous_relay 는 취약

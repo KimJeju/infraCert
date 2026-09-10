@@ -1,0 +1,38 @@
+# U-38 DoS 취약 서비스 비활성화(echo/discard/daytime/chargen) — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-38
+name: DoS 취약 서비스 비활성화(echo/discard/daytime/chargen)
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*echo[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/echo ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/echo && echo ''xinetd: echo enabled'';
+    systemctl is-active echo echo.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: echo /''; grep -E ''^[[:space:]]*discard[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/discard
+    ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/discard && echo ''xinetd: discard enabled''; systemctl is-active discard discard.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: discard /'';
+    grep -E ''^[[:space:]]*daytime[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/daytime ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/daytime && echo ''xinetd: daytime
+    enabled''; systemctl is-active daytime daytime.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: daytime /''; grep -E ''^[[:space:]]*chargen[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f
+    /etc/xinetd.d/chargen ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/chargen && echo ''xinetd: chargen enabled''; systemctl is-active chargen chargen.socket 2>/dev/null | grep -x active | sed ''s/^/systemd:
+    chargen /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: echo/discard/daytime/chargen(inetd/xinetd) 활성이면 취약

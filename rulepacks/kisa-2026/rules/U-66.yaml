@@ -1,0 +1,29 @@
+# U-66 정책에 따른 시스템 로깅 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-66
+name: 정책에 따른 시스템 로깅 설정
+severity: 중
+category: 로그관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: daemon
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(rsyslogd|syslogd|syslog-ng|systemd-journal|systemd-journald)' | sort -u
+- key: conf
+  cmd: grep -hvE '^[[:space:]]*(#|\$)|^[[:space:]]*$' /etc/rsyslog.conf /etc/rsyslog.d/*.conf /etc/syslog.conf 2>/dev/null | head -20
+verdict:
+- when:
+    daemon:
+      absent: true
+  then: VULN
+- when:
+    conf:
+      regex: auth|authpriv|\\*\\.(info|notice|warn|err|crit|alert|emerg|\\*)
+  then: GOOD
+- else: MANUAL
+evidence:
+- daemon
+- conf
+note: syslog 계열 데몬 동작 + auth/authpriv 등 정책 항목이 설정돼야 양호. journald 단독은 보관 정책 확인

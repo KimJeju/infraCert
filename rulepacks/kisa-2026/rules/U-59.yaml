@@ -1,0 +1,36 @@
+# U-59 안전한 SNMP 버전 사용 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-59
+name: 안전한 SNMP 버전 사용
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: snmp
+  cmd: 'grep -E ''^[[:space:]]*snmpd[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/snmpd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/snmpd && echo ''xinetd: snmpd
+    enabled''; systemctl is-active snmpd snmpd.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: snmpd /''; ps -e -o comm= 2>/dev/null | grep -xE ''(snmpd|snmpdv3ne|snmpdv1)'' | sort -u | sed ''s/^/proc: /'''
+- key: v12
+  cmd: grep -vE '^[[:space:]]*#|^[[:space:]]*$' /etc/snmp/snmpd.conf /etc/snmpd.conf /etc/snmpdv3.conf 2>/dev/null | grep -iE '^[[:space:]]*(r[ow]community6?|com2sec|community)[[:space:]]'
+- key: v3
+  cmd: grep -vE '^[[:space:]]*#|^[[:space:]]*$' /etc/snmp/snmpd.conf /etc/snmpd.conf /etc/snmpdv3.conf 2>/dev/null | grep -iE '^[[:space:]]*(r[ow]user|createUser|usm)'
+verdict:
+- when:
+    snmp:
+      absent: true
+  then: NA
+- when:
+    v12:
+      exists: true
+  then: VULN
+- when:
+    v3:
+      exists: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- v12
+- v3
+note: v1/v2c(community) 설정 있으면 취약, v3(USM) 만 있으면 양호

@@ -1,0 +1,41 @@
+# U-36 r 계열 서비스 비활성화(rlogin/rsh/rexec) — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-36
+name: r 계열 서비스 비활성화(rlogin/rsh/rexec)
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*shell[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/shell ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/shell && echo ''xinetd: shell
+    enabled''; systemctl is-active shell shell.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: shell /''; grep -E ''^[[:space:]]*login[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/login
+    ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/login && echo ''xinetd: login enabled''; systemctl is-active login login.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: login /''; grep -E ''^[[:space:]]*exec[[:space:]]''
+    /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/exec ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/exec && echo ''xinetd: exec enabled''; systemctl is-active exec exec.socket
+    2>/dev/null | grep -x active | sed ''s/^/systemd: exec /''; grep -E ''^[[:space:]]*rsh[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/rsh ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no''
+    /etc/xinetd.d/rsh && echo ''xinetd: rsh enabled''; systemctl is-active rsh rsh.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: rsh /''; grep -E ''^[[:space:]]*rlogin[[:space:]]'' /etc/inetd.conf 2>/dev/null |
+    sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/rlogin ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/rlogin && echo ''xinetd: rlogin enabled''; systemctl is-active rlogin rlogin.socket 2>/dev/null | grep
+    -x active | sed ''s/^/systemd: rlogin /''; grep -E ''^[[:space:]]*rexec[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/rexec ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/rexec
+    && echo ''xinetd: rexec enabled''; systemctl is-active rexec rexec.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: rexec /''; ps -e -o comm= 2>/dev/null | grep -xE ''(rshd|rlogind|rexecd|in.rshd|in.rlogind|in.rexecd)''
+    | sort -u | sed ''s/^/proc: /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: rsh/rlogin/rexec 활성이면 취약

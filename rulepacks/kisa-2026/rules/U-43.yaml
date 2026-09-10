@@ -1,0 +1,35 @@
+# U-43 NIS, NIS+ 점검 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-43
+name: NIS, NIS+ 점검
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*ypserv[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/ypserv ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ypserv && echo ''xinetd:
+    ypserv enabled''; systemctl is-active ypserv ypserv.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: ypserv /''; grep -E ''^[[:space:]]*ypbind[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [
+    -f /etc/xinetd.d/ypbind ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ypbind && echo ''xinetd: ypbind enabled''; systemctl is-active ypbind ypbind.socket 2>/dev/null | grep -x active | sed ''s/^/systemd:
+    ypbind /''; ps -e -o comm= 2>/dev/null | grep -xE ''(ypserv|ypbind|ypxfrd|rpc.yppasswdd|rpc.ypupdated|nisd)'' | sort -u | sed ''s/^/proc: /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: NIS/NIS+ 데몬 활성이면 취약(NIS+ 또는 LDAP 권고)

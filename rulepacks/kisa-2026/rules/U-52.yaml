@@ -1,0 +1,33 @@
+# U-52 Telnet 서비스 비활성화 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-52
+name: Telnet 서비스 비활성화
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*telnet[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/telnet ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/telnet && echo ''xinetd:
+    telnet enabled''; systemctl is-active telnet telnet.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: telnet /''; ps -e -o comm= 2>/dev/null | grep -xE ''(telnetd|in.telnetd)'' | sort -u | sed ''s/^/proc: /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: telnet 활성이면 취약(SSH 사용)

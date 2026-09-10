@@ -1,0 +1,33 @@
+# U-61 SNMP Access Control 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-61
+name: SNMP Access Control 설정
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: snmp
+  cmd: 'grep -E ''^[[:space:]]*snmpd[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/snmpd ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/snmpd && echo ''xinetd: snmpd
+    enabled''; systemctl is-active snmpd snmpd.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: snmpd /''; ps -e -o comm= 2>/dev/null | grep -xE ''(snmpd|snmpdv3ne|snmpdv1)'' | sort -u | sed ''s/^/proc: /'''
+- key: com
+  cmd: grep -vE '^[[:space:]]*#|^[[:space:]]*$' /etc/snmp/snmpd.conf /etc/snmpd.conf /etc/snmpdv3.conf 2>/dev/null | grep -iE '^[[:space:]]*(r[ow]community6?|com2sec)[[:space:]]'
+verdict:
+- when:
+    snmp:
+      absent: true
+  then: NA
+- when:
+    com:
+      absent: true
+  then: NA
+- when:
+    com:
+      regex: (?im)^\s*r[ow]community6?\s+\S+\s*$|\sdefault(\s|$)
+  then: VULN
+- else: GOOD
+evidence:
+- com
+note: ro/rw 커뮤니티 설정에 접근 허용 소스(IP/네트워크)가 없거나 default 면 취약

@@ -1,0 +1,33 @@
+# U-50 DNS Zone Transfer 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-50
+name: DNS Zone Transfer 설정
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: named
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(named|named-pkcs11|bind9)' | sort -u
+- key: xfer
+  cmd: cat /etc/named.conf /etc/bind/named.conf /etc/bind/named.conf.options /etc/bind/named.conf.local 2>/dev/null | grep -vE '^[[:space:]]*(//|#)' | grep -iE 'allow-transfer' | head -5
+verdict:
+- when:
+    named:
+      absent: true
+  then: NA
+- when:
+    xfer:
+      regex: (?i)allow-transfer\s*\{\s*any
+  then: VULN
+- when:
+    xfer:
+      exists: true
+  then: GOOD
+- else: VULN
+evidence:
+- named
+- xfer
+note: allow-transfer 로 전송 대상을 제한해야 양호. 미설정/any 취약

@@ -1,0 +1,44 @@
+# U-48 expn, vrfy 명령어 제한 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-48
+name: expn, vrfy 명령어 제한
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: mta
+  cmd: ps -e -o comm= 2>/dev/null | grep -xE '(sendmail|postfix|master|exim4?|qmail-send|smtpd)' | sort -u
+- key: priv
+  cmd: grep -hiE '^[[:space:]]*O[[:space:]]*PrivacyOptions' /etc/mail/sendmail.cf /etc/sendmail.cf 2>/dev/null
+- key: pf
+  cmd: command -v postconf >/dev/null && postconf -h disable_vrfy_command 2>/dev/null
+verdict:
+- when:
+    mta:
+      absent: true
+  then: NA
+- when:
+    priv:
+      regex: (?i)goaway|(noexpn.*novrfy|novrfy.*noexpn)
+  then: GOOD
+- when:
+    priv:
+      exists: true
+  then: VULN
+- when:
+    pf:
+      eq: 'yes'
+  then: GOOD
+- when:
+    pf:
+      eq: 'no'
+  then: VULN
+- else: MANUAL
+evidence:
+- mta
+- priv
+- pf
+note: sendmail PrivacyOptions noexpn,novrfy(또는 goaway) / postfix disable_vrfy_command=yes 이면 양호

@@ -1,0 +1,33 @@
+# U-37 crontab 설정파일 권한 설정 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-37
+name: crontab 설정파일 권한 설정
+severity: 상
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: ls
+  cmd: ls -ld /etc/crontab /etc/cron.d /var/spool/cron /var/spool/cron/crontabs /var/adm/cron 2>/dev/null
+- key: unreadable
+  cmd: for p in /etc/crontab /etc/cron.d /var/spool/cron /var/spool/cron/crontabs /var/adm/cron; do [ -e "$p" ] && [ ! -r "$p" ] && echo "$p"; done; true
+- key: found
+  cmd: find /etc/crontab /etc/cron.d /etc/cron.allow /etc/cron.deny /var/spool/cron /var/spool/cron/crontabs /var/spool/cron/tabs /var/adm/cron -maxdepth 1 \( -perm -o+w -o ! -user root -o \( -type f -perm -g+w \) \) 2>/dev/null;
+    true
+verdict:
+- when:
+    found:
+      exists: true
+  then: VULN
+- when:
+    unreadable:
+      exists: true
+  then: MANUAL
+- else: GOOD
+evidence:
+- ls
+- found
+- unreadable
+note: cron 설정/스풀이 root 소유·other 쓰기 없음·파일 그룹쓰기 없음이어야 양호. 읽기 불가 경로는 root 로 재확인

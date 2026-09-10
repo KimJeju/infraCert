@@ -1,0 +1,33 @@
+# U-54 암호화되지 않는 FTP 서비스 비활성화 — 선언형 룰(gen_rules_services.py 생성). 명령은 상수, 판정은 화이트리스트 연산자만.
+id: U-54
+name: 암호화되지 않는 FTP 서비스 비활성화
+severity: 중
+category: 서비스관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: found
+  cmd: 'grep -E ''^[[:space:]]*ftp[[:space:]]'' /etc/inetd.conf 2>/dev/null | sed ''s/^/inetd: /''; [ -f /etc/xinetd.d/ftp ] && grep -iqE ''disable[[:space:]]*=[[:space:]]*no'' /etc/xinetd.d/ftp && echo ''xinetd: ftp enabled'';
+    systemctl is-active ftp ftp.socket 2>/dev/null | grep -x active | sed ''s/^/systemd: ftp /''; ps -e -o comm= 2>/dev/null | grep -xE ''(vsftpd|proftpd|pure-ftpd|in.ftpd|ftpd|wu-ftpd)'' | sort -u | sed ''s/^/proc: /'''
+  timeout: 60
+extract:
+- from: found
+  lines: n
+verdict:
+- when:
+    found_ok:
+      eq: 'False'
+    n:
+      eq: 0
+  then: MANUAL
+- when:
+    n:
+      eq: 0
+  then: GOOD
+- else: VULN
+evidence:
+- found
+note: 평문 FTP 활성이면 취약(SFTP/FTPS 권고)
