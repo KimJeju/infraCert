@@ -6,7 +6,7 @@ __pycache__/
 *.egg-info/
 build/
 dist/
-workspace/
+/workspace/
 _sample_report.xlsx
 .venv/
 config.json
