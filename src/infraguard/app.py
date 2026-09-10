@@ -28,6 +28,17 @@ def main() -> int:
     ws = Workspace()
     layout = ws.create()
 
+    # 처리되지 않은 예외 → workspace/logs/crash.log (마스킹). --noconsole 빌드의 유일한 단서.
+    from infraguard import crashlog
+
+    def _notify(path: str) -> None:
+        from PySide6.QtWidgets import QApplication, QMessageBox
+        if QApplication.instance() is not None:
+            QMessageBox.critical(None, "InfraGuard 오류",
+                                 f"예기치 않은 오류가 발생했습니다.\n기록: {path}\n(크리덴셜은 마스킹됩니다)")
+
+    crashlog.install(layout.logs / "crash.log", notify=_notify)
+
     from infraguard.assets.store import AssetStore
     assets = AssetStore(layout.assets_db)
     results = ResultsStore(layout.results_db)
