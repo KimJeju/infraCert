@@ -63,6 +63,19 @@ note: "기준: 소유자 root, 권한 644 이하"
 - 룰 파일은 `manifest.yaml` 의 `rule_files` 에 SHA-256 으로 등록돼야 한다. 미등록·불일치는 실행 차단.
 - OS 분기·PAM 파싱처럼 선언형으로 어색한 룰은 `src/infraguard/rules/*.py` 에 파이썬으로 두고 같은 id 로 등록한다. 스키마 정본은 `rules/declarative.py` 의 pydantic 모델.
 
+## 패키징 (portable exe)
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install pyinstaller
+.\.venv\Scripts\python.exe scripts\build_exe.py --clean
+```
+
+`dist\InfraGuard\` 를 통째로 반입한다(약 110 MB, 260여 파일). onedir(onefile 금지 — EDR 오탐·`%TEMP%` 잔류), `--noconsole`.
+Anaconda 기반 venv 면 `_sqlite3` 등이 base 의 `Library\bin` DLL 에 의존하므로 빌드 스크립트가 그 경로를 PATH 에 넣어 수집한다.
+`rulepacks/` 는 exe 옆에 복사되고 `workspace/`·`config.json` 은 실행 시 그 폴더에 생긴다.
+불필요한 Qt 모듈(WebEngine/Qml/3D/Charts/Multimedia …)은 제외해 크기를 줄인다.
+코드 서명은 별도(반입 심사 직결 — 조직 결정).
+
 ## 로컬 E2E 환경 (WSL)
 
 WSL Ubuntu 에 sshd 를 :2222 로 띄우고 테스트 계정 `igtest` 로 검증했다. (`wsl -u root` 로 설정)
