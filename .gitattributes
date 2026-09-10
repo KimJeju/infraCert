@@ -1,0 +1,5 @@
+# Cowork(Linux) ↔ Claude Code(Windows) 사이 줄바꿈 diff 오염 방지. 저장소는 항상 LF.
+* text=auto eol=lf
+*.sh text eol=lf
+*.png binary
+*.xlsx binary
