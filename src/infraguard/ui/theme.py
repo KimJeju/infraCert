@@ -58,14 +58,22 @@ QMenu::item:selected {{ background: {ACCENT_DIM}; color: white; }}
 QMenu::separator {{ height: 1px; background: {BG3}; margin: 4px 8px; }}
 
 /* ---- 입력 ---- */
+/* 높이를 명시하지 않으면 Windows 스타일에서 padding 만큼 글자가 위아래로 잘린다(09-11 형 스크린샷) */
 QLineEdit, QComboBox, QSpinBox, QPlainTextEdit, QTextEdit {{
-    background: {BG0}; border: 1px solid {BG3}; padding: 5px 8px;
+    background: {BG0}; border: 1px solid {BG3}; padding: 3px 8px; min-height: 24px;
     color: {FG0}; selection-background-color: {ACCENT_DIM};
 }}
+QPlainTextEdit, QTextEdit {{ padding: 6px 8px; }}
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QTextEdit:focus {{ border: 1px solid {ACCENT}; }}
-QComboBox::drop-down {{ border: none; width: 22px; }}
+QComboBox::drop-down {{ border: none; width: 22px; subcontrol-origin: padding; subcontrol-position: center right; }}
 QComboBox QAbstractItemView {{ background: {BG1}; border: 1px solid {BG3}; selection-background-color: {ACCENT_DIM}; }}
-QSpinBox::up-button, QSpinBox::down-button {{ width: 16px; border: none; background: {BG2}; }}
+QSpinBox {{ padding-right: 22px; }}
+QSpinBox::up-button, QSpinBox::down-button {{
+    width: 18px; border: none; background: {BG2}; subcontrol-origin: border;
+}}
+QSpinBox::up-button {{ subcontrol-position: top right; }}
+QSpinBox::down-button {{ subcontrol-position: bottom right; }}
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {{ background: {BG3}; }}
 QCheckBox, QRadioButton {{ spacing: 6px; }}
 QCheckBox::indicator, QRadioButton::indicator {{ width: 15px; height: 15px; border: 1px solid {BG3}; background: {BG0}; }}
 QCheckBox::indicator:checked, QRadioButton::indicator:checked {{ background: {ACCENT}; border-color: {ACCENT}; }}
@@ -113,8 +121,9 @@ QTabBar::tab:selected {{ background: {BG0}; color: {FG0}; border-color: {BG3}; b
 QTabBar::close-button {{ subcontrol-position: right; }}
 
 /* ---- 그룹/구분 ---- */
-QGroupBox {{ border: 1px solid {BG3}; margin-top: 12px; padding: 12px 8px 6px 8px; }}
-QGroupBox::title {{ subcontrol-origin: margin; left: 12px; padding: 0 6px; color: {FG1}; font-weight: 600; }}
+QGroupBox {{ border: 1px solid {BG3}; margin-top: 10px; padding: 16px 12px 10px 12px; }}
+QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; left: 12px; padding: 0 6px;
+                    color: {FG1}; font-weight: 600; background: {BG0}; }}
 QSplitter::handle {{ background: {BG3}; width: 1px; }}
 QScrollBar:vertical {{ background: transparent; width: 10px; margin: 0; }}
 QScrollBar::handle:vertical {{ background: {BG3}; min-height: 24px; }}

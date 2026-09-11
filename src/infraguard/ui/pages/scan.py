@@ -7,6 +7,7 @@ from PySide6.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
     QComboBox,
+    QFormLayout,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -37,6 +38,8 @@ class ScanPage(QWidget):
         super().__init__()
         self._rows: dict[str, int] = {}
         root = QVBoxLayout(self)
+        root.setContentsMargins(12, 10, 12, 10)
+        root.setSpacing(8)
 
         top = QHBoxLayout()
 
@@ -59,20 +62,21 @@ class ScanPage(QWidget):
         self.profile_info.setWordWrap(True)
         right.addWidget(self.profile_info)
         right.addWidget(QLabel("3. 실행 설정"))
-        crow = QHBoxLayout()
-        crow.addWidget(QLabel("동시 실행"))
+        form = QFormLayout()
+        form.setHorizontalSpacing(12)
+        form.setVerticalSpacing(6)
+        form.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.FieldsStayAtSizeHint)
         self.concurrency = QSpinBox()
         self.concurrency.setRange(1, 20)
         self.concurrency.setValue(5)
-        crow.addWidget(self.concurrency)
-        right.addLayout(crow)
-        trow = QHBoxLayout()
-        trow.addWidget(QLabel("타임아웃(초)"))
+        self.concurrency.setFixedWidth(110)
         self.timeout = QSpinBox()
         self.timeout.setRange(30, 86400)
         self.timeout.setValue(1800)
-        trow.addWidget(self.timeout)
-        right.addLayout(trow)
+        self.timeout.setFixedWidth(110)
+        form.addRow("동시 실행", self.concurrency)
+        form.addRow("타임아웃(초)", self.timeout)
+        right.addLayout(form)
         self.preflight = QCheckBox("실행 전 환경점검")
         self.preflight.setChecked(True)
         right.addWidget(self.preflight)

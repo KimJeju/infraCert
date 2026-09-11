@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QCheckBox,
     QComboBox,
@@ -42,9 +42,19 @@ class SettingsPage(QWidget):
         super().__init__()
         self._layout = layout
         root = QVBoxLayout(self)
+        root.setContentsMargins(16, 12, 16, 12)
+        root.setSpacing(10)
+
+        def form(box: QGroupBox) -> QFormLayout:
+            f = QFormLayout(box)
+            f.setHorizontalSpacing(16)
+            f.setVerticalSpacing(8)
+            f.setLabelAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
+            f.setFieldGrowthPolicy(QFormLayout.FieldGrowthPolicy.FieldsStayAtSizeHint)
+            return f
 
         g_run = QGroupBox("실행")
-        f = QFormLayout(g_run)
+        f = form(g_run)
         self.concurrency = QSpinBox()
         self.concurrency.setRange(1, 20)
         self.timeout = QSpinBox()
@@ -60,7 +70,7 @@ class SettingsPage(QWidget):
         root.addWidget(g_run)
 
         g_sec = QGroupBox("접속 · 보안")
-        f = QFormLayout(g_sec)
+        f = form(g_sec)
         self.connect_timeout = QSpinBox()
         self.connect_timeout.setRange(3, 120)
         self.idle_lock = QSpinBox()
@@ -73,7 +83,7 @@ class SettingsPage(QWidget):
         root.addWidget(g_sec)
 
         g_rep = QGroupBox("리포트")
-        f = QFormLayout(g_rep)
+        f = form(g_rep)
         self.export_fmt = QComboBox()
         self.export_fmt.addItems(["xlsx", "html"])
         self.company = QLineEdit()
@@ -83,15 +93,16 @@ class SettingsPage(QWidget):
         root.addWidget(g_rep)
         for w in (self.concurrency, self.timeout, self.max_out, self.connect_timeout,
                   self.idle_lock, self.export_fmt):
-            w.setMaximumWidth(180)
-        self.company.setMaximumWidth(420)
+            w.setFixedWidth(160)
+        self.company.setFixedWidth(420)
 
         g_ws = QGroupBox("작업공간")
-        f = QFormLayout(g_ws)
+        f = form(g_ws)
         self.ws_path = QLabel(str(layout.root))
         self.ws_size = QLabel("")
         wipe = QPushButton("지금 완전삭제")
         wipe.setObjectName("danger")
+        wipe.setFixedWidth(160)
         wipe.clicked.connect(self.sanitize_requested)
         f.addRow("경로", self.ws_path)
         f.addRow("사용량", self.ws_size)
@@ -99,13 +110,14 @@ class SettingsPage(QWidget):
         root.addWidget(g_ws)
 
         g_info = QGroupBox("정보")
-        f = QFormLayout(g_info)
+        f = form(g_info)
         f.addRow("엔진", QLabel(engine_version))
         f.addRow("룰팩", QLabel(pack_label))
         f.addRow("네트워크", QLabel("오프라인 전용 — 업데이트 확인·텔레메트리 없음"))
         f.addRow("설정 파일", QLabel(str(config.config_path())))
         root.addWidget(g_info)
 
+        root.addStretch(1)
         brow = QHBoxLayout()
         brow.addStretch(1)
         save = QPushButton("저장")
