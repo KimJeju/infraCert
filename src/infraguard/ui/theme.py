@@ -7,15 +7,15 @@ from __future__ import annotations
 
 from infraguard.core.status import Status
 
-# --- 기본 팔레트 ---
-BG0 = "#0D1117"      # 캔버스
-BG1 = "#161B22"      # 패널
-BG2 = "#21262D"      # 컨트롤
-BG3 = "#30363D"      # 테두리
-FG0 = "#E6EDF3"      # 본문
-FG1 = "#8B949E"      # 보조
-ACCENT = "#2F81F7"
-ACCENT_DIM = "#1F6FEB"
+# --- 기본 팔레트 (거의 흑색, 저채도. 둥근 모서리 없음, 선은 1px) ---
+BG0 = "#07090C"      # 캔버스
+BG1 = "#0C0F14"      # 패널·헤더
+BG2 = "#12161C"      # 컨트롤
+BG3 = "#1E242D"      # 테두리
+FG0 = "#D7DDE6"      # 본문
+FG1 = "#7D8794"      # 보조
+ACCENT = "#3D7BFF"
+ACCENT_DIM = "#2455B8"
 
 # --- 호스트 상태 배지 (§1.1) — 연결/실행 상태, 진단 판정 아님 ---
 BADGE = {
@@ -28,11 +28,19 @@ BADGE = {
 
 # --- 진단 결과 상태 배경 (§6.1) : 밝은 칩(표 셀·카드) ---
 STATUS_BG = {
-    Status.PASS: "#E2EFDA",
-    Status.FAIL: "#FCE4E4",
-    Status.UNKNOWN: "#FFF2CC",
-    Status.SKIPPED: "#F2F2F2",
-    Status.ERROR: "#E4DFEC",
+    Status.PASS: "#0F2A1A",
+    Status.FAIL: "#3A1214",
+    Status.UNKNOWN: "#33270A",
+    Status.SKIPPED: "#161A20",
+    Status.ERROR: "#2A1B3D",
+}
+# 상태 칩 글자색(다크 칩 위)
+STATUS_TEXT = {
+    Status.PASS: "#4ADE80",
+    Status.FAIL: "#F87171",
+    Status.UNKNOWN: "#FBBF24",
+    Status.SKIPPED: "#9CA3AF",
+    Status.ERROR: "#C084FC",
 }
 # 다크 배경 위 상태 텍스트/막대 색
 STATUS_FG = {
@@ -44,14 +52,24 @@ STATUS_FG = {
 }
 
 DARK_QSS = f"""
-* {{ font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; font-size: 13px; }}
+* {{ font-family: 'Malgun Gothic', 'Segoe UI', sans-serif; font-size: 12px; }}
 QMainWindow, QDialog, QWidget {{ background: {BG0}; color: {FG0}; }}
+QMainWindow#root {{ border: 1px solid {BG3}; }}
 QToolTip {{ background: {BG1}; color: {FG0}; border: 1px solid {BG3}; padding: 4px; }}
 
+/* ---- 자체 타이틀바 ---- */
+QWidget#titlebar {{ background: {BG1}; border-bottom: 1px solid {BG3}; }}
+QLabel#title-mark {{ color: {ACCENT}; font-size: 10px; }}
+QLabel#title-text {{ color: {FG0}; font-weight: 700; letter-spacing: 2px; font-size: 12px; }}
+QLabel#title-sub {{ color: {FG1}; font-size: 11px; }}
+QToolButton#title-btn {{ background: transparent; border: none; color: {FG1}; font-size: 12px; }}
+QToolButton#title-btn:hover {{ background: {BG2}; color: {FG0}; }}
+QToolButton#title-close:hover {{ background: #B42318; color: white; }}
+
 /* ---- 메뉴 ---- */
-QMenuBar {{ background: {BG1}; color: {FG0}; border-bottom: 1px solid {BG3}; padding: 2px 4px; }}
-QMenuBar::item {{ padding: 4px 10px; }}
-QMenuBar::item:selected {{ background: {BG2}; }}
+QMenuBar {{ background: {BG1}; color: {FG1}; border-bottom: 1px solid {BG3}; padding: 0 4px; }}
+QMenuBar::item {{ padding: 5px 10px; }}
+QMenuBar::item:selected {{ background: {BG2}; color: {FG0}; }}
 QMenu {{ background: {BG1}; color: {FG0}; border: 1px solid {BG3}; padding: 4px; }}
 QMenu::item {{ padding: 6px 24px 6px 12px; }}
 QMenu::item:selected {{ background: {ACCENT_DIM}; color: white; }}
@@ -80,21 +98,21 @@ QCheckBox::indicator:checked, QRadioButton::indicator:checked {{ background: {AC
 
 /* ---- 버튼 ---- */
 QPushButton {{
-    background: {BG2}; border: 1px solid {BG3}; 
-    padding: 6px 14px; color: {FG0}; font-weight: 600;
+    background: {BG2}; border: 1px solid {BG3};
+    padding: 5px 14px; color: {FG0}; min-height: 24px;
 }}
-QPushButton:hover {{ background: {BG3}; border-color: #8B949E; }}
+QPushButton:hover {{ border-color: #3A4452; background: #171C23; }}
 QPushButton:pressed {{ background: {BG1}; }}
-QPushButton:disabled {{ color: #6E7681; border-color: {BG2}; }}
-QPushButton#primary {{ background: #238636; border-color: #2EA043; color: white; }}
-QPushButton#primary:hover {{ background: #2EA043; }}
-QPushButton#primary:disabled {{ background: #1a3d24; color: #6E7681; }}
-QPushButton#danger {{ background: transparent; border-color: #DA3633; color: #F85149; }}
-QPushButton#danger:hover {{ background: #DA3633; color: white; }}
+QPushButton:disabled {{ color: #4B5563; border-color: {BG2}; }}
+QPushButton#primary {{ background: {ACCENT_DIM}; border-color: {ACCENT}; color: white; font-weight: 600; }}
+QPushButton#primary:hover {{ background: {ACCENT}; }}
+QPushButton#primary:disabled {{ background: #14213A; border-color: #1B2B4D; color: #4B5563; }}
+QPushButton#danger {{ background: transparent; border-color: #7F1D1D; color: #EF4444; }}
+QPushButton#danger:hover {{ background: #B42318; border-color: #B42318; color: white; }}
 
 /* ---- 뷰 ---- */
 QTreeView, QTableView, QTableWidget, QTreeWidget, QListWidget {{
-    background: {BG0}; border: 1px solid {BG3}; 
+    background: {BG0}; border: 1px solid {BG3};
     alternate-background-color: #10151C; gridline-color: {BG3};
     selection-background-color: {ACCENT_DIM}; selection-color: white; outline: 0;
 }}
@@ -105,7 +123,7 @@ QTreeView::item:hover, QListWidget::item:hover {{ background: {BG1}; }}
 QTreeView::branch {{ background: transparent; }}
 QHeaderView::section {{
     background: {BG1}; color: {FG1}; border: none; border-right: 1px solid {BG3};
-    border-bottom: 1px solid {BG3}; padding: 6px 8px; font-weight: 600;
+    border-bottom: 1px solid {BG3}; padding: 5px 8px; font-weight: 600; font-size: 11px; letter-spacing: 1px;
 }}
 QTableWidget QTableCornerButton::section {{ background: {BG1}; border: none; }}
 
@@ -113,11 +131,11 @@ QTableWidget QTableCornerButton::section {{ background: {BG1}; border: none; }}
 QTabWidget::pane {{ border: 1px solid {BG3}; top: -1px; background: {BG0}; }}
 QTabBar {{ background: transparent; }}
 QTabBar::tab {{
-    background: transparent; color: {FG1}; padding: 8px 16px; margin-right: 2px;
-    border: 1px solid transparent; border-bottom: none; 
+    background: transparent; color: {FG1}; padding: 7px 16px; margin-right: 0;
+    border: none; border-bottom: 2px solid transparent; letter-spacing: 1px;
 }}
-QTabBar::tab:hover {{ color: {FG0}; background: {BG1}; }}
-QTabBar::tab:selected {{ background: {BG0}; color: {FG0}; border-color: {BG3}; border-top: 2px solid {ACCENT}; }}
+QTabBar::tab:hover {{ color: {FG0}; }}
+QTabBar::tab:selected {{ color: {FG0}; border-bottom: 2px solid {ACCENT}; }}
 QTabBar::close-button {{ subcontrol-position: right; }}
 
 /* ---- 그룹/구분 ---- */
@@ -137,11 +155,11 @@ QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{ width: 0; }}
 QStatusBar {{ background: {BG1}; color: {FG1}; border-top: 1px solid {BG3}; }}
 QStatusBar::item {{ border: none; }}
 QProgressBar {{ border: 1px solid {BG3}; background: {BG1}; text-align: center; color: {FG0}; height: 14px; }}
-QProgressBar::chunk {{ background: #238636; }}
+QProgressBar::chunk {{ background: {ACCENT_DIM}; }}
 
 /* ---- 라벨 역할 ---- */
-QLabel#h1 {{ font-size: 18px; font-weight: 700; color: {FG0}; }}
-QLabel#h2 {{ font-size: 14px; font-weight: 600; color: {FG0}; }}
+QLabel#h1 {{ font-size: 15px; font-weight: 700; color: {FG0}; letter-spacing: 1px; }}
+QLabel#h2 {{ font-size: 13px; font-weight: 600; color: {FG0}; }}
 QLabel#muted {{ color: {FG1}; }}
 QLabel#sidebar-title {{ color: {FG1}; font-weight: 700; font-size: 12px; letter-spacing: 1px; }}
 QWidget#sidebar {{ background: {BG1}; border-right: 1px solid {BG3}; }}

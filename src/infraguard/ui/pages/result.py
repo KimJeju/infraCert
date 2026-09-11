@@ -22,7 +22,7 @@ from PySide6.QtWidgets import (
 from infraguard.core.models import CheckResult, ScanResult
 from infraguard.core.status import DISPLAY_KO, Status
 from infraguard.result.engine import _sort_key
-from infraguard.ui.theme import STATUS_BG
+from infraguard.ui.theme import STATUS_BG, STATUS_TEXT
 
 COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "이전", "판정근거"]
 CHANGED_FG = "#F0883E"   # 전회와 달라진 결과
@@ -176,7 +176,7 @@ class ResultPage(QWidget):
                 it = QTableWidgetItem(v)
                 if c == 4:
                     it.setBackground(QColor(STATUS_BG[r.status]))
-                    it.setForeground(QColor("#1a1a1a"))
+                    it.setForeground(QColor(STATUS_TEXT[r.status]))
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 if c == 5:
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -203,7 +203,7 @@ class ResultPage(QWidget):
                 it = QTableWidgetItem(DISPLAY_KO[st][:2] if st else "")
                 if st:
                     it.setBackground(QColor(STATUS_BG[st]))
-                    it.setForeground(QColor("#1a1a1a"))
+                    it.setForeground(QColor(STATUS_TEXT[st]))
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                 self.table.setItem(i, 2 + j, it)
 

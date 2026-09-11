@@ -47,6 +47,7 @@ from infraguard.ui.pages.scan import ScanPage
 from infraguard.ui.pages.settings import SettingsPage
 from infraguard.ui.pages.sftp import SftpPage
 from infraguard.ui.terminal import TerminalPage
+from infraguard.ui.titlebar import CURSORS, TitleBar, edges_at
 from infraguard.ui.workers import ScanController, build_job
 
 TERMINAL_NOTICE = (
@@ -69,12 +70,19 @@ class AppContext:
 
 
 class MainWindow(QMainWindow):
+    RESIZE_MARGIN = 5
+
     def __init__(self, ctx: AppContext) -> None:
         super().__init__()
         self.ctx = ctx
         self.setWindowTitle("InfraGuard")
+        self.setObjectName("root")
         self.resize(1360, 860)
         self.setMinimumSize(1100, 700)
+        # OS 창 테두리 없이 자체 타이틀바. 리사이즈는 contentsMargins 띠(RESIZE_MARGIN)에서.
+        self.setWindowFlags(Qt.WindowType.Window | Qt.WindowType.FramelessWindowHint)
+        self.setContentsMargins(*([self.RESIZE_MARGIN] * 4))
+        self.setMouseTracking(True)
 
         self._scan_id: str | None = None
         self._scanning = False
@@ -225,7 +233,16 @@ class MainWindow(QMainWindow):
 
     # ------------------------------------------------------------------ 구성
     def _build_menu(self) -> None:
+        # 타이틀바 + 메뉴바를 한 컨테이너에 쌓아 메뉴 영역으로 올린다(프레임리스라 OS 타이틀바가 없다)
+        self.titlebar = TitleBar("INFRAGUARD", self)
         mb = self.menuBar()
+        self._top = QWidget(self)
+        tl = QVBoxLayout(self._top)
+        tl.setContentsMargins(0, 0, 0, 0)
+        tl.setSpacing(0)
+        tl.addWidget(self.titlebar)
+        tl.addWidget(mb)
+        self.setMenuWidget(self._top)
         m_file = mb.addMenu("파일")
         m_file.addAction("완전삭제 후 종료", self.close)
         m_asset = mb.addMenu("자산")
@@ -346,6 +363,7 @@ class MainWindow(QMainWindow):
         self.statusBar().addWidget(self.sb_hosts)
         pk = f"{self.pack.name} {self.pack.version}" if self.pack else "(룰팩 없음)"
         self.statusBar().addPermanentWidget(QLabel(f"룰팩 {pk} · 엔진 {self._engine_version()}"))
+        self.titlebar.set_subtitle(f"v{self._engine_version()} · {pk}")
 
     def _wire_controller(self) -> None:
         c = self.controller
@@ -806,6 +824,24 @@ class MainWindow(QMainWindow):
         self._refresh_assets()
         self._refresh_dashboard()
         self.settings.refresh_usage()
+
+    # ------------------------------------------------------------ 프레임리스 리사이즈
+    def _edges(self, pos) -> Qt.Edge:  # noqa: ANN001
+        if self.isMaximized():
+            return Qt.Edge(0)
+        return edges_at(pos, self.width(), self.height(), self.RESIZE_MARGIN)
+
+    def mouseMoveEvent(self, e) -> None:  # noqa: N802,ANN001
+        edges = self._edges(e.position().toPoint())
+        self.setCursor(CURSORS.get(edges, Qt.CursorShape.ArrowCursor))
+        super().mouseMoveEvent(e)
+
+    def mousePressEvent(self, e) -> None:  # noqa: N802,ANN001
+        edges = self._edges(e.position().toPoint())
+        if e.button() == Qt.MouseButton.LeftButton and edges and self.windowHandle() is not None:
+            self.windowHandle().startSystemResize(edges)
+            return
+        super().mousePressEvent(e)
 
     def closeEvent(self, event) -> None:  # noqa: N802
         gate = exit_gate(ExitState(scanning=self._scanning, unexported=self._unexported))
