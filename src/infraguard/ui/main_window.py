@@ -317,6 +317,7 @@ class MainWindow(QMainWindow):
         self.dashboard.filter_by_status.connect(self._jump_to_result_status)
         self.scan.start_requested.connect(self._run_scan)
         self.scan.cancel_requested.connect(self.controller.cancel)
+        self.scan.retry_requested.connect(self._retry_failed)
         self.result.export_requested.connect(self._export)
         self.manual.verdict_saved.connect(self._save_verdict)
 
@@ -605,11 +606,48 @@ class MainWindow(QMainWindow):
     def _on_scan_progress(self, done: int, total: int) -> None:
         self.sb_hosts.setText(f"진단 {done}/{total}")
 
+    def _baseline_for(self, scan: ScanResult) -> ScanResult | None:
+        """같은 호스트를 하나라도 포함한 직전 진단(전회 대비 표시용). 없으면 None."""
+        names = {h.hostname for h in scan.hosts}
+        for sid, _meta in self.ctx.results.list_scans():
+            if sid == scan.scan_id:
+                continue
+            prev = self.ctx.results.load_scan(sid)
+            if prev and names & {h.hostname for h in prev.hosts}:
+                return prev
+        return None
+
+    def _show_results(self, scan: ScanResult) -> None:
+        self.result.set_baseline(self._baseline_for(scan))
+        self.result.load(scan)
+
+    def _retry_failed(self) -> None:
+        """실패·미완료 호스트만 같은 scan_id 로 다시. 완료된 호스트의 체크포인트는 그대로."""
+        ids = self.scan.pending_or_failed()
+        hosts = [h for h in (self.ctx.assets.get(i) for i in ids) if h]
+        if not hosts or not self._scan_id or self.pack is None:
+            return
+        profile = self.pack.profiles.get(self.scan.current_profile() or "")
+        if profile is None:
+            return
+        jobs = []
+        for h in hosts:
+            cred = self.ctx.creds.get(h.cred_id)
+            if cred is None:
+                QMessageBox.information(self, "재진단", f"{h.label}: 세션에 크리덴셜이 없습니다. '진단 시작'으로 다시 입력하세요.")
+                return
+            jobs.append((h, cred, build_job(self.pack, profile, host_params=h.params)))
+        self.scan.begin(hosts)
+        self._set_scanning(True)
+        self.controller.start(jobs, scan_id=self._scan_id, store=self.ctx.results,
+                              local_root=self.ctx.workspace.layout.scan_dir(self._scan_id),
+                              concurrency=int(self.ctx.config.get("concurrency", 5)))
+
     def _on_scan_finished(self, scan: ScanResult) -> None:
         self._set_scanning(False)
         self._unexported = True
         self.scan.finished()
-        self.result.load(scan)
+        self._show_results(scan)
         self.manual.load(scan)
         self._refresh_dashboard(scan)
         self._refresh_assets()
@@ -648,7 +686,7 @@ class MainWindow(QMainWindow):
             self.ctx.results.set_verdict(self._scan_id, hid, rid, status, note)
         scan = self.ctx.results.load_scan(self._scan_id)
         self.manual.load(scan)
-        self.result.load(scan)
+        self._show_results(scan)
         self._refresh_dashboard(scan)
         self._unexported = True
 

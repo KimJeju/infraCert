@@ -5,6 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
+    QCheckBox,
     QComboBox,
     QHBoxLayout,
     QHeaderView,
@@ -23,7 +24,8 @@ from infraguard.core.status import DISPLAY_KO, Status
 from infraguard.result.engine import _sort_key
 from infraguard.ui.theme import STATUS_BG
 
-COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "판정근거"]
+COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "이전", "판정근거"]
+CHANGED_FG = "#F0883E"   # 전회와 달라진 결과
 _DISPLAY_TO_STATUS = {v: k for k, v in DISPLAY_KO.items()}
 
 
@@ -35,6 +37,8 @@ class ResultPage(QWidget):
         self._scan: ScanResult | None = None
         self._flat: list[tuple[str, CheckResult]] = []
         self._matrix = False
+        self._base: dict[tuple[str, str], Status] = {}   # (hostname, rule_id) → 전회 결과
+        self._base_id: str | None = None
         root = QVBoxLayout(self)
 
         bar = QHBoxLayout()
@@ -57,6 +61,14 @@ class ResultPage(QWidget):
         bar.addWidget(self.status_f)
         bar.addWidget(self.sev_f)
         bar.addWidget(self.search, 1)
+        self.changed_only = QCheckBox("변경만")
+        self.changed_only.setToolTip("전회 진단(같은 호스트가 있는 직전 결과)과 결과가 달라진 항목만")
+        self.changed_only.setEnabled(False)
+        self.changed_only.toggled.connect(self._apply)
+        bar.addWidget(self.changed_only)
+        self.base_label = QLabel("")
+        self.base_label.setObjectName("muted")
+        bar.addWidget(self.base_label)
         self.matrix_btn = QPushButton("매트릭스 뷰")
         self.matrix_btn.setCheckable(True)
         self.matrix_btn.toggled.connect(self._toggle_matrix)
@@ -72,7 +84,7 @@ class ResultPage(QWidget):
         self.table = QTableWidget(0, len(COLS))
         self.table.setHorizontalHeaderLabels(COLS)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setVisible(False)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.itemSelectionChanged.connect(self._show_detail)
@@ -83,6 +95,19 @@ class ResultPage(QWidget):
         self.detail.setReadOnly(True)
         self.detail.setMaximumHeight(160)
         root.addWidget(self.detail, 1)
+
+    def set_baseline(self, prev: ScanResult | None) -> None:
+        """전회 결과. load() 전에 부른다. 없으면 '이전' 컬럼은 비고 '변경만' 은 꺼진다."""
+        self._base = {(h.hostname, r.rule_id): r.status for h in (prev.hosts if prev else []) for r in h.results}
+        self._base_id = prev.scan_id if prev else None
+        self.changed_only.setEnabled(bool(self._base))
+        if not self._base:
+            self.changed_only.setChecked(False)
+        self.base_label.setText(f"기준 {self._base_id}" if self._base_id else "")
+
+    def changed(self, hn: str, r: CheckResult) -> bool:
+        prev = self._base.get((hn, r.rule_id))
+        return prev is not None and prev is not r.status
 
     def load(self, scan: ScanResult | None) -> None:
         self._scan = scan
@@ -124,6 +149,8 @@ class ResultPage(QWidget):
                 continue
             if q and q not in f"{r.rule_id} {r.name}".lower():
                 continue
+            if self.changed_only.isChecked() and not self.changed(hn, r):
+                continue
             out.append((hn, r))
         return out
 
@@ -141,14 +168,21 @@ class ResultPage(QWidget):
         for i, (hn, r) in enumerate(rows):
             # 판정근거 컬럼은 수집 근거 첫 줄. 근거가 없으면 엔진 사유(누락·미등록 어휘 등)를 보인다.
             ev = (r.evidence or "").strip().splitlines()
+            prev = self._base.get((hn, r.rule_id))
+            prev_txt = ("" if prev is None else DISPLAY_KO[prev]) if self._base else ""
             vals = [hn, r.rule_id, r.name, r.severity.value if r.severity else "",
-                    DISPLAY_KO[r.status], ev[0] if ev else r.reason]
+                    DISPLAY_KO[r.status], prev_txt, ev[0] if ev else r.reason]
             for c, v in enumerate(vals):
                 it = QTableWidgetItem(v)
                 if c == 4:
                     it.setBackground(QColor(STATUS_BG[r.status]))
                     it.setForeground(QColor("#1a1a1a"))
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                if c == 5:
+                    it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    if self.changed(hn, r):
+                        it.setForeground(QColor(CHANGED_FG))
+                        it.setText(f"{prev_txt} →")
                 it.setData(Qt.ItemDataRole.UserRole, (hn, r.rule_id))
                 self.table.setItem(i, c, it)
 
@@ -195,5 +229,8 @@ class ResultPage(QWidget):
                     f"원본추적: {r.source.artifact or '-'} "
                     f"line {r.source.line or '-'} / profile {r.source.profile or '-'}"
                     + (f"\n경고: {'; '.join(r.warnings)}" if r.warnings else "")
+                    + (f"\n전회({self._base_id}): {DISPLAY_KO[self._base[(hn, rid)]]}"
+                       + (" → 변경됨" if self.changed(hn, r) else " (동일)")
+                       if (hn, rid) in self._base else "")
                 )
                 return

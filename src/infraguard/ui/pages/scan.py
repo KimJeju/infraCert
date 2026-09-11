@@ -31,6 +31,7 @@ PROG_COLS = ["호스트", "단계", "진행", "경과", "결과", "오류"]
 class ScanPage(QWidget):
     start_requested = Signal(int, int)   # concurrency, timeout
     cancel_requested = Signal()
+    retry_requested = Signal()           # 실패·미완료 호스트만 같은 scan 으로 다시
 
     def __init__(self) -> None:
         super().__init__()
@@ -96,12 +97,18 @@ class ScanPage(QWidget):
 
         brow = QHBoxLayout()
         brow.addStretch(1)
+        self.retry = QPushButton("실패·미완료 재진단")
+        self.retry.setToolTip("오류가 났거나 중단으로 못 돈 호스트만 같은 진단 ID 로 다시 돌린다(완료된 호스트 결과는 유지)")
+        self.retry.setEnabled(False)
+        self.retry.clicked.connect(self.retry_requested)
+        brow.addWidget(self.retry)
         self.cancel = QPushButton("중단")
         self.cancel.setObjectName("danger")
         self.cancel.setEnabled(False)
         self.cancel.clicked.connect(self.cancel_requested)
         brow.addWidget(self.cancel)
         root.addLayout(brow)
+        self._state: dict[str, str] = {}     # host_id → pending | done | error
 
     def set_profiles(self, items: list[tuple[str, str, str]]) -> None:
         """items: (id, 표시명, 설명)."""
@@ -134,6 +141,8 @@ class ScanPage(QWidget):
     def begin(self, hosts: list[Host]) -> None:
         self.table.setRowCount(0)
         self._rows.clear()
+        self._state = {h.host_id: "pending" for h in hosts}
+        self.retry.setEnabled(False)
         for h in hosts:
             r = self.table.rowCount()
             self.table.insertRow(r)
@@ -170,11 +179,17 @@ class ScanPage(QWidget):
         summ = host.summary()
         res = f"{summ[Status.PASS]}/{summ[Status.FAIL]}/{summ[Status.UNKNOWN]}"
         self.table.setItem(r, 1, QTableWidgetItem("완료" if not host.error else "오류"))
+        self._state[host_id] = "error" if host.error else "done"
         self.table.setItem(r, 4, QTableWidgetItem(res))
         self.table.setItem(r, 5, QTableWidgetItem(host.error or ""))
         if host.cleanup_ok is False:
             self.table.setItem(r, 5, QTableWidgetItem("⚠ 정리 미완료: " + "; ".join(host.cleanup_leftovers)))
 
+    def pending_or_failed(self) -> list[str]:
+        """이번 진단에서 완료되지 못한 호스트(중단으로 못 돈 것 + 오류)."""
+        return [hid for hid, st in self._state.items() if st != "done"]
+
     def finished(self) -> None:
         self.start.setEnabled(True)
         self.cancel.setEnabled(False)
+        self.retry.setEnabled(bool(self.pending_or_failed()))
