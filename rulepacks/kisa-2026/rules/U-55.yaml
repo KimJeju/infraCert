@@ -24,3 +24,4 @@ verdict:
 evidence:
 - acct
 note: ftp 계정 셸이 /sbin/nologin 또는 /bin/false 여야 양호
+remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 FTP 계정에 /bin/false 쉘 부여 설정

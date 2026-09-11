@@ -35,7 +35,9 @@ def test_no_source_package_is_gitignored(ignored):
 
 
 def test_no_rulepack_file_is_gitignored(ignored):
-    hit = sorted(p for p in ignored if p.startswith("rulepacks/") and p.endswith((".yaml", ".sh", ".sql")))
+    # rulepacks/*/guide/ 는 가이드 PDF 파생물(로컬 생성, 공개 저장소 미포함) — 의도된 무시
+    hit = sorted(p for p in ignored if p.startswith("rulepacks/") and p.endswith((".yaml", ".sh", ".sql"))
+                 and "/guide/" not in p)
     assert not hit, f".gitignore 가 룰팩 파일을 무시한다: {hit}"
 
 

@@ -19,3 +19,4 @@ verdict:
   - else: VULN
 evidence: [found]
 note: "/dev 아래 일반 파일(디바이스 아님)"
+remediation: major, minor number를 가지지 않는 device 파일 제거하도록 설정

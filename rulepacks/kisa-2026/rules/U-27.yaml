@@ -27,3 +27,4 @@ evidence:
 - files
 - plus
 note: r-command 신뢰파일. 미존재 양호, '+' 포함 취약, 그 외 내용 확인
+remediation: /etc/hosts.equiv, $HOME/.rhosts 파일 소유자 및 권한 변경, 허용 호스트 및 계정 등록 설정

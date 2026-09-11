@@ -42,3 +42,4 @@ evidence:
 - priv
 - pf
 note: sendmail PrivacyOptions noexpn,novrfy(또는 goaway) / postfix disable_vrfy_command=yes 이면 양호
+remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 메일 서비스 설정 파일에 noexpn, novrfy 또는 goaway 옵션 추가 설정

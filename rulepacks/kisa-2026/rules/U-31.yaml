@@ -31,3 +31,4 @@ verdict:
 evidence:
 - found
 note: 홈 디렉터리 world-writable 또는 소유자≠계정명
+remediation: 사용자별 홈 디렉토리 소유주를 해당 계정으로 변경하고, 타 사용자의 쓰기 권한 제거하도록 설정(/etc/passwd 파일에서 홈 디렉토리 확인, 사용자 홈 디렉토리 외 개별적으로 만들어 사용하는 사용자 디렉토리 존재 여부 확인하여 점검)

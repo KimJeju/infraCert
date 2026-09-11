@@ -24,3 +24,4 @@ evidence:
 - ntp
 - src
 note: chronyd/ntpd/systemd-timesyncd 가 동작하고 동기화 서버가 있어야 양호
+remediation: NTP 설정 및 동기화 주기 설정

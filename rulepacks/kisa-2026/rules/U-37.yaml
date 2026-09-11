@@ -31,3 +31,4 @@ evidence:
 - found
 - unreadable
 note: cron 설정/스풀이 root 소유·other 쓰기 없음·파일 그룹쓰기 없음이어야 양호. 읽기 불가 경로는 root 로 재확인
+remediation: crontab 및 at 명령어 파일 권한 750 이하, cron 및 at 관련 파일 소유자 및 파일 권한 640 이하 설정

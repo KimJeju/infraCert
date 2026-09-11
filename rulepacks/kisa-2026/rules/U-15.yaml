@@ -30,3 +30,4 @@ verdict:
 evidence:
 - found
 note: 소유자/그룹이 존재하지 않는 파일(-xdev, 표본 50)
+remediation: 소유자가 존재하지 않는 파일 및 디렉터리 제거 또는 소유자 변경 설정

@@ -180,127 +180,127 @@ bundles:
     example: /u01/oracle/user_projects/domains/base_domain
 rule_files:
 - path: rules/U-05.yaml
-  sha256: 4f4883c245e6ecbbdd0c54fdc71107c6d9d5a84607e637c3bc570017c163cafc
+  sha256: 4a2095980d18091221fe8741d0ab04d6fcf4db1d2e57a7495d9452fc14d6dbdb
 - path: rules/U-07.yaml
-  sha256: ce4d54ed81024b4ac808730acb9f792408ac70bc7aed11ec372e6a4c1f3e888c
+  sha256: d664107f985a03d9985315596119d4005c3443d1aa2e9df441f48f4c9c653bbc
 - path: rules/U-08.yaml
-  sha256: c83b9c14820b85f14888397be9fecf40a71f976a395d58db608bb6df98beef16
+  sha256: 2e279ea5612dd74d8b4430ccd2c443f32662b8ef37bda5198f93464651de163d
 - path: rules/U-09.yaml
-  sha256: 691160f172034d35a735c342e3fc5c2dcb25c104852911277803e055388dd4d6
+  sha256: 456ea372f1aec917de1ad99d642cd71bd7b2c574d3dcf77f67c21252d0754fd9
 - path: rules/U-10.yaml
-  sha256: 0643a7759f80fdb83934a35ae395c55c97a7aa1d64034370185c6c4aac9d6e28
+  sha256: efc63d81b7dbb36905bb3725c382234b52c9e04b5454b67d936a717f68104dc4
 - path: rules/U-11.yaml
-  sha256: c091cd7b024002e002679038e77c9a3d51c67754e2e397f6d0cdc8178b0f5344
+  sha256: 1f26e91959c4217929dce08ce83f20e078f586fda997a7a87766489721bb64c9
 - path: rules/U-12.yaml
-  sha256: 5d00e8cc986f4b033a20b522d76701a3ba409610b38981703cc9f9575d8e5e54
+  sha256: 6f92020fdc7dff92b4d9b4353fa16242b35c00291c275fcbc14d91818d5b810c
 - path: rules/U-13.yaml
-  sha256: 6c991d7cbcb42d60c46ead6e0486e9c757dd9f08d4072fa5800cf03c3afffb1e
+  sha256: d72c1bd9cbe7c1adf657c73354e9ba7866d117de244c679c4714eabab662afeb
 - path: rules/U-14.yaml
-  sha256: 001d67b17df0dbe6d38ff426ec33074c1ae2b82373dc353795bba13a587ad8f8
+  sha256: 5a3ce5bbe76b4aaf11a62b7b1728706139febe31cd79af3c558600bab9d452f6
 - path: rules/U-15.yaml
-  sha256: 6cd6a1cae891b5e2d15b2f0cb1a8d5be320e4ecd6b27881cf0311eb21d91fd4c
+  sha256: 5eb0aa07b322ed255598e36fe00ea3539a81c99821c09bc660fdaeefe80b2fd9
 - path: rules/U-16.yaml
-  sha256: a0cf01426ee03688b4206177adff21d12fa2de56d47b624a8eaa262ed1c812c6
+  sha256: 1f45a27a6973bd589d98d5256cc74d8cf5f07d5d8ffd100d97860dd6d468e0fe
 - path: rules/U-17.yaml
-  sha256: 7972790f195803db7ee640504a953e5b8c9d0d60fef42a8b2327e65b9437fadb
+  sha256: 235c03589b30cc65c1fc76b4fb375573cb7b08588750eb3bb7c2df62ea6fa560
 - path: rules/U-18.yaml
-  sha256: df6dde11cae41dca7b1055acc1521488899a1282048a267964316549eaeba938
+  sha256: e485a79353acf3a089ea06a3f40f20220f4556912c54e24b287a39129573a953
 - path: rules/U-19.yaml
-  sha256: c4eaf95be13af2d75c460608fd5f8c4a500b631d0e3ef541e1cf13b70ee9c932
+  sha256: e75f1f66ffef363e31e3a45e96a3b4f168477182e5b1bbd618e748dfd6e914f9
 - path: rules/U-20.yaml
-  sha256: e9a8d89dd3a41440f7d8106ef71729181a4cbbcf71b3fc3be897b8ab671e24d4
+  sha256: 5f925ed2a0b6d61dd933b3b219eba2a949b882c248a4a609c63223a003c5f815
 - path: rules/U-21.yaml
-  sha256: 868c776056ef94c83acf109f9df69b6f65265c972af3f46c9a289e76a35c4d0a
+  sha256: debd30a4120f21adcfe78e87c8f20f865355c38f7c762ce3d3ab70cdf51ad999
 - path: rules/U-22.yaml
-  sha256: 83f6ea1de2fbf9cf429ce54530dbcc9b4fdae90428df5b29ac888e2ef0ac9505
+  sha256: 1adf704b0f1a828475e15d2992b7ae34949e78e59ec7901b40fbceb27109ae57
 - path: rules/U-23.yaml
-  sha256: adccb413fdd00b938fca3f257418d616273bffaa7d160303d4b8867746fc5e50
+  sha256: 1aa1323dbad71eb6aa9a89fc2fd45bd985a3d345172788ffca16d3e7fb596f16
 - path: rules/U-24.yaml
-  sha256: 96e2bfb9ca5c042f530066ffb986fc1e9333564c2855e276086d82d98d883273
+  sha256: c2c9906908e31e3feb084d447a8a3ee1806418fe03d0566708c0def8403ac39b
 - path: rules/U-25.yaml
-  sha256: dcbee6dc1fca73b63d4f935527cb3859c160b2f8fb4f36316e09cc2c072f532a
+  sha256: 6ddbefb7dbe391db5cdefc6aa144205f224b4949cbaff2c14c158dcffe7f4394
 - path: rules/U-26.yaml
-  sha256: e27096474f079398120a84ca3b6918eaa0d3829828579db7b0a29b4d284a5903
+  sha256: b3b6a17e808933ca897a949b49e4bfcb316a7ac0d181d826fd63502a50843c39
 - path: rules/U-27.yaml
-  sha256: 4cf6431b9964c1f8b9c4b23360e2f2bd2b38a100c8a2a5b372a5f1d636986518
+  sha256: bd08ecedfe4cc1fa430c30c18be1abd8a82b49fe82eea5f419a8e07266dc65f9
 - path: rules/U-28.yaml
-  sha256: d52b3924ee2197542ec3ff8fe105e72229c6786b29f3e66f621347e931b4dfd8
+  sha256: 968a996e1fe01a485bcdb86b83a673d1c205907a6e585de53102483c39281f20
 - path: rules/U-29.yaml
-  sha256: 970b96be5395cbcb042e5f98585c03baf2922ac564940f45ebd599aee5bce2f0
+  sha256: 17cb4c2b3084d47d22fc5a734559f3ff3050424f8ef8398eb2fde73f7e129f08
 - path: rules/U-31.yaml
-  sha256: 4d62c46ada7de973bb50d317c98d2a393160a1c3b863fd0593004512258b840e
+  sha256: 967cd846e4154c7f8e6fd998e696864a7259be6dcefe2e17a4bdd7df88b21a87
 - path: rules/U-32.yaml
-  sha256: 4e431cc4178ee5d86dd2259287be264b000fae27d59d9772bef9a7e3c65f1d50
+  sha256: eb0f5e3cf68f3bedf7269ff5ee815637710aab9d96cf72c03bbeef17a25f4c70
 - path: rules/U-33.yaml
-  sha256: 65495d412ae282bcef2642a50e02c3383040df0fa409d061164b27501c25da2f
+  sha256: e4d70e1bf20bca41cff9f381d836273bf6d36942ddd85603186e81c3c9c499ca
 - path: rules/U-34.yaml
-  sha256: c7e44ab629197ae38dcce54c307c5c7021dc7f74c6c05d82d067622b2fd30ffa
+  sha256: 881204189c78eed5a871c2320ab8f13a5a07b4faae4dbf2a8af246a683d83c04
 - path: rules/U-35.yaml
-  sha256: 556d510788d02df08cd9b308f86436e0f4acb5595ac5724b3a3682178d67d70c
+  sha256: 7dd1f288da1feb509ce0206193b8c7e3810435e35b3da934178ac5edc2b2ab76
 - path: rules/U-36.yaml
-  sha256: 999f65cb37f8c677639d4c98d9a029eff94a56df206c0238ed3246f7213a4485
+  sha256: 1f7a72722ab261a56e6df4807a42511827c5e1ee065e80638cb02793c56721bb
 - path: rules/U-37.yaml
-  sha256: e94f58007b8272fa208763bbdfb24751aec27e79b20e080be9d5d2e1030a807c
+  sha256: 306e81a74f4fb6aaf56257ca2b6e4009813ef4618234048552a4907816463a27
 - path: rules/U-38.yaml
-  sha256: 8c803dbb49fe1620cdda53e7544c0ffd5d48372feea49d783300dc98fc0fac91
+  sha256: a2e60bc0a4778cdb5d4671297347e51c918dc9ca7d7d22dbcc0fbdb676ad3f02
 - path: rules/U-39.yaml
-  sha256: 89f7b0a7ec6f6bfc11ffec876f4829640c991f2908ab816ca42f800bb03d2e1e
+  sha256: 567bfe151dfc185869a7c23bdddda633202ed6840f9942f3321f811b9d4ed160
 - path: rules/U-40.yaml
-  sha256: bc41e7c6759a182f81ff83b525a0441f61ddd17dc3eafbfe24c74ec9cfbb163d
+  sha256: ba65243ef1b8bf1296354ee633967aa8a89c45f47ae120aa1e83fbb9c700e228
 - path: rules/U-41.yaml
-  sha256: 1ed7b7637482e38ce2f790170bccd830c443383f17dd031c70bd7d391bb2ad95
+  sha256: 32bd10583604b7b84392980829de426cdbdaf63eac6760408fa248cb196eead0
 - path: rules/U-42.yaml
-  sha256: 8ec7f66dd9a0287418e6485f88004b446041df7f6cfc5d06e6fa45c9512dc38e
+  sha256: fab44e24d6d27939c3ee765093fd6112b5bc66f51ea7d6434ecd8e4ab023441a
 - path: rules/U-43.yaml
-  sha256: e31e0604e1ed111b67ceb78cb0995c4d20c695b3147fe93661cb7ca75b534507
+  sha256: 53bb33aa81319b96087510bce5add897b2f97d45aba0fa1eb16dad262fa949b8
 - path: rules/U-44.yaml
-  sha256: f056816953db543a1395eaea41a055f65bf802f031571efbc8d03fa9815b0849
+  sha256: 62fc998ac6cb82e89f63ecf3c169868fb7a2281f3facade77df667243abab94a
 - path: rules/U-45.yaml
-  sha256: 0c5c2c945b94565c93848778a3f3ae014ce2a99211d38d848a3a34d009ad6d0c
+  sha256: 49d66b510dcc7f7138a1b764634207e4f2e946837fa7dba019b48c1d0ccf34da
 - path: rules/U-46.yaml
-  sha256: 119930609a25be883a886e455df6ab0a9980080d8286ed9e7c7a41a85fdb9994
+  sha256: c2e03d9dd8e4db8178cbfa342d4bf3c50e2ae9f25983574651d201e0529e37fe
 - path: rules/U-47.yaml
-  sha256: 3765eb6957ebd3d42779480b2b1b1e790dca17f1861b2e2ec7dfea31a7e79aa1
+  sha256: 291050c3d3e3bd273619d0281acbfd98bd13f4945f62820b26e16f070aaf1fd5
 - path: rules/U-48.yaml
-  sha256: 1f6bda936716d334c8ef7d525cbb4a19e4c25bd04a05756867eba662ef1fc685
+  sha256: a06e38cac8103aaaa2e32e3c3bc1706c68be2b24ada987a86c23d542b3381714
 - path: rules/U-49.yaml
-  sha256: 044334aafb5a9a3d0acabde72f2cccf8f97c2ccd19394a76ef83e9b196ce7f61
+  sha256: e41e0ad004cabc852cb4041d170e8cf2f89d51cad9e637099092c0889233b279
 - path: rules/U-50.yaml
-  sha256: b08ed048a8fe30d6014caa16355cd43eb6ae05dba85cb4dc4344cfa48576c0ac
+  sha256: ede229d88a787265ad02d4853aedffc20156e69c91743cd2960d47bb3e4bcc6e
 - path: rules/U-51.yaml
-  sha256: f676427a6b6b32542f98e8c7f723ab123a86b900d4f570d410b2c6c41250844c
+  sha256: db661327cb64766c0f7776c90d45faec73e6b46e974b7edd0c4324f6df6a3f67
 - path: rules/U-52.yaml
-  sha256: d90497e27b92fb0feff69facf04e8f9dd7ca8031a3d4c50faa84996cf3beba33
+  sha256: 844e9f8d36d094b368f9885b595c6ec100a8a0f2621ee2ca6b5ec88aeee1501c
 - path: rules/U-53.yaml
-  sha256: 7e48f6ddb8aae7202ad520a96a341e71f5b32f9c139bd48b44e0207af70b16a2
+  sha256: 3cb5d19669a425af5b4d073d8a645c491cfda6f97e853f3639e9dcfb55502abd
 - path: rules/U-54.yaml
-  sha256: c4d83a2164a3e5ea95833a712b1ac72bc34c0377e0a5038e6a9dde266052248e
+  sha256: bf91ebf9eddb7d7f34f466c073fc9cc88c3d75ec0cf3ccc3a65ae646f08184c8
 - path: rules/U-55.yaml
-  sha256: e96ccee61357fbf0366e4dc8807c379b5bbc3034e2c4c75896854fdf008bd791
+  sha256: 027d243134a5f8159c225a53173a99c4d4b17045a62bb03b42d2bcb4c7340580
 - path: rules/U-56.yaml
-  sha256: 06d55f80269b198d6a5d201e4ffc4a7ec5e2e3d84e862030845ac21450e1ce29
+  sha256: d0f620b52d26dc69ed7d47ca4ecd1bdeac7d88d4b54fbf33243898318a27d53c
 - path: rules/U-57.yaml
-  sha256: 9d5e9b2ba032b880b3ccd720a6412c67576a2078387d185e16f69d66e844c3aa
+  sha256: 27d6b50558261729aeb2bc7b737d9edc5d343794be608e1a8b72b7eb80904bbb
 - path: rules/U-58.yaml
-  sha256: 87c7f7ae59da86d505f9c1d541eb5622c4eec0013a16c52623e520f3a5efaedc
+  sha256: 072658d9b6196b22c0e82ca2c1c963ed979f1b4df07c9497354e4a51d11232b6
 - path: rules/U-59.yaml
-  sha256: 92b35d50915b0c519b5f65e29855b01b994a71a8269161805a1c3420c5ac2fab
+  sha256: 39ceb0d477c1918b52f80244a1074dd80f9f26c07c339d762b3ada47f3441c17
 - path: rules/U-60.yaml
-  sha256: eed42ae8d78560e816f60fe94467c2be37445d1229ceb85d8a28d77d11544992
+  sha256: 88fc533118750d1123ad0ec2ea67b600db455b58421db286b4c0e748aab44660
 - path: rules/U-61.yaml
-  sha256: 29ec9175a323dac866383ab9e34a9cadf9af7a36e7d86f6cba6e61b1d60bf347
+  sha256: 64306f2db9837c93e78d394724e120b3522c50200b37e143d4f96fe901782a29
 - path: rules/U-62.yaml
-  sha256: 9a229f0268d3b4a37f8dee9d6dcd4fd698a493c07c43b984505c76406054a727
+  sha256: 10d1841736d4fa63fddd85149290158b581909826906b1e1f28c2de3f4c47b67
 - path: rules/U-63.yaml
-  sha256: b01be3638c9181a06a15c16d82ffe23ec608ea0218d45f5b8a7ccc7549b5837d
+  sha256: 6a75515f17e54af7b8cd1aed84b69ae5df9257878e3c27adc2529a0ed767270c
 - path: rules/U-64.yaml
-  sha256: ff1816066f809ec256a424005d81bce956e5adacc453ed9bd833c1c54aead113
+  sha256: 3952a1463ab70a7dd40548829dd8c90c65abfdb3fc3a9f24fa176b2e67b5714c
 - path: rules/U-65.yaml
-  sha256: 3a72ad5b7ff55c78691fe6785f47c625af67d99082b6b41a72ec8860353d3e03
+  sha256: 848d8f2e280c6c03c6183fa41741ba699de42b6e8dae4948a22547f69a806ded
 - path: rules/U-66.yaml
-  sha256: 95852d0e0452a59670c9b6bf50c12e6c3b494c68c97289c40f96d18f6376a9ef
+  sha256: 6fed1406b5152b1a46f9091523896979ba3e62b9915cf516e6ed84ad3369f11c
 - path: rules/U-67.yaml
-  sha256: cc1cb9086065e3c4942193c4dd5637ee5e6fd9539803b374ce938e8c3c9505b2
+  sha256: 7b0ae8a5b622c47323cc06326b7a536182740141ce9b35e45ce327493a806671
 native: &id001
 - U-01
 - U-02
@@ -374,503 +374,623 @@ rules:
   name: 기본 계정의 비밀번호/정책 변경
   severity: 상
   category: DBMS
+  remediation: 기본(관리자) 계정의 초기 비밀번호 및 권한 정책 변경
 - id: D-02
   name: 불필요(데모/샘플) 계정 제거
   severity: 상
   category: DBMS
+  remediation: 계정별 용도를 파악한 후 불필요한 계정 삭제
 - id: D-03
   name: 비밀번호 사용기간/복잡도 (DEFAULT 프로파일 기준)
   severity: 상
   category: DBMS
+  remediation: 기관 정책에 맞게 비밀번호 사용 기간 및 복잡도 정책 설정
 - id: D-04
   name: DBA(관리자) 권한 최소화
   severity: 상
   category: DBMS
+  remediation: 관리자 권한이 필요한 계정 및 그룹에만 관리자 권한 부여
 - id: D-05
   name: 비밀번호 재사용 제약 (DEFAULT 프로파일)
   severity: 중
   category: DBMS
+  remediation: PASSWORD_REUSE_TIME, PASSWORD_REUSE_MAX 파라미터 설정
 - id: D-06
   name: 사용자 계정 개별 부여
   severity: 중
   category: DBMS
+  remediation: 사용자별 계정 생성 및 권한 부여
 - id: D-08
   name: 안전한 암호화 알고리즘 (SHA-2 이상; password_versions 에 12C 포함)
   severity: 상
   category: DBMS
+  remediation: SHA-256 이상의 암호화 알고리즘 적용
 - id: D-09
   name: 로그인 실패 잠금 (DEFAULT 프로파일 FAILED_LOGIN_ATTEMPTS)
   severity: 중
   category: DBMS
+  remediation: 로그인 시도 횟수 제한 값 설정
 - id: D-11
   name: 시스템 테이블 비인가 접근 제한 (가이드 쿼리)
   severity: 상
   category: DBMS
+  remediation: 시스템 테이블에 일반 사용자 계정이 접근할 수 없도록 설정
 - id: D-17
   name: Audit Table(AUD$) 접근 제한
   severity: 하
   category: DBMS
+  remediation: Audit Table 접근 권한을 관리자 계정으로 제한
 - id: D-18
   name: DBA Role 이 PUBLIC 에 부여되지 않을 것
   severity: 상
   category: DBMS
+  remediation: DBA 계정의 Role 설정에서 Public 그룹 권한 취소
 - id: D-19
   name: OS_ROLES / REMOTE_OS_AUTHENT / REMOTE_OS_ROLES = FALSE
   severity: 상
   category: DBMS
+  remediation: OS_ROLES, REMOTE_OS_AUTHENTICATION, REMOTE_OS_ROLES 설정을 FALSE로 변경
 - id: D-20
   name: 인가되지 않은 Object Owner 제한 (가이드 쿼리)
   severity: 하
   category: DBMS
+  remediation: Object Owner를 SYS, SYSTEM, 관리자 계정으로 제한 설정
 - id: D-21
   name: 인가되지 않은 GRANT OPTION 제한 (가이드 쿼리)
   severity: 중
   category: DBMS
+  remediation: WITH_GRANT_OPTION이 ROLE에 의하여 설정되도록 변경
 - id: D-22
   name: RESOURCE_LIMIT = TRUE
   severity: 하
   category: DBMS
+  remediation: RESOURCE_LIMIT 설정을 TRUE로 설정 변경
 - id: D-25
   name: 보안 패치/버전
   severity: 상
   category: DBMS
+  remediation: 보안 패치가 적용된 버전으로 업데이트
 - id: D-26
   name: 감사 기록 설정 (audit_trail / Unified Auditing)
   severity: 상
   category: DBMS
+  remediation: DBMS에 대한 감사 로그 저장 정책 수립, 적용
 - id: U-01
   name: root 계정 원격 접속 제한
   severity: 상
   category: Unix
+  remediation: 원격 접속 시 root 계정으로 접속할 수 없도록 파일 내용 설정
 - id: U-02
   name: 비밀번호 관리정책 설정
   severity: 상
   category: Unix
+  remediation: root 계정을 포함한 사용자 계정의 비밀번호를 영문, 숫자, 특수문자를 포함하여 최소 8자리 이상 및 최소 사용 기간 1일, 최대 사용 기간 90일, 최근 비밀번호 기억 4회 이상으로 설정
 - id: U-03
   name: 계정 잠금 임계값 설정
   severity: 상
   category: Unix
+  remediation: 계정 잠금 임계값을 10회 이하로 설정
 - id: U-04
   name: 비밀번호 파일 보호
   severity: 상
   category: Unix
+  remediation: 비밀번호 암호화 저장·관리 설정
 - id: U-05
   name: root 이외의 UID 0 금지
   severity: 상
   category: Unix
   manual: false
+  remediation: ŸUID가 0으로 설정된 계정을 0 이외의 중복되지 않은 UID로 변경 또는 불필요한 계정인 경우 제거하도록 설정Ÿ(사용 중인 계정인 경우 명령어를 통한 조치가 적용되지 않을 수 있으므로 /etc/passwd
+    파일을 통해 변경)
 - id: U-06
   name: 사용자 계정 su 기능 제한
   severity: 상
   category: Unix
+  remediation: PAM 모듈 설정 또는 su 명령어 허용 그룹 생성 후 su 명령어 일반 사용자 권한 제거하도록 설정
 - id: U-07
   name: 불필요한 계정 제거
   severity: 하
   category: Unix
   manual: false
+  remediation: 시스템에 존재하는 계정 확인 후 불필요한 계정 제거하도록 설정
 - id: U-08
   name: 관리자 그룹에 최소한의 계정 포함
   severity: 중
   category: Unix
   manual: false
+  remediation: 관리자 그룹에 등록된 계정 확인 후 불필요한 계정 제거하도록 설정
 - id: U-09
   name: 계정이 존재하지 않는 GID 금지
   severity: 하
   category: Unix
   manual: false
+  remediation: 불필요한 그룹이 존재하는 경우 관리자와 검토하여 제거하도록 설정※/etc/group 파일과 /etc/passwd 파일을 비교하여 점검하기를 권고함
 - id: U-10
   name: 동일한 UID 금지
   severity: 중
   category: Unix
   manual: false
+  remediation: 동일한 UID를 가진 사용자 계정의 UID를 중복되지 않도록 변경하도록 설정
 - id: U-11
   name: 사용자 Shell 점검
   severity: 하
   category: Unix
   manual: false
+  remediation: 로그인이 필요하지 않은 계정에 대해 /bin/false(/sbin/nologin) 쉘 부여 설정
 - id: U-12
   name: 세션 종료 시간 설정
   severity: 하
   category: Unix
   manual: false
+  remediation: 600초(10분) 동안 입력이 없는 경우 접속된 Session을 끊도록 설정
 - id: U-13
   name: 안전한 비밀번호 암호화 알고리즘 사용
   severity: 중
   category: Unix
   manual: false
+  remediation: SHA-2 이상의 안전한 비밀번호 암호화 알고리즘 적용 설정
 - id: U-14
   name: root 홈, 패스 디렉터리 권한 및 PATH 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: root 계정의 환경설정 파일(/.profile, /.bashrc 등)과 시스템 환경설정 파일(/etc/profile 등)에 설정된 PATH 환경변수에서 현재 디렉터리를 나타내는 “.”을 PATH
+    환경변수의 마지막으로 이동하도록 설정※/etc/profile 파일, root 계정, 일반 사용자 계정의 환경설정 파일을 순차적으로 검색하여 확인
 - id: U-15
   name: 파일 및 디렉터리 소유자 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: 소유자가 존재하지 않는 파일 및 디렉터리 제거 또는 소유자 변경 설정
 - id: U-16
   name: /etc/passwd 파일 소유자 및 권한 설정(644 이하)
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/passwd 파일 소유자 및 권한 변경 설정
 - id: U-17
   name: 시스템 시작 스크립트 권한 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: 시스템 시작 스크립트 파일 소유자 및 권한 변경 설정
 - id: U-18
   name: /etc/security/passwd 소유자 및 권한(400 이하)
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/shadow 파일 소유자 및 권한 변경 설정
 - id: U-19
   name: /etc/hosts 소유자 및 권한(644 이하)
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/hosts 파일 소유자 및 권한 변경 설정
 - id: U-20
   name: /etc/inetd.conf 소유자 및 권한(600 이하)
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/(x)inetd.conf 파일 소유자 및 권한 변경 설정
 - id: U-21
   name: /etc/syslog.conf 소유자 및 권한(644 이하)
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/(r)syslog.conf 파일 소유자 및 권한 변경 설정
 - id: U-22
   name: /etc/services 소유자 및 권한(644 이하)
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/ services 파일 소유자 및 권한 변경 설정
 - id: U-23
   name: SUID, SGID, Sticky bit 설정 파일 점검
   severity: 상
   category: Unix
   manual: false
+  remediation: Ÿ불필요한 SUID, SGID 권한 또는 해당 파일 제거하도록 설정Ÿ애플리케이션에서 생성한 파일이나 사용자가 임의로 생성한 파일 등 의심스럽거나 특이한 파일에 SUID 권한이 부여된 경우 제거하도록
+    설정
 - id: U-24
   name: 사용자, 시스템 환경변수 파일 소유자 및 권한 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: 환경변수 파일의 일반 사용자 쓰기 권한 제거하도록 설정
 - id: U-25
   name: world writable 파일 점검
   severity: 상
   category: Unix
   manual: false
+  remediation: world writable 파일 존재 여부를 확인하고 불필요한 경우 제거하도록 설정
 - id: U-26
   name: /dev에 존재하지 않는 device 파일 점검
   severity: 상
   category: Unix
   manual: false
+  remediation: major, minor number를 가지지 않는 device 파일 제거하도록 설정
 - id: U-27
   name: \$HOME/.rhosts, hosts.equiv 사용 금지
   severity: 상
   category: Unix
   manual: false
+  remediation: /etc/hosts.equiv, $HOME/.rhosts 파일 소유자 및 권한 변경, 허용 호스트 및 계정 등록 설정
 - id: U-28
   name: 접속 IP 및 포트 제한
   severity: 상
   category: Unix
   manual: true
+  remediation: OS에 기본으로 제공하는 방화벽 애플리케이션이나 TCP Wrapper와 같은 호스트별 서비스 제한 애플리케이션을 사용하여 접근 허용 IP 등록 설정
 - id: U-29
   name: /etc/hosts.lpd 소유자 및 권한(600 이하/미존재 양호)
   severity: 하
   category: Unix
   manual: false
+  remediation: /etc/hosts.lpd 파일 제거 또는 /etc/hosts.lpd 파일 소유자 및 권한 변경 설정
 - id: U-30
   name: UMASK 설정 관리
   severity: 중
   category: Unix
+  remediation: 설정 파일에 UMASK 값을 022로 설정
 - id: U-31
   name: 홈 디렉토리 소유자 및 권한 설정
   severity: 중
   category: Unix
   manual: false
+  remediation: 사용자별 홈 디렉토리 소유주를 해당 계정으로 변경하고, 타 사용자의 쓰기 권한 제거하도록 설정(/etc/passwd 파일에서 홈 디렉토리 확인, 사용자 홈 디렉토리 외 개별적으로 만들어 사용하는
+    사용자 디렉토리 존재 여부 확인하여 점검)
 - id: U-32
   name: 홈 디렉토리로 지정한 디렉토리의 존재 관리
   severity: 중
   category: Unix
   manual: false
+  remediation: 홈 디렉토리가 존재하지 않는 계정에 홈 디렉토리 설정 또는 계정 제거하도록 설정
 - id: U-33
   name: 숨겨진 파일 및 디렉토리 검색 및 제거
   severity: 하
   category: Unix
   manual: false
+  remediation: ls -al 명령어로 숨겨진 파일 존재 파악 후 불법적이거나 의심스러운 파일을 제거하도록 설정
 - id: U-34
   name: Finger 서비스 비활성화
   severity: 상
   category: Unix
   manual: false
+  remediation: Finger 서비스 비활성화 설정
 - id: U-35
   name: 공유 서비스에 대한 익명 접근 제한 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: 공유 서비스의 익명 접근 제한 설정
 - id: U-36
   name: r 계열 서비스 비활성화(rlogin/rsh/rexec)
   severity: 상
   category: Unix
   manual: false
+  remediation: 불필요한 r 계열 서비스 중지 및 비활성화 설정※NET Backup 등 특별한 용도로 사용하지 않는다면 shell(514), login(513), exec(512) 서비스 중지※rlogin,
+    rsh, rexec 서비스는 backup, 클러스터링 등의 용도로 종종 사용되고 있으므로 해당 서비스 사용 유무를 확인하여 미사용시 서비스 중지※/etc/hosts.equiv 또는 $HOME/.rhosts 파일을
+    통해 해당 서비스 사용 여부 확인 (파일이 존재하지 않거나 해당 파일 내에 설정이 없다면 사용하지 않는 것으로 간주)
 - id: U-37
   name: crontab 설정파일 권한 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: crontab 및 at 명령어 파일 권한 750 이하, cron 및 at 관련 파일 소유자 및 파일 권한 640 이하 설정
 - id: U-38
   name: DoS 취약 서비스 비활성화(echo/discard/daytime/chargen)
   severity: 상
   category: Unix
   manual: false
+  remediation: echo, discard, daytime, chargen, ntp, dns, snmp 등의 서비스 비활성화 설정
 - id: U-39
   name: 불필요한 NFS 서비스 비활성화
   severity: 상
   category: Unix
   manual: false
+  remediation: NFS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정※로컬 서버에 마운트 되어 있는 디렉터리 제거 및 공유 디렉터리 제거 후 서비스 중지 가능
 - id: U-40
   name: NFS 접근 통제
   severity: 상
   category: Unix
   manual: false
+  remediation: ŸNFS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ불가피하게 사용 시 접근 통제 설정 및 NFS 설정 파일 접근 권한 644 설정
 - id: U-41
   name: 불필요한 automountd 제거
   severity: 상
   category: Unix
   manual: false
+  remediation: automountd 서비스 비활성화 설정
 - id: U-42
   name: 불필요한 RPC 서비스 비활성화
   severity: 상
   category: Unix
   manual: false
+  remediation: 불필요한 RPC 서비스 중지 및 비활성화 설정
 - id: U-43
   name: NIS, NIS+ 점검
   severity: 상
   category: Unix
   manual: false
+  remediation: NIS 관련 서비스 비활성화 설정
 - id: U-44
   name: tftp, talk 서비스 비활성화
   severity: 상
   category: Unix
   manual: false
+  remediation: 불필요한 tftp, talk, ntalk 서비스 비활성화 설정
 - id: U-45
   name: 메일 서비스 버전 점검
   severity: 상
   category: Unix
   manual: false
+  remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 패치 관리 정책을 수립하여 주기적으로 패치 적용 설정
 - id: U-46
   name: 일반 사용자의 메일 서비스 실행 방지
   severity: 상
   category: Unix
   manual: false
+  remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 메일 서비스의 q 옵션 제한 설정
 - id: U-47
   name: 스팸 메일 릴레이 제한
   severity: 상
   category: Unix
   manual: false
+  remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 릴레이 방지 설정 또는 릴레이 대상 접근 제어 설정
 - id: U-48
   name: expn, vrfy 명령어 제한
   severity: 중
   category: Unix
   manual: false
+  remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 메일 서비스 설정 파일에 noexpn, novrfy 또는 goaway 옵션 추가 설정
 - id: U-49
   name: DNS 보안 버전 패치
   severity: 상
   category: Unix
   manual: false
+  remediation: ŸDNS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸDNS 서비스 사용 시 패치 관리 정책 수립 및 주기적으로 패치 적용 설정※DNS 서비스의 경우 대부분의 버전에서 취약점이
+    보고되고 있으므로 OS 관리자, 서비스 개발자가 패치 적용에 따른 서비스 영향 정도를 정확히 파악하여 주기적인 패치 적용 정책 수리 후 적용
 - id: U-50
   name: DNS Zone Transfer 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: ŸDNS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸDNS 서비스 사용 시 DNS Zone Transfer를 허가된 사용자에게만 전송 허용하도록 설정
 - id: U-51
   name: DNS 서비스의 취약한 동적 업데이트 설정 금지
   severity: 중
   category: Unix
   manual: false
+  remediation: ŸDNS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸDNS 서비스 사용 시 일반적으로 동적 업데이트 기능이 필요 없으나 확인 필요함
 - id: U-52
   name: Telnet 서비스 비활성화
   severity: 중
   category: Unix
   manual: false
+  remediation: Telnet, FTP 등 안전하지 않은 서비스 사용을 중지하고 SSH 설치 및 사용하도록 설정
 - id: U-53
   name: FTP 서비스 정보 노출 제한
   severity: 하
   category: Unix
   manual: false
+  remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 FTP 설정 파일을 통해 접속 배너 설정※접속 배너에 서비스 이름이나 버전 정보를 노출하지 않는 것을
+    권고
 - id: U-54
   name: 암호화되지 않는 FTP 서비스 비활성화
   severity: 중
   category: Unix
   manual: false
+  remediation: 암호화되지 않은 FTP 서비스 중지 및 비활성화 설정
 - id: U-55
   name: FTP 계정 Shell 제한
   severity: 중
   category: Unix
   manual: false
+  remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 FTP 계정에 /bin/false 쉘 부여 설정
 - id: U-56
   name: FTP 서비스 접근 제어 설정
   severity: 하
   category: Unix
   manual: false
+  remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 접근 제어 설정
 - id: U-57
   name: Ftpusers 파일 설정
   severity: 중
   category: Unix
   manual: false
+  remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 root 계정으로 직접 접속할 수 없도록 설정
 - id: U-58
   name: 불필요한 SNMP 서비스 구동 점검
   severity: 중
   category: Unix
   manual: false
+  remediation: SNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정
 - id: U-59
   name: 안전한 SNMP 버전 사용
   severity: 상
   category: Unix
   manual: false
+  remediation: ŸSNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸSNMP 서비스 사용 시 SNMP 버전을 v3 이상으로 적용하도록 설정
 - id: U-60
   name: SNMP Community String 복잡성 설정
   severity: 중
   category: Unix
   manual: false
+  remediation: ŸSNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸSNMP 서비스 사용 시 SNMP Community String 기본값인 “public”, “private”이 아닌 영문자,
+    숫자 포함 10자리 이상 또는 영문자, 숫자, 특수문자 포함 8자리 이상으로 설정
 - id: U-61
   name: SNMP Access Control 설정
   severity: 상
   category: Unix
   manual: false
+  remediation: ŸSNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸSNMP 서비스 사용 시 SNMP 접근 제어 설정하도록 설정
 - id: U-62
   name: 로그인 시 경고 메시지 설정
   severity: 하
   category: Unix
   manual: false
+  remediation: Telnet, FTP, SMTP, DNS 서비스를 사용하는 경우 설정 파일을 통해 로그온 시 경고 메시지 설정
 - id: U-63
   name: sudo 명령어 접근 관리
   severity: 중
   category: Unix
   manual: false
+  remediation: /etc/sudoers 파일 소유자 및 권한 변경 설정
 - id: U-64
   name: 주기적 보안 패치 및 벤더 권고사항 적용
   severity: 상
   category: Unix
   manual: true
+  remediation: OS 관리자, 서비스 개발자가 패치 적용에 따른 서비스 영향 정도를 파악하여 OS 관리자 및 벤더에서 적용하도록 설정※OS 패치의 경우 지속해서 취약점이 발표되고 있으므로 O/S 관리자, 서비스
+    개발자가 패치 적용에 따른 서비스 영향 정도를 정확히 파악하여 주기적인 패치 적용 정책을 수립하여 적용해야 함
 - id: U-65
   name: NTP 및 시각 동기화 설정
   severity: 중
   category: Unix
   manual: false
+  remediation: NTP 설정 및 동기화 주기 설정
 - id: U-66
   name: 정책에 따른 시스템 로깅 설정
   severity: 중
   category: Unix
   manual: false
+  remediation: 로그 기록 정책을 수립하고, 정책에 따라 (r)syslog.conf 파일을 설정
 - id: U-67
   name: 로그 디렉터리 소유자 및 권한 설정
   severity: 중
   category: Unix
   manual: false
+  remediation: 디렉터리 내 로그 파일 소유자 및 권한 변경 설정
 - id: WEB-01
   name: 기본 관리자 계정/관리자 페이지
   severity: ''
   category: WEB
+  remediation: 기본 관리자 계정명을 추측하기 어려운 계정명으로 설정
 - id: WEB-02
   name: 취약한 비밀번호 (평문여부만 자동, 복잡도는 수동)
   severity: ''
   category: WEB
+  remediation: 복잡도 기준에 맞는 추측하기 어려운 비밀번호 설정
 - id: WEB-03
   name: 비밀번호 파일 권한 (tomcat-users.xml <= 600)
   severity: ''
   category: WEB
+  remediation: 비밀번호 파일 권한 600 이하로 설정
 - id: WEB-04
   name: 디렉터리 리스팅 (web.xml listings=false)
   severity: ''
   category: WEB
+  remediation: 디렉터리 리스팅 기능 차단 설정
 - id: WEB-05
   name: CGI 매핑
   severity: ''
   category: WEB
+  remediation: CGI 스크립트를 정해진 디렉터리 내에서만 실행할 수 있도록 설정
 - id: WEB-06
   name: 상위 디렉터리 접근 (allowLinking=true)
   severity: ''
   category: WEB
+  remediation: 상위 디렉터리 접근 기능 제거 설정
 - id: WEB-07
   name: 불필요 기본 파일/디렉터리
   severity: ''
   category: WEB
+  remediation: 불필요한 파일 및 디렉터리를 제거하도록 설정
 - id: WEB-08
   name: 업로드/다운로드 용량 제한
   severity: ''
   category: WEB
+  remediation: 파일 업로드 및 다운로드 용량을 허용 가능한 최소 범위로 제한하여 설정
 - id: WEB-09
   name: 프로세스 권한 (root 구동 금지)
   severity: ''
   category: WEB
+  remediation: 웹 서비스 프로세스 구동 시 관리자 권한이 아닌 운영에 필요한 최소한의 권한을 가진 계정으로 구동 설정
 - id: WEB-10
   name: 불필요 프록시 설정
   severity: ''
   category: WEB
+  remediation: 불필요한 Proxy 설정 존재 여부 점검 및 제한 설정
 - id: WEB-11
   name: 웹 서비스 경로 설정 (DocumentRoot) - 수동
   severity: ''
   category: WEB
+  remediation: 웹 서버의 경로를 별도의 경로로 변경 및 불필요한 경로 제거 설정
 - id: WEB-12
   name: 링크(심볼릭) 사용 금지 (FollowSymLinks)
   severity: ''
   category: WEB
+  remediation: 웹 서비스 링크 사용 제한 설정
 - id: WEB-13
   name: 설정 파일(DB연결정보) 노출 - server.xml 권한 600
   severity: ''
   category: WEB
+  remediation: DB 연결 파일에 대한 접근 권한 제한 또는 불필요한 스크립트 매핑 제거 등을 통한 웹 서비스 내 DB 연결 취약점 제거 설정
 - id: WEB-14
   name: 설정파일 접근통제 (conf/*)
   severity: ''
   category: WEB
+  remediation: 주요 설정 파일 및 디렉터리에 불필요한 접근 권한 제거 설정
 - id: WEB-15
   name: 불필요 스크립트 매핑 - 수동
   severity: ''
   category: WEB
+  remediation: 불필요한 스크립트 매핑 존재 여부 점검 및 제거 설정
 - id: WEB-16
   name: 헤더 정보 노출 (Connector server= / showServerInfo=false)
   severity: ''
   category: WEB
+  remediation: 응답 헤더에 표시되는 정보를 최소한으로 제한하여 설정
 - id: WEB-17
   name: 가상 디렉터리 (Context path)
   severity: ''
   category: WEB
+  remediation: 불필요한 가상 디렉터리 존재 여부 점검 및 삭제하도록 설정
 - id: WEB-18
   name: WebDAV 비활성화 (Dav On)
   severity: ''
   category: WEB
+  remediation: WebDAV 서비스 비활성화 설정
 - id: WEB-19
   name: SSI 사용 제한
   severity: ''
   category: WEB
+  remediation: 웹 서비스 내 불필요한 SSI 사용 제한 설정
 - id: WEB-20
   name: SSL/TLS 활성화
   severity: ''
   category: WEB
+  remediation: 웹 서비스 내 SSL/TLS 활성화 설정
 - id: WEB-21
   name: HTTP->HTTPS 리디렉션
   severity: ''
   category: WEB
+  remediation: HTTP Redirection 활성화 설정
 - id: WEB-22
   name: 에러 페이지 관리
   severity: ''
   category: WEB
+  remediation: 필수 에러 코드에 대해 일원화된 에러 페이지 사용 및 에러 페이지 내 불필요 정보 노출 제한 설정
 - id: WEB-23
   name: LDAP digest 알고리즘
   severity: ''
   category: WEB
+  remediation: LDAP 연결 인증 시 SHA-256 이상의 알고리즘을 사용하도록 설정
 - id: WEB-24
   name: 별도 업로드 경로 - 수동
   severity: ''
   category: WEB
+  remediation: 기본 경로가 아닌 별도의 업로드 경로를 지정하고, 해당 경로에 대한 일반 사용자의 접근 권한을 제한하도록 설정
 - id: WEB-25
   name: 패치/버전 - 수동
   severity: ''
   category: WEB
+  remediation: 패치 적용에 따른 서비스 영향 정도를 정확히 파악하여 주기적인 패치 적용 정책 수립 및 적용하도록 설정
 - id: WEB-26
   name: 로그 디렉터리/파일 권한
   severity: ''
   category: WEB
+  remediation: 로그 디렉터리 및 파일에 일반 사용자 접근 권한 제거 설정
 profiles:
 - id: aix-server
   name: AIX 서버 (스크립트)

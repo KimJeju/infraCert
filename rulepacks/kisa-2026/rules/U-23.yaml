@@ -30,3 +30,4 @@ verdict:
 evidence:
 - found
 note: root 소유 SUID/SGID 파일 목록(표본 80). 불필요 여부는 운영 판단
+remediation: Ÿ불필요한 SUID, SGID 권한 또는 해당 파일 제거하도록 설정Ÿ애플리케이션에서 생성한 파일이나 사용자가 임의로 생성한 파일 등 의심스럽거나 특이한 파일에 SUID 권한이 부여된 경우 제거하도록 설정

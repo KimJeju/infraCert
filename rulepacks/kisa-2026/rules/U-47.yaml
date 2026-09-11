@@ -33,3 +33,4 @@ evidence:
 - mta
 - cfg
 note: postfix reject_unauth_destination / sendmail access DB 로 릴레이 제한. promiscuous_relay 는 취약
+remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 릴레이 방지 설정 또는 릴레이 대상 접근 제어 설정

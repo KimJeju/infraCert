@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from infraguard import config
 from infraguard.assets.models import Host
 from infraguard.assets.store import AssetStore
 from infraguard.core.ids import new_scan_id
@@ -94,19 +95,58 @@ class MainWindow(QMainWindow):
         self._refresh_dashboard()
         self._refresh_profiles()
 
-    def _load_rulepack(self) -> RulePack | None:
+    def _load_rulepack(self, name: str | None = None) -> RulePack | None:
+        """rulepacks/<name>. name 없으면 config 의 rulepack, 그것도 없으면 첫 번째."""
         packs = rp_loader.list_packs()
         if not packs:
             return None
+        want = name or str(self.ctx.config.get("rulepack") or "")
+        chosen = next((p for p in packs if p.name == want), packs[0])
         try:
-            return rp_loader.load(packs[0])
+            return rp_loader.load(chosen)
         except Exception as e:  # noqa: BLE001 - 룰팩 깨져도 앱은 떠야 한다(문제를 보여준다)
             log.exception("rulepack load failed")
-            return RulePack(name=packs[0].name, version="?", root=packs[0], bundles={}, native=[],
+            return RulePack(name=chosen.name, version="?", root=chosen, bundles={}, native=[],
                             rules={}, profiles={}, integrity_ok=False, problems=[f"로드 실패: {e}"])
 
+    def _switch_rulepack(self, name: str) -> None:
+        if not name or self._scanning:
+            return
+        self.pack = self._load_rulepack(name)
+        self.ctx.config["rulepack"] = name
+        config.save(self.ctx.config)
+        self._refresh_profiles()
+
+    def _import_rulepack(self) -> None:
+        path, _ = QFileDialog.getOpenFileName(self, "룰팩 가져오기", "", "룰팩 zip (*.zip)")
+        if not path:
+            return
+        from pathlib import Path
+
+        from infraguard.rulepack import importer
+        try:
+            name = importer.pack_name(Path(path))
+            replace = False
+            if (rp_loader.rulepacks_root() / name).exists():
+                if QMessageBox.question(self, "룰팩 가져오기", f"'{name}' 이(가) 이미 있습니다. 덮어쓸까요?") \
+                        != QMessageBox.StandardButton.Yes:
+                    return
+                replace = True
+            dest, pack = importer.import_zip(Path(path), replace=replace)
+        except Exception as e:  # noqa: BLE001 - zip 검사 실패·manifest 오류 전부 사용자에게
+            QMessageBox.warning(self, "룰팩 가져오기 실패", str(e))
+            return
+        msg = f"{dest.name}: 번들 {len(pack.bundles)} · 네이티브 {len(pack.native)} · 가이드 {len(pack.guide)}항목"
+        if not pack.runnable:
+            msg += f"\n⚠ 문제 {len(pack.problems)}건 — 실행 차단 (룰팩 탭에서 확인)"
+        QMessageBox.information(self, "룰팩 가져오기", msg)
+        self._switch_rulepack(dest.name)
+
     def _refresh_profiles(self) -> None:
+        self.rulepack.set_packs([p.name for p in rp_loader.list_packs()], self.pack.name if self.pack else None)
         self.rulepack.load(self.pack)
+        self.manual.set_guide(self.pack.guide if self.pack else {},
+                              self.pack.remediation_map() if self.pack else {})
         items = []
         if self.pack:
             for pid, p in self.pack.profiles.items():
@@ -189,6 +229,8 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.manual, "수동확인")
         self.rulepack = RulePackPage()
         self.rulepack.profiles_changed.connect(self._refresh_profiles)
+        self.rulepack.import_requested.connect(self._import_rulepack)
+        self.rulepack.pack_selected.connect(self._switch_rulepack)
         self.tabs.addTab(self.rulepack, "룰팩")
         pk_label = f"{self.pack.name} {self.pack.version}" if self.pack else "(없음)"
         self.settings = SettingsPage(self.ctx.config, self.ctx.workspace.layout,
@@ -563,10 +605,11 @@ class MainWindow(QMainWindow):
             return
         from pathlib import Path
         try:
+            rem = self.pack.remediation_map() if self.pack else {}
             if fmt == "xlsx":
-                xlsx_report.build(scan, Path(path))
+                xlsx_report.build(scan, Path(path), rem)
             else:
-                html_report.build(scan, Path(path))
+                html_report.build(scan, Path(path), rem)
             self._unexported = False
             QMessageBox.information(self, "내보내기", f"저장됨: {path}")
         except Exception as e:  # noqa: BLE001

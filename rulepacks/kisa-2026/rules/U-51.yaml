@@ -27,3 +27,4 @@ evidence:
 - named
 - upd
 note: allow-update { any; } 이면 취약. 미설정(기본 none)·제한 설정은 양호
+remediation: ŸDNS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸDNS 서비스 사용 시 일반적으로 동적 업데이트 기능이 필요 없으나 확인 필요함

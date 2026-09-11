@@ -10,4 +10,5 @@ dist/
 _sample_report.xlsx
 .venv/
 config.json
-
+/rulepacks/*/guide/
+*.rulepack.zip

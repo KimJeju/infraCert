@@ -18,3 +18,4 @@ verdict:
   - else: MANUAL
 evidence: [unused]
 note: "기본 미사용 계정 존재 시 운영 필요성 확인 후 제거 여부 판단"
+remediation: 시스템에 존재하는 계정 확인 후 불필요한 계정 제거하도록 설정

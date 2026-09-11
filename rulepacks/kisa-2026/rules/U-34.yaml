@@ -31,3 +31,4 @@ verdict:
 evidence:
 - found
 note: finger 서비스가 inetd/xinetd/프로세스 어디서든 활성이면 취약
+remediation: Finger 서비스 비활성화 설정

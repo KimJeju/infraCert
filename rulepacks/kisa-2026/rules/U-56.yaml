@@ -25,3 +25,4 @@ evidence:
 - ftp
 - acl
 note: FTP 구동 시 접근제어(tcp_wrappers/Limit/ftpaccess) 설정 적정성 확인
+remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 접근 제어 설정

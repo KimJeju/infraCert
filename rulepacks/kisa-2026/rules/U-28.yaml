@@ -25,3 +25,4 @@ evidence:
 - fw
 - listen
 note: hosts.deny ALL:ALL + hosts.allow 화이트리스트 또는 방화벽 정책이 있어야 양호
+remediation: OS에 기본으로 제공하는 방화벽 애플리케이션이나 TCP Wrapper와 같은 호스트별 서비스 제한 애플리케이션을 사용하여 접근 허용 IP 등록 설정

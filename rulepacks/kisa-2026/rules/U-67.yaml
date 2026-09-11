@@ -33,3 +33,4 @@ evidence:
 - ls
 - found
 note: 로그 디렉터리/파일이 root 소유이고 other 쓰기 없음이어야 양호(wtmp/btmp/lastlog 제외)
+remediation: 디렉터리 내 로그 파일 소유자 및 권한 변경 설정

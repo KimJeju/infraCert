@@ -30,3 +30,4 @@ evidence:
 - ftp
 - ls
 note: ftpusers(접속 금지 목록)에 root 가 있어야 양호
+remediation: ŸFTP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸFTP 서비스 사용 시 root 계정으로 직접 접속할 수 없도록 설정

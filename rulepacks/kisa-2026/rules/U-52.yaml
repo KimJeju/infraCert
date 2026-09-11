@@ -31,3 +31,4 @@ verdict:
 evidence:
 - found
 note: telnet 활성이면 취약(SSH 사용)
+remediation: Telnet, FTP 등 안전하지 않은 서비스 사용을 중지하고 SSH 설치 및 사용하도록 설정

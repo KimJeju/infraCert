@@ -20,3 +20,4 @@ verdict:
   - else: VULN
 evidence: [ls]
 note: "기준: 미존재 또는 소유자 root·권한 600 이하"
+remediation: /etc/hosts.lpd 파일 제거 또는 /etc/hosts.lpd 파일 소유자 및 권한 변경 설정

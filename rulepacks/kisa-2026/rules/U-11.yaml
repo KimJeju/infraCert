@@ -16,3 +16,4 @@ verdict:
   - else: VULN
 evidence: [bad]
 note: "시스템 계정에 /sbin/nologin 또는 /bin/false 가 아닌 셸이 있으면 취약"
+remediation: 로그인이 필요하지 않은 계정에 대해 /bin/false(/sbin/nologin) 쉘 부여 설정

@@ -21,3 +21,4 @@ verdict:
   - else: VULN
 evidence: [ls]
 note: "기준: 소유자 root, 권한 400 이하"
+remediation: /etc/shadow 파일 소유자 및 권한 변경 설정

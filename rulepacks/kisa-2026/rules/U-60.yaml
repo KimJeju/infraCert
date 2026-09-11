@@ -31,3 +31,4 @@ verdict:
 evidence:
 - com
 note: 커뮤니티 문자열이 public/private 이면 취약. 그 외는 복잡성(길이·문자조합) 수동확인
+remediation: ŸSNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸSNMP 서비스 사용 시 SNMP Community String 기본값인 “public”, “private”이 아닌 영문자, 숫자 포함 10자리 이상 또는 영문자, 숫자, 특수문자 포함 8자리 이상으로 설정

@@ -27,3 +27,4 @@ evidence:
 - daemon
 - conf
 note: syslog 계열 데몬 동작 + auth/authpriv 등 정책 항목이 설정돼야 양호. journald 단독은 보관 정책 확인
+remediation: 로그 기록 정책을 수립하고, 정책에 따라 (r)syslog.conf 파일을 설정

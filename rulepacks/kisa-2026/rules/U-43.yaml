@@ -33,3 +33,4 @@ verdict:
 evidence:
 - found
 note: NIS/NIS+ 데몬 활성이면 취약(NIS+ 또는 LDAP 권고)
+remediation: NIS 관련 서비스 비활성화 설정

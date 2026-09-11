@@ -30,3 +30,4 @@ verdict:
 evidence:
 - found
 note: 홈 밖의 숨김 파일(표본 50). 용도 확인 후 제거 여부 판단
+remediation: ls -al 명령어로 숨겨진 파일 존재 파악 후 불법적이거나 의심스러운 파일을 제거하도록 설정

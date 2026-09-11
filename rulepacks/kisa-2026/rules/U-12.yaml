@@ -32,3 +32,4 @@ verdict:
 evidence:
 - tmout
 note: '기준: TMOUT 600 이하(설정 없음 취약)'
+remediation: 600초(10분) 동안 입력이 없는 경우 접속된 Session을 끊도록 설정

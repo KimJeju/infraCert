@@ -31,3 +31,4 @@ verdict:
 evidence:
 - found
 note: 평문 FTP 활성이면 취약(SFTP/FTPS 권고)
+remediation: 암호화되지 않은 FTP 서비스 중지 및 비활성화 설정

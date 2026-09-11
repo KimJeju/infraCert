@@ -29,6 +29,8 @@ KIND_ROLE = int(Qt.ItemDataRole.UserRole) + 2   # "bundle" | "native"
 
 class RulePackPage(QWidget):
     profiles_changed = Signal()
+    import_requested = Signal()          # zip 가져오기 (파일 선택·풀기는 메인윈도가)
+    pack_selected = Signal(str)          # rulepacks/<name> 전환
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,6 +44,13 @@ class RulePackPage(QWidget):
         top.addStretch(1)
         self.integrity = QLabel("")
         top.addWidget(self.integrity)
+        self.packs = QComboBox()
+        self.packs.setToolTip("rulepacks/ 아래 룰팩. 컨설턴트가 자산에 맞게 만든 부분 룰팩을 골라 쓴다.")
+        self.packs.activated.connect(lambda _i: self.pack_selected.emit(self.packs.currentData() or ""))
+        top.addWidget(self.packs)
+        imp = QPushButton("룰팩 가져오기(.zip)")
+        imp.clicked.connect(self.import_requested.emit)
+        top.addWidget(imp)
         root.addLayout(top)
 
         body = QHBoxLayout()
@@ -68,6 +77,15 @@ class RulePackPage(QWidget):
         root.addLayout(prow)
 
     # ---------------------------------------------------------------- 표시
+    def set_packs(self, names: list[str], current: str | None) -> None:
+        self.packs.blockSignals(True)
+        self.packs.clear()
+        for n in names:
+            self.packs.addItem(n, n)
+        if current and (i := self.packs.findData(current)) >= 0:
+            self.packs.setCurrentIndex(i)
+        self.packs.blockSignals(False)
+
     def load(self, pack: RulePack | None) -> None:
         self._pack = pack
         self.model.clear()
@@ -78,7 +96,8 @@ class RulePackPage(QWidget):
             self.integrity.setText("")
             self.profile.blockSignals(False)
             return
-        self.title.setText(f"룰팩: {pack.name} ({pack.version})")
+        self.title.setText(f"룰팩: {pack.name} ({pack.version})"
+                           + (f" · 가이드 {len(pack.guide)}항목" if pack.guide else ""))
         if pack.runnable:
             self.integrity.setText("무결성 ✓ 검증됨")
             self.integrity.setStyleSheet("color:#3FB950")

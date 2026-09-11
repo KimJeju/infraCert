@@ -31,3 +31,4 @@ verdict:
 evidence:
 - found
 note: snmpd 구동이면 취약(운영상 필요 시 예외 사유 기록)
+remediation: SNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정

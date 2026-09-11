@@ -30,3 +30,4 @@ verdict:
 evidence:
 - found
 note: 로그인 가능 계정 중 홈 디렉터리가 없는 계정
+remediation: 홈 디렉토리가 존재하지 않는 계정에 홈 디렉토리 설정 또는 계정 제거하도록 설정

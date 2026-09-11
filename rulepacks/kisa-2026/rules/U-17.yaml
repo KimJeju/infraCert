@@ -30,3 +30,4 @@ verdict:
 evidence:
 - found
 note: 시작 스크립트 중 world-writable 또는 root 소유 아닌 파일
+remediation: 시스템 시작 스크립트 파일 소유자 및 권한 변경 설정

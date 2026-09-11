@@ -36,6 +36,8 @@ class ManualBenchPage(QWidget):
     def __init__(self) -> None:
         super().__init__()
         self._scan: ScanResult | None = None
+        self._guide: dict[str, dict] = {}          # rule id → 가이드 항목
+        self._remediation: dict[str, str] = {}     # rule id → 조치방법(가이드 없을 때의 대체)
         root = QHBoxLayout(self)
 
         left = QVBoxLayout()
@@ -61,6 +63,10 @@ class ManualBenchPage(QWidget):
         self.evidence = QTextEdit()
         self.evidence.setReadOnly(True)
         right.addWidget(self.evidence, 1)
+        right.addWidget(QLabel("가이드 — 판단기준 · 조치 · 점검사례 (룰팩 guide/ 또는 manifest 메타)"))
+        self.guide = QTextEdit()
+        self.guide.setReadOnly(True)
+        right.addWidget(self.guide, 1)
 
         vrow = QHBoxLayout()
         vrow.addWidget(QLabel("판정"))
@@ -96,6 +102,30 @@ class ManualBenchPage(QWidget):
             QShortcut(QKeySequence(key), self, lambda i=idx: self.radios[i].setChecked(True))
         QShortcut(QKeySequence("Ctrl+Return"), self, self._save_next)
 
+    def set_guide(self, guide: dict[str, dict], remediation: dict[str, str]) -> None:
+        self._guide, self._remediation = guide, remediation
+
+    def _guide_text(self, rule_id: str) -> str:
+        g = self._guide.get(rule_id)
+        if not g:
+            rem = self._remediation.get(rule_id)
+            return f"조치방법: {rem}" if rem else "(이 항목의 가이드 없음 — 룰팩에 guide/ 가 없거나 항목 미포함)"
+        j = g.get("judgment") or {}
+        out = []
+        if j:
+            out.append(f"양호: {j.get('good', '')}\n취약: {j.get('vuln', '')}")
+        if g.get("remediation"):
+            out.append(f"조치방법: {g['remediation']}")
+        if g.get("impact"):
+            out.append(f"조치 시 영향: {g['impact']}")
+        for pr in g.get("procedures") or []:
+            out.append(f"[{pr.get('platform', '')}]")
+            for k, v in (pr.get("variants") or {}).items():
+                out.append(f"  ({k})")
+                out.extend("   " + st for st in v.get("steps") or [])
+            out.extend("  " + st for st in pr.get("steps") or [])
+        return "\n".join(out)
+
     def load(self, scan: ScanResult | None) -> None:
         self._scan = scan
         self.items.blockSignals(True)
@@ -117,6 +147,7 @@ class ManualBenchPage(QWidget):
         else:
             self.title.setText("남은 수동확인 항목 없음")
             self.evidence.clear()
+            self.guide.clear()
 
     def _current(self):
         it = self.items.currentItem()
@@ -135,6 +166,7 @@ class ManualBenchPage(QWidget):
                     self.title.setText(f"{r.rule_id}  {r.name}")
                     self.meta.setText(f"호스트: {hostname}   중요도: {r.severity.value if r.severity else '-'}")
                     self.evidence.setPlainText(r.evidence or r.reason or "")
+                    self.guide.setPlainText(self._guide_text(r.rule_id))
                     self.note.setText(r.analyst_note or "")
                     for rb in self.radios:
                         rb.setChecked(False)

@@ -31,3 +31,4 @@ verdict:
 evidence:
 - com
 note: ro/rw 커뮤니티 설정에 접근 허용 소스(IP/네트워크)가 없거나 default 면 취약
+remediation: ŸSNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸSNMP 서비스 사용 시 SNMP 접근 제어 설정하도록 설정

@@ -31,3 +31,4 @@ verdict:
 evidence:
 - found
 note: 환경변수 파일 중 world-writable
+remediation: 환경변수 파일의 일반 사용자 쓰기 권한 제거하도록 설정

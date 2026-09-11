@@ -34,3 +34,4 @@ verdict:
 evidence:
 - found
 note: tftp/talk/ntalk 활성이면 취약
+remediation: 불필요한 tftp, talk, ntalk 서비스 비활성화 설정

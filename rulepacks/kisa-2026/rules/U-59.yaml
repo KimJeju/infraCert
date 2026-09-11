@@ -34,3 +34,4 @@ evidence:
 - v12
 - v3
 note: v1/v2c(community) 설정 있으면 취약, v3(USM) 만 있으면 양호
+remediation: ŸSNMP 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정ŸSNMP 서비스 사용 시 SNMP 버전을 v3 이상으로 적용하도록 설정

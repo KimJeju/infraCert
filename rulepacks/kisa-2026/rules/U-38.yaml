@@ -36,3 +36,4 @@ verdict:
 evidence:
 - found
 note: echo/discard/daytime/chargen(inetd/xinetd) 활성이면 취약
+remediation: echo, discard, daytime, chargen, ntp, dns, snmp 등의 서비스 비활성화 설정

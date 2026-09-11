@@ -37,3 +37,4 @@ evidence:
 - mta
 - priv
 note: 'sendmail: PrivacyOptions 에 restrictqrun 있어야 양호. postfix/exim 은 해당 없음(N/A)'
+remediation: Ÿ메일 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ메일 서비스 사용 시 메일 서비스의 q 옵션 제한 설정

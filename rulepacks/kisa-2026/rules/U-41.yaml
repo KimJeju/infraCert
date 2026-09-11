@@ -32,3 +32,4 @@ verdict:
 evidence:
 - found
 note: automount 활성이면 취약
+remediation: automountd 서비스 비활성화 설정

@@ -19,3 +19,4 @@ verdict:
   - else: VULN
 evidence: [ls]
 note: "기준: 소유자 root, 권한 600 이하"
+remediation: /etc/(x)inetd.conf 파일 소유자 및 권한 변경 설정

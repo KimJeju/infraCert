@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import hashlib
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -18,9 +19,12 @@ import yaml
 from infraguard.rules import load_all
 from infraguard.workspace.layout import app_root
 
+log = logging.getLogger(__name__)
+
 RULEPACKS_DIRNAME = "rulepacks"
 PROFILES_DIRNAME = "profiles"
 RULES_DIRNAME = "rules"
+GUIDE_DIRNAME = "guide"
 
 
 class RulePackError(Exception):
@@ -80,6 +84,7 @@ class RulePack:
     profiles: dict[str, Profile]
     integrity_ok: bool
     problems: list[str]                # 로드는 됐지만 실행을 막아야 하는 사유
+    guide: dict[str, dict] = field(default_factory=dict)   # rule id → 가이드 항목(판단기준·조치·사례). 선택 사항
 
     @property
     def runnable(self) -> bool:
@@ -87,6 +92,14 @@ class RulePack:
 
     def manual_rules(self) -> set[str]:
         return {r.id for r in self.rules.values() if r.manual}
+
+    def remediation_map(self) -> dict[str, str]:
+        """리포트용 rule id → 조치방법. 가이드 항목이 있으면 그것, 없으면 manifest 메타."""
+        out = {rid: m.remediation for rid, m in self.rules.items() if m.remediation}
+        for rid, g in self.guide.items():
+            if g.get("remediation"):
+                out[rid] = str(g["remediation"])
+        return out
 
 
 def rulepacks_root() -> Path:
@@ -233,8 +246,30 @@ def load(pack_dir: Path) -> RulePack:
     return RulePack(
         name=str(raw.get("name") or pack_dir.name), version=str(raw.get("version") or ""),
         root=pack_dir, bundles=bundles, native=native, rules=rules, profiles=profiles,
-        integrity_ok=integrity_ok, problems=problems,
+        integrity_ok=integrity_ok, problems=problems, guide=_load_guide(pack_dir, problems),
     )
+
+
+def _load_guide(pack_dir: Path, problems: list[str]) -> dict[str, dict]:
+    """guide/**/*.yaml — scripts/extract_guide.py 산출(items 목록). 데이터일 뿐 코드가 아니므로 해시 검증 없음.
+
+    깨진 파일은 문제 목록에 남기되 실행은 막지 않는다(가이드는 참고자료).
+    """
+    d = pack_dir / GUIDE_DIRNAME
+    out: dict[str, dict] = {}
+    if not d.exists():
+        return out
+    for f in sorted(d.rglob("*.yaml")):
+        try:
+            data = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
+        except yaml.YAMLError as e:
+            log.warning("guide %s: YAML 오류 — %s (무시)", f.name, e)   # problems 에 넣으면 실행이 막힌다
+            continue
+        items = data.get("items") if isinstance(data, dict) else data
+        for it in items or []:
+            if isinstance(it, dict) and it.get("id"):
+                out[str(it["id"])] = it
+    return out
 
 
 def _load_user_profiles(pack_dir: Path) -> list[dict]:

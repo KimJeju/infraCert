@@ -68,6 +68,25 @@ note: "기준: 소유자 root, 권한 644 이하"
 - 룰 파일은 `manifest.yaml` 의 `rule_files` 에 SHA-256 으로 등록돼야 한다. 미등록·불일치는 실행 차단.
 - OS 분기·PAM 파싱처럼 선언형으로 어색한 룰은 `src/infraguard/rules/*.py` 에 파이썬으로 두고 같은 id 로 등록한다. 스키마 정본은 `rules/declarative.py` 의 pydantic 모델.
 
+## 부분 룰팩 — 고객사 자산에 맞는 항목만 가지고 다닌다
+
+전 항목(380)을 반입할 필요가 없다. 컨설턴트가 PC 에서 필요한 번들·룰만 골라 zip 을 만들고, 툴의 **룰팩 탭 → 룰팩 가져오기(.zip)** 로 올린다.
+
+```powershell
+python scripts\build_rulepack.py --src rulepacks\kisa-2026 --name acme-2026q3 --out acme.zip `
+    --profile aix-server --rules U-01,U-16,U-18 --guide rulepacks\kisa-2026\guide\all.json
+```
+
+- 선택 = 프로파일의 bundles/native ∪ `--rules` ∪ `--bundles`. sha256 은 재계산되고 번들 스크립트·동반파일이 같이 담긴다.
+- `--guide` 를 주면 선택 항목의 가이드(판단기준·조치·플랫폼별 점검사례)가 `guide/items.yaml` 로 동봉된다.
+  → 수동확인 워크벤치에 사례가 뜨고, XLSX/HTML 리포트의 **조치방법** 컬럼(취약·수동확인 행만)에 붙는다.
+  가이드가 없으면 manifest `rules:` 메타의 `remediation`(가이드에서 한 줄씩 채운 것)만 쓴다.
+- 가져오기는 zip 을 신뢰하지 않는다: 절대경로·`..`·심볼릭링크 멤버가 하나라도 있으면 아무것도 풀지 않는다. 풀린 뒤 로더의 무결성·읽기전용 검사를 그대로 받는다.
+- `rulepacks/` 에 여러 팩이 있으면 룰팩 탭 콤보로 전환한다(선택은 config.json `rulepack`).
+
+가이드 원본 구조화 데이터(`rulepacks/kisa-2026/guide/`)는 `scripts/extract_guide.py <가이드.pdf>` 로 로컬 생성하며 저장소에는 넣지 않는다.
+룰 YAML 의 `remediation` 과 manifest 메타는 `scripts/enrich_rules.py` 가 가이드에서 id 로 조인해 채운다.
+
 ## 패키징 (portable exe)
 
 ```powershell

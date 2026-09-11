@@ -34,3 +34,4 @@ verdict:
 evidence:
 - exports
 note: NFS 미사용 N/A. exports 에 호스트 제한 없음/'*'/no_root_squash 있으면 취약
+remediation: ŸNFS 서비스를 사용하지 않는 경우 서비스 중지 및 비활성화 설정Ÿ불가피하게 사용 시 접근 통제 설정 및 NFS 설정 파일 접근 권한 644 설정

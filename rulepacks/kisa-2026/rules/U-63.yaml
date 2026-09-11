@@ -29,3 +29,4 @@ evidence:
 - ls
 - grants
 note: sudoers 는 root 소유 440. ALL 권한/NOPASSWD 부여 계정은 필요성 확인(수동). 읽기 불가 시 수동
+remediation: /etc/sudoers 파일 소유자 및 권한 변경 설정

@@ -26,3 +26,4 @@ verdict:
 evidence:
 - shares
 note: 공유 없음 양호. exports '*'/no_root_squash/insecure, smb guest ok 는 취약. 그 외 공유는 접근제어 확인
+remediation: 공유 서비스의 익명 접근 제한 설정

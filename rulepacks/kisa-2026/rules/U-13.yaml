@@ -38,3 +38,4 @@ verdict:
 evidence:
 - enc
 note: '기준: SHA-256 이상(SHA512/YESCRYPT 권장). MD5/DES 취약'
+remediation: SHA-2 이상의 안전한 비밀번호 암호화 알고리즘 적용 설정

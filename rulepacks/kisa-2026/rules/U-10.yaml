@@ -20,3 +20,4 @@ verdict:
   - else: VULN
 evidence: [who]
 note: "중복 UID 계정 목록"
+remediation: 동일한 UID를 가진 사용자 계정의 UID를 중복되지 않도록 변경하도록 설정
