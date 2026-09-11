@@ -9,11 +9,12 @@
 
 from __future__ import annotations
 
+import logging
 import threading
 from datetime import UTC, datetime
 from pathlib import Path
 
-from PySide6.QtCore import QObject, QThread, Signal
+from PySide6.QtCore import QObject, QThread, QTimer, Signal
 
 from infraguard.assets.models import Host
 from infraguard.core.models import HostResult, Platform
@@ -29,6 +30,8 @@ from infraguard.transport.ssh import SSHConnection, SSHTarget
 from infraguard.transport.winrm import WinRMConnection, WinRMTarget
 
 # 진행 바용 단계 순서 (§5.1 코어스)
+log = logging.getLogger(__name__)
+
 STAGES = ["연결 중", "환경 점검", "실행 중", "산출물 회수", "파싱", "네이티브 점검", "완료"]
 
 
@@ -181,6 +184,7 @@ class ScanController(QObject):
         self._store: ResultsStore | None = None
         self._local_root = Path(".")
         self._profiles: list[CsvProfile] | None = None
+        self._zombies: list[tuple[QThread, ScanWorker | None]] = []   # 종료 안 된 스레드 참조 보관(GC 방지)
 
     @property
     def running(self) -> bool:
@@ -229,7 +233,9 @@ class ScanController(QObject):
         worker.failed.connect(self._on_failed)
         worker.host_finished.connect(self._on_host_finished)
         worker.log.connect(self.log)
-        worker.done.connect(lambda hid, t=thread: self._cleanup_thread(hid, t))
+        # 람다가 아니라 바운드 슬롯이어야 한다. 람다는 워커 스레드에서 직접 호출돼 thread.wait() 가 자기 자신을
+        # 기다리다 실패하고, 참조를 놓은 QThread 가 실행 중 GC 돼 qFatal(0xc0000409) 로 앱이 죽는다(09-11 GUI 크래시).
+        worker.done.connect(self._on_worker_done)
 
         self._workers[host.host_id] = worker
         self._threads[host.host_id] = thread
@@ -248,9 +254,21 @@ class ScanController(QObject):
         self.host_failed.emit(host_id, message)
         self.host_result.emit(host_id, host)
 
+    def _on_worker_done(self, host_id: str) -> None:
+        """메인 스레드(큐 연결)에서 실행된다. 워커 run() 은 이미 끝났으므로 quit/wait 는 즉시 돌아온다."""
+        thread = self._threads.get(host_id)
+        if thread is not None:
+            self._cleanup_thread(host_id, thread)
+
     def _cleanup_thread(self, host_id: str, thread: QThread) -> None:
+        if QThread.currentThread() is thread:          # 방어: 워커 스레드에서 불리면 메인으로 되던진다
+            QTimer.singleShot(0, lambda: self._cleanup_thread(host_id, thread))
+            return
         thread.quit()
-        thread.wait(2000)
+        if not thread.wait(5000):
+            log.error("scan thread %s did not stop in 5s — keeping reference to avoid fatal", host_id)
+            thread.finished.connect(thread.deleteLater)
+            self._zombies.append((thread, self._workers.get(host_id)))
         self._workers.pop(host_id, None)
         self._threads.pop(host_id, None)
         self._active -= 1
