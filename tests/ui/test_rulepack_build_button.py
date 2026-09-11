@@ -26,7 +26,7 @@ def test_button_emits_checked_selection(qtbot) -> None:  # noqa: ANN001
     for it in page._iter_checkable():
         on = it.data(ID_ROLE) in ("aix-unix", "U-16")
         it.setCheckState(Qt.CheckState.Checked if on else Qt.CheckState.Unchecked)
-    btn = next(b for b in page.findChildren(QPushButton) if "룰팩 zip" in b.text())
+    btn = next(b for b in page.findChildren(QPushButton) if "선택 항목만" in b.text())
     qtbot.mouseClick(btn, Qt.MouseButton.LeftButton)
     assert got == [(["aix-unix"], ["U-16"])]
 

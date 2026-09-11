@@ -171,6 +171,26 @@ class MainWindow(QMainWindow):
             f"저장됨: {path}\n번들 {st['bundles']} · 네이티브 룰 {st['native']} · 항목 메타 {st['rules_meta']} · 가이드 {st['guide']}",
         )
 
+    def _export_rulepack(self) -> None:
+        """현재 룰팩 전체(번들·룰·프로파일·가이드)를 zip 으로. 다른 PC 의 '가져오기'로 그대로 복원된다."""
+        if not self.pack:
+            return
+        path, _ = QFileDialog.getSaveFileName(self, "룰팩 내보내기", f"{self.pack.name}.rulepack.zip", "zip (*.zip)")
+        if not path:
+            return
+        from pathlib import Path
+
+        from infraguard.rulepack import builder
+        try:
+            st = builder.build(self.pack.root, self.pack.name, Path(path), profiles=list(self.pack.profiles),
+                               rules=list(self.pack.native), bundles=list(self.pack.bundles),
+                               guide_items=list(self.pack.guide.values()), version=self.pack.version or "1.0")
+        except Exception as e:  # noqa: BLE001
+            QMessageBox.warning(self, "룰팩 내보내기 실패", str(e))
+            return
+        QMessageBox.information(self, "룰팩 내보내기",
+                                f"저장됨: {path}\n번들 {st['bundles']} · 룰 {st['native']} · 가이드 {st['guide']}")
+
     def _delete_rulepack(self, name: str) -> None:
         import shutil
 
@@ -281,6 +301,7 @@ class MainWindow(QMainWindow):
         self.rulepack.profiles_changed.connect(self._refresh_profiles)
         self.rulepack.import_requested.connect(self._import_rulepack)
         self.rulepack.build_requested.connect(self._build_rulepack)
+        self.rulepack.export_requested.connect(self._export_rulepack)
         self.rulepack.delete_requested.connect(self._delete_rulepack)
         self.rulepack.pack_selected.connect(self._switch_rulepack)
         self.tabs.addTab(self.rulepack, "룰팩")

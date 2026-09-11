@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMessageBox,
     QPushButton,
+    QSplitter,
     QTextEdit,
     QTreeView,
     QVBoxLayout,
@@ -34,6 +35,7 @@ class RulePackPage(QWidget):
     profiles_changed = Signal()
     import_requested = Signal()          # zip 가져오기 (파일 선택·풀기는 메인윈도가)
     build_requested = Signal(list, list) # (bundles, native) 체크한 항목으로 부분 룰팩 zip
+    export_requested = Signal()          # 현재 룰팩 전체를 zip 으로
     delete_requested = Signal(str)       # rulepacks/<name> 삭제(확인은 메인윈도가)
     pack_selected = Signal(str)          # rulepacks/<name> 전환
 
@@ -41,54 +43,90 @@ class RulePackPage(QWidget):
         super().__init__()
         self._pack: RulePack | None = None
         root = QVBoxLayout(self)
+        root.setContentsMargins(12, 10, 12, 10)
+        root.setSpacing(8)
 
+        # 1행: 제목 · 무결성 ─── 룰팩 선택
         top = QHBoxLayout()
         self.title = QLabel("룰팩: (없음)")
         self.title.setObjectName("h1")
         top.addWidget(self.title)
-        top.addStretch(1)
         self.integrity = QLabel("")
         top.addWidget(self.integrity)
+        top.addStretch(1)
+        top.addWidget(QLabel("룰팩"))
         self.packs = QComboBox()
+        self.packs.setMinimumWidth(220)
         self.packs.setToolTip("rulepacks/ 아래 룰팩. 컨설턴트가 자산에 맞게 만든 부분 룰팩을 골라 쓴다.")
         self.packs.activated.connect(lambda _i: self.pack_selected.emit(self.packs.currentData() or ""))
         top.addWidget(self.packs)
-        imp = QPushButton("룰팩 가져오기(.zip)")
-        imp.clicked.connect(self.import_requested.emit)
-        top.addWidget(imp)
-        rm = QPushButton("룰팩 삭제")
-        rm.setToolTip("현재 선택한 룰팩 폴더를 rulepacks/ 에서 지운다(가져온 부분 룰팩 정리용)")
-        rm.clicked.connect(lambda: self.delete_requested.emit(self.packs.currentData() or ""))
-        top.addWidget(rm)
         root.addLayout(top)
 
-        body = QHBoxLayout()
+        # 2행: 룰팩 단위 동작(가져오기 · 내보내기 · 삭제)
+        tb = QHBoxLayout()
+        imp = QPushButton("가져오기(.zip)")
+        imp.setToolTip("컨설턴트가 만든 룰팩 zip 을 rulepacks/ 에 푼다(경로탈출·심볼릭링크 거부, 무결성 검사)")
+        imp.clicked.connect(self.import_requested.emit)
+        exp = QPushButton("내보내기(전체 zip)")
+        exp.setToolTip("현재 룰팩 전체(번들·룰·프로파일·가이드)를 zip 으로")
+        exp.clicked.connect(self.export_requested.emit)
+        zipb = QPushButton("내보내기(선택 항목만)")
+        zipb.setToolTip("체크한 번들·룰(+그 항목의 가이드)만 담은 부분 룰팩. 고객사 반입용.")
+        zipb.clicked.connect(lambda: self.build_requested.emit(*self.current_selection()))
+        rm = QPushButton("삭제")
+        rm.setObjectName("danger")
+        rm.setToolTip("현재 선택한 룰팩 폴더를 rulepacks/ 에서 지운다(가져온 부분 룰팩 정리용)")
+        rm.clicked.connect(lambda: self.delete_requested.emit(self.packs.currentData() or ""))
+        for b in (imp, exp, zipb):
+            tb.addWidget(b)
+        tb.addStretch(1)
+        tb.addWidget(rm)
+        root.addLayout(tb)
+
+        # 본문: 트리 | 상세 (스플리터, 기본 3:2)
         self.tree = QTreeView()
         self.tree.setHeaderHidden(True)
+        self.tree.setMinimumWidth(360)
         self.model = QStandardItemModel()
         self.tree.setModel(self.model)
         self._syncing = False
         self.model.itemChanged.connect(self._on_item_changed)
         self.tree.clicked.connect(self._show_detail)
-        body.addWidget(self.tree, 2)
 
+        right = QWidget()
+        rl = QVBoxLayout(right)
+        rl.setContentsMargins(0, 0, 0, 0)
+        rl.setSpacing(4)
+        rl.addWidget(QLabel("상세 — 항목을 누르면 스크립트/룰 정보와 가이드(판단기준·조치·사례)"))
         self.detail = QTextEdit()
         self.detail.setReadOnly(True)
-        body.addWidget(self.detail, 1)
-        root.addLayout(body, 1)
+        self.detail.setMinimumWidth(300)
+        self.detail.setPlaceholderText("왼쪽에서 번들·룰·항목을 선택하세요.")
+        rl.addWidget(self.detail, 1)
 
+        self.split = QSplitter(Qt.Orientation.Horizontal)
+        self.split.addWidget(self.tree)
+        self.split.addWidget(right)
+        self.split.setStretchFactor(0, 3)
+        self.split.setStretchFactor(1, 2)
+        self.split.setSizes([600, 400])
+        root.addWidget(self.split, 1)
+
+        # 하단: 프로파일(체크 상태의 이름)
         prow = QHBoxLayout()
         prow.addWidget(QLabel("프로파일"))
         self.profile = QComboBox()
+        self.profile.setMinimumWidth(260)
         self.profile.currentIndexChanged.connect(self._apply_profile_checks)
-        prow.addWidget(self.profile, 1)
-        save = QPushButton("현재 선택으로 저장")
+        prow.addWidget(self.profile)
+        save = QPushButton("현재 체크 상태를 프로파일로 저장")
         save.clicked.connect(self._save_as)
         prow.addWidget(save)
-        zipb = QPushButton("선택 항목으로 룰팩 zip 만들기")
-        zipb.setToolTip("체크한 번들·룰(+그 항목의 가이드)만 담은 부분 룰팩. 고객사 반입용.")
-        zipb.clicked.connect(lambda: self.build_requested.emit(*self.current_selection()))
-        prow.addWidget(zipb)
+        prow.addStretch(1)
+        self.sel_label = QLabel("")
+        self.sel_label.setObjectName("muted")
+        prow.addWidget(self.sel_label)
+        self.model.itemChanged.connect(lambda _i: self._update_sel_label())
         root.addLayout(prow)
 
     # ---------------------------------------------------------------- 표시
@@ -278,6 +316,13 @@ class RulePackPage(QWidget):
             self._syncing = False
         for it in list(self._iter_checkable()):
             self._on_item_changed(it)          # 상위 그룹 상태 재계산
+        self._update_sel_label()
+
+    def _update_sel_label(self) -> None:
+        if self._syncing or not self._pack:
+            return
+        b, n = self.current_selection()
+        self.sel_label.setText(f"체크: 번들 {len(b)} · 룰 {len(n)}")
 
     def current_selection(self) -> tuple[list[str], list[str]]:
         bundles, native = [], []
