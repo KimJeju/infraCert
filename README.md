@@ -79,6 +79,9 @@ note: "기준: 소유자 root, 권한 644 이하"
 | linux/unix + `ORACLE_HOME`·`ORACLE_SID` 파라미터 | SSH exec → `sqlplus / as sysdba` | `sh` | oracle-native | D-01~26 (SELECT 만; MSSQL 전용 항목은 NA) |
 | network | SSH 대화형 셸(장비 CLI) | `raw` | cisco-native | N-01~38 (Cisco IOS `show` 만, running-config 세션 캐시) |
 
+- **WinRM 점검 계정 조건**: 대상에서 WinRM(5985/5986)이 켜져 있고, 계정이 도메인 관리자이거나 **로컬 관리자 + `LocalAccountTokenFilterPolicy=1`**
+  이어야 한다(내장 Administrator 제외 로컬 관리자는 UAC 원격 토큰 필터링으로 WinRS 셸이 AccessDenied). "Remote Management Users" 그룹은
+  PowerShell 세션 엔드포인트만 열어 주므로 부족하다. 비밀번호 없는 계정은 네트워크 로그온이 거부된다(`LimitBlankPasswordUse`).
 - `sh` 룰은 호스트 파라미터를 `env K=V` 접두로 받는다(값은 `validate_env` 통과분만). PowerShell/장비 출력의 CRLF 는 평가기가 정규화한다.
 - Windows 룰은 이 개발기(Win11)에서 `transport/local.LocalConnection` 으로 64개 전부 실행 검증했다(예외 0). Oracle·Cisco 는 canned 출력 테스트만 — 실장비 검증 대기.
 - Junos 는 룰 platforms 에 없어 플랫폼 불일치 SKIPPED 로 드러난다. 생성기: `scripts/gen_rules_{windows,oracle,netdev}.py`.
