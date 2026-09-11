@@ -229,7 +229,8 @@ def load_file(path: Path) -> RuleSpec:
 def to_native(spec: RuleSpec) -> NativeRule:
     def check(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
         return evaluate(spec, conn, env)
-    return NativeRule(spec.id, spec.name, spec.severity, tuple(spec.platforms), check)
+    return NativeRule(spec.id, spec.name, spec.severity, tuple(spec.platforms), check,
+                      collects=tuple((spec.shell, c.cmd) for c in spec.collect))
 
 
 def register_dir(directory: Path) -> tuple[dict[str, RuleSpec], list[str]]:

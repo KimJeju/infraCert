@@ -30,6 +30,7 @@ class NativeRule:
     severity: str               # 상 | 중 | 하
     platforms: tuple[str, ...]  # linux | aix | solaris | hpux ...
     check: Callable[[Connection, RemoteEnvironment], NativeOutcome]
+    collects: tuple[tuple[str, str], ...] = ()   # (shell, cmd) — 선언형 룰의 수집 명령. 배치 프리페치용(파이썬 룰은 빈 튜플)
 
 
 REGISTRY: dict[str, NativeRule] = {}

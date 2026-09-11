@@ -13,6 +13,7 @@ import time
 from pathlib import Path
 
 from infraguard.core.models import RemoteEnvironment
+from infraguard.transport import psbatch
 from infraguard.transport.base import CleanupReport, Connection, ExecResult, TransportError
 
 # 출력 인코딩은 건드리지 않는다: UTF-8 로 강제하면 w32tm 같은 네이티브 도구(OEM cp949)가 깨진다.
@@ -32,6 +33,13 @@ def decode_output(b: bytes) -> tuple[str, bool]:
 class LocalConnection(Connection):
     def __init__(self) -> None:
         self._env: RemoteEnvironment | None = None
+        self._prefetched: dict[str, tuple[str, int]] = {}   # cmd → (stdout, rc), 배치 프리페치 결과
+
+    def prefetch_powershell(self, cmds: list[str]) -> None:
+        """수집 명령을 powershell 프로세스 1회로 묶어 실행(WinRM 과 같은 스크립트·파서 — 여기서 실검증된다)."""
+        r = self.exec(["powershell", "-NoProfile", "-NonInteractive", "-Command", psbatch.build_script(cmds)], timeout=600)
+        for cmd, (body, rc) in psbatch.parse_output(r.stdout, cmds).items():
+            self._prefetched[cmd] = (body, rc)
 
     def connect(self) -> None:
         return None
@@ -49,6 +57,9 @@ class LocalConnection(Connection):
     def exec(self, argv: list[str], *, timeout: int, cwd: str | None = None,
              stdin_data: str | None = None, max_output: int = 1 << 20) -> ExecResult:
         argv = list(argv)
+        if argv and argv[0].lower() == "powershell" and argv[-1] in self._prefetched:
+            body, rc = self._prefetched.pop(argv[-1])
+            return ExecResult(argv, rc, body, "", 0)
         if argv and argv[0].lower() == "powershell" and len(argv) >= 2:
             argv[-1] = _PS_PRELUDE + argv[-1]
         started = time.monotonic()

@@ -33,6 +33,21 @@ def run_native(
     findings: list[RawFinding] = []
     errors: list[CheckResult] = []
 
+    # PowerShell 수집 명령은 프로세스 기동이 비싸다(룰당 ~1s). 전송이 지원하면 한 스크립트로 미리 받아 둔다.
+    prefetch = getattr(conn, "prefetch_powershell", None)
+    if prefetch is not None:
+        cmds: list[str] = []
+        for rid in rule_ids:
+            rule = registry.get(rid)
+            if rule is None or (env.os and env.os not in rule.platforms):
+                continue
+            cmds += [c for sh, c in rule.collects if sh == "powershell" and c not in cmds]
+        if cmds:
+            try:
+                prefetch(cmds)
+            except Exception as e:  # noqa: BLE001 - 배치 실패는 개별 실행으로 폴백(성능만 잃는다)
+                log.warning("powershell prefetch failed, falling back to per-rule exec: %s", e)
+
     for i, rid in enumerate(rule_ids, start=1):
         if should_cancel():
             errors.append(error_result(rid, "사용자 취소", bundle_id=BUNDLE_ID))

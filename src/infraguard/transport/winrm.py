@@ -12,6 +12,7 @@ from pathlib import Path
 
 from infraguard.core.models import RemoteEnvironment
 from infraguard.credentials.session import Credential
+from infraguard.transport import psbatch
 from infraguard.transport.base import CleanupReport, Connection, ExecResult, TransportError
 from infraguard.transport.local import decode_output
 
@@ -35,6 +36,7 @@ class WinRMConnection(Connection):
         self.target = target
         self._session = None
         self._env: RemoteEnvironment | None = None
+        self._prefetched: dict[str, tuple[str, int]] = {}   # cmd → (stdout, rc), 배치 프리페치 결과
 
     def connect(self) -> None:
         import winrm  # noqa: PLC0415 - 선택 의존성(pywinrm)
@@ -59,10 +61,21 @@ class WinRMConnection(Connection):
             raise TransportError("not connected")
         return self._session
 
+    def prefetch_powershell(self, cmds: list[str]) -> None:
+        """룰 수집 명령을 스크립트 하나로 실행해 캐시(native_runner 가 호출). 마커가 깨진 명령은 캐시에 안 들어가 개별 실행."""
+        s = self._require()
+        r = s.run_ps(psbatch.build_script(cmds))
+        out, _ = decode_output(r.std_out)
+        for cmd, (body, rc) in psbatch.parse_output(out, cmds).items():
+            self._prefetched[cmd] = (body, rc)
+
     def exec(self, argv: list[str], *, timeout: int, cwd: str | None = None,
              stdin_data: str | None = None, max_output: int = 1 << 20) -> ExecResult:
         s = self._require()
         started = time.monotonic()
+        if argv and argv[0].lower() == "powershell" and argv[-1] in self._prefetched:
+            body, rc = self._prefetched.pop(argv[-1])
+            return ExecResult(argv, rc, body, "", 0)
         try:
             if argv and argv[0].lower() == "powershell":
                 r = s.run_ps(_PS_PRELUDE + argv[-1])
