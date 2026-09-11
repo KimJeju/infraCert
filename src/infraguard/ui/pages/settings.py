@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QScrollArea,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -41,9 +42,19 @@ class SettingsPage(QWidget):
     def __init__(self, cfg: dict, layout: Layout, engine_version: str, pack_label: str) -> None:
         super().__init__()
         self._layout = layout
-        root = QVBoxLayout(self)
+        # 그룹 5개가 창 높이보다 길어질 수 있다(형 스크린샷: 행이 겹침) → 스크롤 영역 안에 쌓는다
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        outer.setSpacing(0)
+        body = QWidget()
+        root = QVBoxLayout(body)
         root.setContentsMargins(16, 12, 16, 12)
         root.setSpacing(10)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setWidget(body)
+        outer.addWidget(scroll, 1)
 
         def form(box: QGroupBox) -> QFormLayout:
             f = QFormLayout(box)
@@ -119,13 +130,13 @@ class SettingsPage(QWidget):
 
         root.addStretch(1)
         brow = QHBoxLayout()
+        brow.setContentsMargins(16, 8, 16, 10)
         brow.addStretch(1)
         save = QPushButton("저장")
         save.setObjectName("primary")
         save.clicked.connect(self._save)
         brow.addWidget(save)
-        root.addLayout(brow)
-        root.addStretch(1)
+        outer.addLayout(brow)              # 저장은 스크롤 밖 하단 고정
 
         self.load(cfg)
 
