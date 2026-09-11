@@ -51,6 +51,18 @@ def main() -> int:
     app.setApplicationName("InfraGuard")
     app.setStyleSheet(DARK_QSS)
 
+    # 단일 인스턴스: 같은 workspace 를 두 창이 열면 종료 시 완전삭제가 상대 창의 DB 핸들에 막힌다(09-11 실측).
+    from PySide6.QtCore import QLockFile
+    from PySide6.QtWidgets import QMessageBox
+
+    from infraguard.workspace.layout import app_root
+    lock = QLockFile(str(app_root() / ".infraguard.lock"))
+    lock.setStaleLockTime(0)
+    if not lock.tryLock(0):
+        QMessageBox.warning(None, "InfraGuard", "이미 실행 중입니다. 열려 있는 창을 사용하세요.")
+        return 2
+    app._ig_lock = lock  # noqa: SLF001 - 프로세스 수명 동안 잡아 둔다
+
     ctx = AppContext(workspace=ws, assets=assets, results=results, creds=creds, config=cfg)
     win = MainWindow(ctx)
     win.show()

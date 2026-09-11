@@ -12,3 +12,4 @@ _sample_report.xlsx
 config.json
 /rulepacks/*/guide/
 *.rulepack.zip
+/.infraguard.lock
