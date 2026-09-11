@@ -18,3 +18,4 @@ verdict:
 - else: VULN
 evidence:
 - v
+remediation: '※Windows NT: 마지막으로 로그온한 사용자 이름 표시 안 함 설정※Windows 2000: 로그온 스크린에 마지막 사용자 이름 표시 안 함 사용 설정※Windows 2003, 2008, 2012, 2016, 2019, 2022: 대화형 로그온: 마지막 사용자 이름 표시 안 함 사용 설정'

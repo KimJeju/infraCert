@@ -23,3 +23,4 @@ verdict:
 evidence:
 - svc
 note: Remote Registry 중지·없음이면 양호
+remediation: 불필요 시 서비스 중지 및 사용 안 함으로 설정

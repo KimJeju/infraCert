@@ -15,3 +15,4 @@ verdict:
 - else: MANUAL
 evidence:
 - hf
+remediation: 주기적인 보안 패치 확인 및 설치 적용

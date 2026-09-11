@@ -19,3 +19,4 @@ verdict:
 evidence:
 - dsn
 note: 시스템 DSN 이 없으면 양호
+remediation: 사용하지 않는 불필요한 ODBC 데이터 소스 제거

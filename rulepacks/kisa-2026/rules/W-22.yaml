@@ -20,3 +20,4 @@ verdict:
 evidence:
 - svc
 note: FTP 미사용이면 해당없음
+remediation: FTP 홈 디렉터리에서 Everyone 권한 삭제, 각 사용자에게 적절한 권한 부여

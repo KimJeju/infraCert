@@ -20,3 +20,4 @@ verdict:
 evidence:
 - svc
 note: 가이드 목록의 불필요 서비스가 하나도 실행 중이 아니면 양호. 실행 중이면 업무 필요성 판단(Spooler 등)
+remediation: 서비스 중지 후 “사용 안 함” 설정

@@ -24,3 +24,4 @@ evidence:
 - rdu
 - deny
 note: 원격 데스크톱 비활성(fDenyTSConnections=1)이면 해당없음. Remote Desktop Users 구성원을 보고 판단
+remediation: 관리자 계정과 이외의 계정을 생성, 권한을 제한 사용 설정

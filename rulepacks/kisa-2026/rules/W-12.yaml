@@ -20,3 +20,4 @@ verdict:
 evidence:
 - v
 note: LSAAnonymousNameLookup 은 secedit 전용. 레지스트리 TurnOffAnonymousBlock=1 이면 취약 확정, 아니면 정책 확인
+remediation: '“네트워크 액세스: 익명 SID/이름 변환 허용” 정책 “사용 안 함” 설정'

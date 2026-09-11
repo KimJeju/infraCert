@@ -27,3 +27,4 @@ verdict:
 evidence:
 - acc
 note: '기준: 잠금 임계값 5 이하'
+remediation: 계정 잠금 임계값을 5 이하의 값으로 설정

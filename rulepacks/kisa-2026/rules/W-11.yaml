@@ -20,3 +20,4 @@ evidence:
 - adm
 - usr
 note: SeInteractiveLogonRight 는 secedit 없이 조회 불가 — 그룹 구성원만 근거로
+remediation: Administrators, IUSR_ 외 다른 계정 및 그룹의 로컬 로그온 제한

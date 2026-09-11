@@ -20,3 +20,4 @@ verdict:
 evidence:
 - svc
 note: 서비스가 있으면 배너 응답을 직접 확인
+remediation: 사용하지 않는 경우 IIS 서비스 중지/사용 안 함, 사용 시 속성값 수정

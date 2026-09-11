@@ -32,3 +32,4 @@ evidence:
 - sh
 - acl
 note: 일반 공유 없음 또는 공유 권한에 Everyone 없음
+remediation: 공유 디렉터리 접근 권한에서 Everyone 권한 제거 후 필요한 계정 추가

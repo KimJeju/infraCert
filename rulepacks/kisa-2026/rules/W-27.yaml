@@ -20,3 +20,4 @@ evidence:
 - os
 - hf
 note: 빌드·핫픽스 목록을 벤더 최신과 대조
+remediation: 설치에 따른 영향도 확인 후 최신 Build 설치(설치 후 시스템 재시작 필요)

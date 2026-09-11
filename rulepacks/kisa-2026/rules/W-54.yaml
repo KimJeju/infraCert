@@ -35,3 +35,4 @@ verdict:
 evidence:
 - t
 note: '기준: SynAttackProtect≥1, EnableDeadGWDetect=0, EnableICMPRedirect=0, KeepAliveTime≤300000'
+remediation: 레지스트리 값을 추가 또는 수정

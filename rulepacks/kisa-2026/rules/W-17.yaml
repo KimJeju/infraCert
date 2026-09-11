@@ -30,3 +30,4 @@ evidence:
 - reg
 - sh
 note: '기준: AutoShareServer(Wks)=0 이고 C$/ADMIN$ 등 기본 공유 없음'
+remediation: 기본 공유 중지 후 레지스트리 값 설정(IPC$, 일반 공유 제외)

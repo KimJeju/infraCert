@@ -19,3 +19,4 @@ verdict:
 evidence:
 - v
 note: 값 없음 = 기본값 0(사용 안 함)
+remediation: “Everyone 사용 권한을 익명 사용자에게 적용”정책을 “사용 안 함”으로 설정

@@ -19,3 +19,4 @@ verdict:
 evidence:
 - svc
 note: FTP 실행 중이면 Secure FTP(TLS) 여부 확인
+remediation: FTP 서비스가 필요하지 않다면 서비스 중지 또는 Secure FTP 응용 프로그램 사용

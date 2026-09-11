@@ -27,3 +27,4 @@ verdict:
 evidence:
 - adm
 note: RID 500 계정명이 Administrator 그대로면 취약. 비밀번호 강도는 별도 확인
+remediation: Administrator 기본 계정 이름 변경 및 보안성이 있는 비밀번호 설정

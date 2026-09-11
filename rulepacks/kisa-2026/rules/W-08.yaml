@@ -31,3 +31,4 @@ verdict:
 evidence:
 - acc
 note: '기준: 잠금 기간·원래대로 설정 기간 60분 이상'
+remediation: “계정 잠금 기간” 및 “잠금 기간 원래대로 설정 기간” 60분 이상으로 설정

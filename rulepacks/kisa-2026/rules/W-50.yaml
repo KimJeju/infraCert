@@ -19,3 +19,4 @@ verdict:
 evidence:
 - v
 note: 값 없음 = 기본값 0(사용 안 함)
+remediation: “보안 감사를 로그 할 수 없는 경우 즉시 시스템 종료” 정책을 “사용 안 함”으로 설정

@@ -30,3 +30,4 @@ verdict:
 evidence:
 - ss
 note: '접속 계정(HKCU) 기준. 기준: 사용, 10분(600초) 이하, 암호 보호'
+remediation: 화면 보호기 사용, 대기 시간 10분 이하, 해제를 위한 암호 사용

@@ -27,3 +27,4 @@ verdict:
 evidence:
 - nb
 note: TcpipNetbiosOptions 2=NetBIOS over TCP/IP 사용 안 함. 0(기본)/1 이면 바인딩됨
+remediation: 네트워크 제어판을 이용하여 TCP/IP와 NetBIOS 간의 바인딩(binding) 제거

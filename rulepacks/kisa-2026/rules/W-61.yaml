@@ -25,3 +25,4 @@ verdict:
 - else: VULN
 evidence:
 - all
+remediation: FAT 파일 시스템을 사용 시 가능한 NTFS 파일 시스템 변환 설정

@@ -27,3 +27,4 @@ evidence:
 - svc
 - auth
 note: Telnet 미실행 또는 NTLM 전용 인증(NTLM=2)
+remediation: 불필요 시 서비스 중지/사용 안 함 설정, 사용 시 인증 방법으로 NTLM만 사용

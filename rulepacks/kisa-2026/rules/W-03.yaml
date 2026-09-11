@@ -16,3 +16,4 @@ verdict:
 evidence:
 - users
 note: 계정 목록을 보고 퇴직·테스트 계정 여부를 분석자가 판단
+remediation: 현재 계정 현황 확인 후 불필요한 계정 삭제

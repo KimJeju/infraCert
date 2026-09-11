@@ -27,3 +27,4 @@ evidence:
 - age
 - av
 note: Defender 서명 7일 이내면 양호. 타사 백신은 콘솔에서 확인
+remediation: 백신 프로그램 환경설정 메뉴를 통해 DB 및 엔진의 최신 업데이트를 하도록 설정

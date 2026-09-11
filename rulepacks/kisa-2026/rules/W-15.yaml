@@ -19,3 +19,4 @@ verdict:
 evidence:
 - v
 note: '기준: ForceKeyProtection=2(항상 암호 입력)'
+remediation: '“시스템 암호화: 컴퓨터에 저장된 사용자 키에 대해 강력한 키 보호 사용” 정책을 “키를 사용할 때마다 암호를 매 번 입력해야 함”으로 적용'

@@ -17,3 +17,4 @@ verdict:
 evidence:
 - tasks
 note: Microsoft 기본 작업 제외 목록. 명령·파일의 정당성은 분석자 판단
+remediation: 예약 작업에 대한 주기적인 확인

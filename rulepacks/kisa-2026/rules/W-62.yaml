@@ -15,3 +15,4 @@ verdict:
 - else: MANUAL
 evidence:
 - st
+remediation: 시작 프로그램 목록의 정기적인 검사 실시 및 불필요한 서비스 비활성화 설정

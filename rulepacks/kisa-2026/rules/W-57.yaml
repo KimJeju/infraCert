@@ -26,3 +26,4 @@ verdict:
 - else: VULN
 evidence:
 - t
+remediation: 로그인 메시지 제목 및 메시지 내용에 경고 문구 삽입

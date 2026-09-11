@@ -26,3 +26,4 @@ verdict:
 evidence:
 - logs
 note: '기준: 최대 로그 크기 10,240KB 이상. 덮어쓰기 90일 정책은 별도 확인'
+remediation: 최대 로그 크기 “10,204KB”, “90일 이후 이벤트 덮어씀” 설정

@@ -29,3 +29,4 @@ evidence:
 - svc
 - v
 note: FTP 익명 인증은 IIS 설정 확인. 공유 익명 접근은 RestrictAnonymous=1
+remediation: 공유 서비스를 사용하지 않는 경우 서비스 중지, 사용할 경우 익명 인증 사용 안 함 설정 적용

@@ -27,3 +27,4 @@ verdict:
 evidence:
 - acl
 note: Administrators·SYSTEM 외 ACE 가 있으면 취약
+remediation: SAM 파일 권한 확인 후 Administrator, System 그룹 외 다른 그룹에 설정된 권한 제거

@@ -18,3 +18,4 @@ verdict:
 - else: MANUAL
 evidence:
 - svc
+remediation: 불필요 시 서비스 중지/사용 안 함

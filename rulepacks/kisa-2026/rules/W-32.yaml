@@ -30,3 +30,4 @@ verdict:
 evidence:
 - svc
 - dyn
+remediation: DNS 서비스의 동적 업데이트 비활성화 설정

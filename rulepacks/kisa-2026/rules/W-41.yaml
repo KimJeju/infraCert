@@ -22,3 +22,4 @@ verdict:
 - else: MANUAL
 evidence:
 - ntp
+remediation: NTP 및 시각 동기화 설정

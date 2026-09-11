@@ -19,3 +19,4 @@ verdict:
 evidence:
 - svc
 note: IIS 실행 중이면 필요성 판단
+remediation: IIS 서비스가 불필요한 경우 IIS 서비스 중지

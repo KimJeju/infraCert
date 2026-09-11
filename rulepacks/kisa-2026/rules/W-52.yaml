@@ -18,3 +18,4 @@ verdict:
 - else: GOOD
 evidence:
 - v
+remediation: 해당 레지스트리 값이 존재하는 경우 0으로 설정

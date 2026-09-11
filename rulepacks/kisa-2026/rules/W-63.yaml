@@ -27,3 +27,4 @@ verdict:
 evidence:
 - t
 note: '기준: 최대 허용 오차 5분(300초) 이하'
+remediation: Kerberos 사용 시 컴퓨터 시계 동기화 최대 허용 오차값 5분 이하로 설정

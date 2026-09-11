@@ -27,3 +27,4 @@ evidence:
 - major
 - iis
 note: IIS 미사용 또는 Windows 2008 이상이면 양호
+remediation: 사용하지 않는 경우 IIS 서비스 중지/사용 안 함, 사용할 경우 레지스트리 키 값 제거 또는 관련 패치 적용

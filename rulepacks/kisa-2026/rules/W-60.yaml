@@ -30,3 +30,4 @@ verdict:
 - else: VULN
 evidence:
 - t
+remediation: 보안 채널 데이터를 디지털 암호화·서명 관련 3개 정책 → 사용

@@ -23,3 +23,4 @@ verdict:
 evidence:
 - audit
 note: 로그온 감사가 '감사 안 함'이면 취약 확정, 나머지는 기관 감사 정책과 대조(관리자 권한 필요)
+remediation: 이벤트에 대한 감사 설정

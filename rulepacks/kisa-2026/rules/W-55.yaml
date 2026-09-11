@@ -18,3 +18,4 @@ verdict:
 - else: VULN
 evidence:
 - v
+remediation: “사용자가 프린터 드라이버를 설치할 수 없게 함” 정책을 “사용”으로 설정

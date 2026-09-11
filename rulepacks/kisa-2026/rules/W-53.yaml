@@ -19,3 +19,4 @@ verdict:
 evidence:
 - v
 note: 값 없음/0 = Administrators 만
+remediation: “이동식 NTFS 미디어 꺼내기 허용” 정책을 “Administrators”로 설정

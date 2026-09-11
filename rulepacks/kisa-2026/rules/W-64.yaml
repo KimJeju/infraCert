@@ -26,3 +26,4 @@ verdict:
 - else: GOOD
 evidence:
 - fw
+remediation: Windows 방화벽 “사용”으로 설정

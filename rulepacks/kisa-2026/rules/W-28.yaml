@@ -31,3 +31,4 @@ evidence:
 - deny
 - lvl
 note: 원격 데스크톱 미사용 또는 MinEncryptionLevel 2(클라이언트 호환) 이상
+remediation: 원격 데스크톱 서비스의 가동을 ‘중지’ 및 ‘사용 안 함’ 설정을 하거나, 부득이하게 사용할 경우 암호화 수준 설정 적용

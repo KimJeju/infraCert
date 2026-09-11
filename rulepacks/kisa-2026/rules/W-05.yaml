@@ -16,3 +16,4 @@ verdict:
 evidence:
 - acc
 note: ClearTextPassword 정책은 secedit 내보내기(파일 생성) 없이 읽을 수 없어 로컬 보안 정책에서 직접 확인
+remediation: “해독 가능한 암호화를 사용하여 암호 저장”을 “사용 안 함”으로 설정

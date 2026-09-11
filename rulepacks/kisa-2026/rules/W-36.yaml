@@ -37,3 +37,4 @@ evidence:
 - pol
 - tcp
 note: '기준: 유휴 세션 제한 30분(1800000ms) 이하. 원격 데스크톱 미사용이면 양호'
+remediation: Timeout 제어 설정 적용

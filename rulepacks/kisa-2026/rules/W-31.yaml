@@ -27,3 +27,4 @@ evidence:
 - svc
 - mgr
 note: PermittedManagers 에 허용 호스트가 있어야 양호
+remediation: 불필요 시 서비스 중지/사용 안 함, 사용 시 SNMP 패킷 수령 호스트 지정

@@ -19,3 +19,4 @@ verdict:
 - else: MANUAL
 evidence:
 - svc
+remediation: 특정 IP주소에서만 FTP 서버에 접속하도록 접근 제어 설정
