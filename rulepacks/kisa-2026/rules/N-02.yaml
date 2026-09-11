@@ -1,4 +1,4 @@
-# N-02 비밀번호 복잡성 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-02 비밀번호 복잡성 설정 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-02
 name: 비밀번호 복잡성 설정
 severity: 상
@@ -25,4 +25,27 @@ verdict:
 evidence:
 - ev
 note: security passwords min-length 8 이상이면 양호, 없으면 기관 정책으로 판단
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "login password"
+    timeout: 60
+  verdict:
+  - when:
+      n:
+        ge: 8
+    then: GOOD
+  - else: MANUAL
+  evidence:
+  - ev
+  extract:
+  - from: cfg
+    regex: (?m)^set system login password minimum-length (?P<n>\d+)
+  note: system login password minimum-length 8 이상
 remediation: 관리기관의 비밀번호 작성규칙에 맞게 비밀번호 복잡성 정책 및 비밀번호 설정

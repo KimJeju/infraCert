@@ -1,4 +1,4 @@
-# N-01 비밀번호 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-01 비밀번호 설정 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-01
 name: 비밀번호 설정
 severity: 상
@@ -26,4 +26,24 @@ verdict:
 evidence:
 - ev
 note: enable secret 이면 양호. enable password 만 있으면 기본값 변경 여부 확인
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "root-authentication|system login user"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set system root-authentication encrypted-password
+    then: GOOD
+  - else: VULN
+  evidence:
+  - ev
+  note: root 비밀번호(encrypted-password)가 설정돼 있어야 양호
 remediation: 기본 비밀번호를 관리기관의 비밀번호 작성규칙을 준용하여 변경

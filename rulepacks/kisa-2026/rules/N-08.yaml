@@ -1,4 +1,4 @@
-# N-08 VTY 접속 시 안전한 프로토콜 사용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-08 VTY 접속 시 안전한 프로토콜 사용 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-08
 name: VTY 접속 시 안전한 프로토콜 사용
 severity: 중
@@ -30,4 +30,27 @@ verdict:
 evidence:
 - cfg
 note: transport input ssh 만 허용. 미설정은 기본 all/telnet
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "system services (ssh|telnet)"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set system services telnet
+    then: VULN
+  - when:
+      cfg:
+        regex: (?m)^set system services ssh
+    then: GOOD
+  - else: MANUAL
+  evidence:
+  - ev
 remediation: 암호화 프로토콜만 VTY에 접근할 수 있도록 설정

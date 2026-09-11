@@ -1,4 +1,4 @@
-# N-32 Source Routing 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-32 Source Routing 차단 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-32
 name: Source Routing 차단
 severity: 중
@@ -22,4 +22,24 @@ verdict:
 evidence:
 - ev
 note: 기본 활성 → no ip source-route 필요
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "source-route"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)no-source-route
+    then: GOOD
+  - else: MANUAL
+  evidence:
+  - ev
+  note: Junos 기본 동작을 장비 문서로 확인 — no-source-route 설정이 있으면 양호
 remediation: 각 인터페이스에서 ip-source-route 차단 설정

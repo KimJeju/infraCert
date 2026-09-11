@@ -1,4 +1,4 @@
-# N-35 identd 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-35 identd 서비스 차단 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-35
 name: identd 서비스 차단
 severity: 중
@@ -21,4 +21,20 @@ verdict:
 - else: GOOD
 evidence:
 - ev
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "ident"
+    timeout: 60
+  verdict:
+  - else: GOOD
+  evidence:
+  - ev
+  note: Junos 에 identd 없음
 remediation: idnetd 서비스 비활성화

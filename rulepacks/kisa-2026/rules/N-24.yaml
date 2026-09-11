@@ -1,4 +1,4 @@
-# N-24 사용하지 않는 인터페이스 비활성화 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-24 사용하지 않는 인터페이스 비활성화 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-24
 name: 사용하지 않는 인터페이스 비활성화
 severity: 상
@@ -23,4 +23,25 @@ verdict:
 evidence:
 - br
 note: '''down down''(shutdown 아닌 미사용 링크다운)이 있으면 취약. administratively down 은 양호'
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: br
+    cmd: show interfaces terse
+    timeout: 30
+  verdict:
+  - when:
+      br:
+        regex: (?m)^\S+\s+up\s+down\b
+    then: VULN
+  - when:
+      br:
+        exists: true
+    then: GOOD
+  - else: MANUAL
+  evidence:
+  - br
+  note: Admin up 인데 Link down 인 물리 인터페이스가 있으면 취약(미사용은 disable)
 remediation: 네트워크 장비에서 사용하지 않는 모든 인터페이스 비활성화 설정

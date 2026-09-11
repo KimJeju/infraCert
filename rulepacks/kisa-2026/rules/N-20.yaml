@@ -1,4 +1,4 @@
-# N-20 SNMP Community 권한 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-20 SNMP Community 권한 설정 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-20
 name: SNMP Community 권한 설정
 severity: 상
@@ -21,4 +21,23 @@ verdict:
 - else: GOOD
 evidence:
 - ev
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "snmp community"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set snmp community \S+ authorization read-write
+    then: VULN
+  - else: GOOD
+  evidence:
+  - ev
 remediation: SNMP Community String 권한 설정 (RW 권한 삭제 권고)

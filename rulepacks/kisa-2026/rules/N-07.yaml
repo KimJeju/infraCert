@@ -1,4 +1,4 @@
-# N-07 Session Timeout 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-07 Session Timeout 설정 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-07
 name: Session Timeout 설정
 severity: 상
@@ -30,4 +30,27 @@ verdict:
 evidence:
 - cfg
 note: 기준 10분 이하. 설정 없음 = IOS 기본 10분(양호), exec-timeout 0 0 은 무제한(취약)
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "idle-timeout"
+    timeout: 60
+  verdict:
+  - when:
+      m:
+        le: 10
+    then: GOOD
+  - else: VULN
+  evidence:
+  - ev
+  extract:
+  - from: cfg
+    regex: (?m)^set system login class \S+ idle-timeout (?P<m>\d+)
+  note: login class idle-timeout 10분 이하(미설정 → 무제한, 취약)
 remediation: Session Timeout 설정 (10분 이하 권고)

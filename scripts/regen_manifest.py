@@ -79,7 +79,7 @@ def main(pack_dir: Path) -> int:
     py_rules = load_all()
     def plats(rid: str) -> set[str]:
         if rid in specs:
-            return set(specs[rid].platforms)
+            return set(specs[rid].all_platforms())     # variants 의 플랫폼 포함(N-xx: cisco-ios + junos)
         return set(py_rules[rid].platforms) if rid in py_rules else set()
     for p in man.get("profiles") or []:
         if str(p.get("id", "")).endswith("-native"):

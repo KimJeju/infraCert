@@ -1,4 +1,4 @@
-# N-03 암호화된 비밀번호 사용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-03 암호화된 비밀번호 사용 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-03
 name: 암호화된 비밀번호 사용
 severity: 상
@@ -22,4 +22,24 @@ verdict:
 evidence:
 - ev
 note: service password-encryption + enable secret
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "encrypted-password|plain-text"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set system root-authentication encrypted-password
+    then: GOOD
+  - else: VULN
+  evidence:
+  - ev
+  note: Junos 는 비밀번호를 항상 해시 저장(encrypted-password)
 remediation: 비밀번호 암호화 설정 적용

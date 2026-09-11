@@ -1,4 +1,4 @@
-# N-06 VTY 접근(ACL) 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-06 VTY 접근(ACL) 설정 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-06
 name: VTY 접근(ACL) 설정
 severity: 상
@@ -25,4 +25,24 @@ verdict:
 - else: MANUAL
 evidence:
 - cfg
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "lo0 unit 0 family inet filter"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set interfaces lo0 unit 0 family inet filter input
+    then: GOOD
+  - else: VULN
+  evidence:
+  - ev
+  note: lo0 입력 필터로 관리 접근 제한
 remediation: 가상 터미널(VTY)에 특정 IP주소만 접근할 수 있도록 설정

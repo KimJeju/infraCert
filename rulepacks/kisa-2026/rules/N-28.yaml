@@ -1,4 +1,4 @@
-# N-28 TCP/UDP small 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-28 TCP/UDP small 서비스 차단 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-28
 name: TCP/UDP small 서비스 차단
 severity: 중
@@ -22,4 +22,20 @@ verdict:
 evidence:
 - ev
 note: IOS 12 이후 기본 비활성
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "services"
+    timeout: 60
+  verdict:
+  - else: GOOD
+  evidence:
+  - ev
+  note: Junos 에는 TCP/UDP small servers 가 없다
 remediation: TCP/UDP Small Service 제한 설정

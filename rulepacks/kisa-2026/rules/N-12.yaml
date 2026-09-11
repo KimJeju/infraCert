@@ -1,4 +1,4 @@
-# N-12 주기적 보안 패치 및 벤더 권고사항 적용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-12 주기적 보안 패치 및 벤더 권고사항 적용 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-12
 name: 주기적 보안 패치 및 벤더 권고사항 적용
 severity: 상
@@ -16,4 +16,16 @@ verdict:
 evidence:
 - ver
 note: IOS 버전을 Cisco 권고와 대조
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: ver
+    cmd: show version
+    timeout: 30
+  verdict:
+  - else: MANUAL
+  evidence:
+  - ver
 remediation: 장비별 제공하는 최신 취약점 정보를 파악 후 최신 패치 및 업그레이드를 수행

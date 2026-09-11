@@ -1,4 +1,4 @@
-# N-21 TFTP 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-21 TFTP 서비스 차단 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-21
 name: TFTP 서비스 차단
 severity: 상
@@ -21,4 +21,23 @@ verdict:
 - else: GOOD
 evidence:
 - ev
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "services (tftp|ftp)"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set system services (tftp|ftp)
+    then: VULN
+  - else: GOOD
+  evidence:
+  - ev
 remediation: 네트워크 장비의 불필요한 TFTP 서비스를 비활성화 설정

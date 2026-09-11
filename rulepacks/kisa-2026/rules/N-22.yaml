@@ -1,4 +1,4 @@
-# N-22 Spoofing 방지 필터링 적용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-22 Spoofing 방지 필터링 적용 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-22
 name: Spoofing 방지 필터링 적용
 severity: 상
@@ -26,4 +26,23 @@ verdict:
 evidence:
 - ev
 note: uRPF 또는 사설/루프백 대역 deny ACL 이 있으면 양호, 없으면 경계 장비 여부로 판단
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "rpf-check|firewall filter"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)rpf-check
+    then: GOOD
+  - else: MANUAL
+  evidence:
+  - ev
 remediation: 경계 라우터 또는 보안 장비에서 스푸핑 방지 필터링 적용

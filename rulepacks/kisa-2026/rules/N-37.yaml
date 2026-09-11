@@ -1,4 +1,4 @@
-# N-37 pad 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-37 pad 차단 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-37
 name: pad 차단
 severity: 중
@@ -22,4 +22,20 @@ verdict:
 evidence:
 - ev
 note: 기본 활성 → no service pad 필요
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "pad"
+    timeout: 60
+  verdict:
+  - else: GOOD
+  evidence:
+  - ev
+  note: Junos 에 PAD 서비스 없음
 remediation: PAD 서비스 비활성화

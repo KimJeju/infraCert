@@ -1,4 +1,4 @@
-# N-23 DDoS 공격 방어 설정 또는 DDoS 장비 사용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-23 DDoS 공격 방어 설정 또는 DDoS 장비 사용 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-23
 name: DDoS 공격 방어 설정 또는 DDoS 장비 사용
 severity: 상
@@ -18,4 +18,19 @@ verdict:
 - else: MANUAL
 evidence:
 - ev
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "firewall|policer|screen"
+    timeout: 60
+  verdict:
+  - else: MANUAL
+  evidence:
+  - ev
 remediation: DDoS 공격 방어 설정 점검

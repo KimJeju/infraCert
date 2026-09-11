@@ -78,6 +78,17 @@ class Step(BaseModel):
         return v
 
 
+class Variant(BaseModel):
+    """같은 항목의 다른 플랫폼 구현(예: N-xx 의 Junos). env.os 가 platforms 에 있으면 이 블록이 기본을 대체한다."""
+    platforms: list[str]
+    shell: Literal["sh", "powershell", "raw"] = "raw"
+    collect: list[Collect] = Field(default_factory=list)
+    extract: list[Extract] = Field(default_factory=list)
+    verdict: list[Step] = Field(default_factory=list)
+    evidence: list[str] = Field(default_factory=list)
+    note: str = ""
+
+
 class RuleSpec(BaseModel):
     id: str
     name: str
@@ -92,6 +103,22 @@ class RuleSpec(BaseModel):
     note: str = ""                                       # 근거에 덧붙일 기준 설명
     remediation: str = ""
     shell: Literal["sh", "powershell", "raw"] = "sh"     # sh: POSIX, powershell: WinRM/로컬, raw: 장비 CLI 한 줄
+    variants: list[Variant] = Field(default_factory=list)   # 플랫폼별 대체 구현(collect/extract/verdict/evidence/note)
+
+    def for_platform(self, os_name: str | None) -> RuleSpec:
+        """env.os 에 맞는 variant 가 있으면 그 블록으로 덮어쓴 사본, 없으면 자기 자신."""
+        for v in self.variants:
+            if os_name and os_name in v.platforms:
+                return self.model_copy(update={"platforms": v.platforms, "shell": v.shell, "collect": v.collect,
+                                               "extract": v.extract, "verdict": v.verdict, "evidence": v.evidence,
+                                               "note": v.note or self.note, "variants": []})
+        return self
+
+    def all_platforms(self) -> tuple[str, ...]:
+        out = list(self.platforms)
+        for v in self.variants:
+            out += [x for x in v.platforms if x not in out]
+        return tuple(out)
 
     @field_validator("id")
     @classmethod
@@ -176,6 +203,7 @@ def build_argv(spec: RuleSpec, cmd: str, params: dict[str, str]) -> list[str]:
 
 
 def evaluate(spec: RuleSpec, conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
+    spec = spec.for_platform(env.os)
     vars_: dict[str, Any] = {}
     raw: dict[str, str] = {}
 
@@ -229,8 +257,9 @@ def load_file(path: Path) -> RuleSpec:
 def to_native(spec: RuleSpec) -> NativeRule:
     def check(conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
         return evaluate(spec, conn, env)
-    return NativeRule(spec.id, spec.name, spec.severity, tuple(spec.platforms), check,
-                      collects=tuple((spec.shell, c.cmd) for c in spec.collect))
+    return NativeRule(spec.id, spec.name, spec.severity, spec.all_platforms(), check,
+                      collects=tuple((spec.shell, c.cmd) for c in spec.collect)
+                      + tuple((v.shell, c.cmd) for v in spec.variants for c in v.collect))
 
 
 def register_dir(directory: Path) -> tuple[dict[str, RuleSpec], list[str]]:

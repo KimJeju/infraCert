@@ -1,4 +1,4 @@
-# N-13 로깅 버퍼 크기 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+# N-13 로깅 버퍼 크기 설정 — Cisco IOS + Junos variant 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
 id: N-13
 name: 로깅 버퍼 크기 설정
 severity: 중
@@ -29,4 +29,24 @@ verdict:
 evidence:
 - ev
 note: logging buffered 16384 이상이면 양호, 작으면 로그량 대비 판단
+variants:
+- platforms:
+  - junos
+  shell: raw
+  collect:
+  - key: cfg
+    cmd: show configuration | display set
+    timeout: 60
+  - key: ev
+    cmd: show configuration | display set | match "syslog (file|archive)"
+    timeout: 60
+  verdict:
+  - when:
+      cfg:
+        regex: (?m)^set system syslog (file|archive)
+    then: MANUAL
+  - else: VULN
+  evidence:
+  - ev
+  note: syslog 파일·archive size 설정을 로그량과 대조
 remediation: 로그에 대한 정보를 확인하여 장비 성능을 고려한 최대 버퍼 크기를 설정
