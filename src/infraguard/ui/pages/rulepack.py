@@ -30,6 +30,7 @@ KIND_ROLE = int(Qt.ItemDataRole.UserRole) + 2   # "bundle" | "native"
 class RulePackPage(QWidget):
     profiles_changed = Signal()
     import_requested = Signal()          # zip 가져오기 (파일 선택·풀기는 메인윈도가)
+    build_requested = Signal(list, list) # (bundles, native) 체크한 항목으로 부분 룰팩 zip
     pack_selected = Signal(str)          # rulepacks/<name> 전환
 
     def __init__(self) -> None:
@@ -74,6 +75,10 @@ class RulePackPage(QWidget):
         save = QPushButton("현재 선택으로 저장")
         save.clicked.connect(self._save_as)
         prow.addWidget(save)
+        zipb = QPushButton("선택 항목으로 룰팩 zip 만들기")
+        zipb.setToolTip("체크한 번들·룰(+그 항목의 가이드)만 담은 부분 룰팩. 고객사 반입용.")
+        zipb.clicked.connect(lambda: self.build_requested.emit(*self.current_selection()))
+        prow.addWidget(zipb)
         root.addLayout(prow)
 
     # ---------------------------------------------------------------- 표시

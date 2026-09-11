@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
+    QInputDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
@@ -142,6 +143,34 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "룰팩 가져오기", msg)
         self._switch_rulepack(dest.name)
 
+    def _build_rulepack(self, bundles: list, native: list) -> None:
+        """룰팩 탭에서 체크한 항목만 담은 zip. 가이드는 현재 팩의 guide/ 에서 해당 항목만 딸려간다."""
+        if not self.pack:
+            return
+        if not bundles and not native:
+            QMessageBox.information(self, "룰팩 zip", "체크된 번들/룰이 없습니다.")
+            return
+        name, ok = QInputDialog.getText(self, "룰팩 zip", "룰팩 이름 (영문/숫자/-)", text=f"{self.pack.name}-subset")
+        if not ok or not name.strip():
+            return
+        name = "".join(c for c in name.strip() if c.isalnum() or c in "-_.") or "subset"
+        path, _ = QFileDialog.getSaveFileName(self, "룰팩 zip 저장", f"{name}.rulepack.zip", "zip (*.zip)")
+        if not path:
+            return
+        from pathlib import Path
+
+        from infraguard.rulepack import builder
+        try:
+            st = builder.build(self.pack.root, name, Path(path), rules=list(native), bundles=list(bundles),
+                               guide_items=list(self.pack.guide.values()), version=self.pack.version or "1.0")
+        except Exception as e:  # noqa: BLE001 - 파일 없음·스키마 오류 전부 사용자에게
+            QMessageBox.warning(self, "룰팩 zip 실패", str(e))
+            return
+        QMessageBox.information(
+            self, "룰팩 zip",
+            f"저장됨: {path}\n번들 {st['bundles']} · 네이티브 룰 {st['native']} · 항목 메타 {st['rules_meta']} · 가이드 {st['guide']}",
+        )
+
     def _refresh_profiles(self) -> None:
         self.rulepack.set_packs([p.name for p in rp_loader.list_packs()], self.pack.name if self.pack else None)
         self.rulepack.load(self.pack)
@@ -230,6 +259,7 @@ class MainWindow(QMainWindow):
         self.rulepack = RulePackPage()
         self.rulepack.profiles_changed.connect(self._refresh_profiles)
         self.rulepack.import_requested.connect(self._import_rulepack)
+        self.rulepack.build_requested.connect(self._build_rulepack)
         self.rulepack.pack_selected.connect(self._switch_rulepack)
         self.tabs.addTab(self.rulepack, "룰팩")
         pk_label = f"{self.pack.name} {self.pack.version}" if self.pack else "(없음)"
