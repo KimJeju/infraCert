@@ -211,7 +211,9 @@ class MainWindow(QMainWindow):
         m_asset = mb.addMenu("자산")
         m_asset.addAction("자산 추가", self._add_asset)
         m_asset.addAction("자산 가져오기(JSON)", self._import_assets)
-        mb.addMenu("진단").addAction("새 진단 시작", self._start_scan)
+        m_scan = mb.addMenu("진단")
+        m_scan.addAction("선택 호스트 진단 (Ctrl/Shift 다중선택, 그룹 선택 시 하위 전부)", self._start_scan)
+        m_scan.addAction("모든 호스트 진단", self._start_scan_all)
         mb.addMenu("도구").addAction("지금 완전삭제", self._sanitize_now)
         mb.addMenu("도움말").addAction("정보", self._about)
 
@@ -342,13 +344,28 @@ class MainWindow(QMainWindow):
         self.sb_hosts.setText(f"자산 {len(hosts)}대")
 
     def _selected_hosts(self) -> list[Host]:
-        ids = []
-        for idx in self.tree.selectionModel().selectedIndexes():
+        """선택된 호스트. 고객사/분류 노드를 고르면 그 아래 호스트 전부(다건 진단). 중복 제거, 트리 순서 유지."""
+        ids: list[str] = []
+
+        def walk(idx) -> None:  # noqa: ANN001
             hid = idx.data(HOST_ID_ROLE)
             if hid:
-                ids.append(hid)
+                if hid not in ids:
+                    ids.append(hid)
+                return
+            m = idx.model()
+            for r in range(m.rowCount(idx)):
+                walk(m.index(r, 0, idx))
+
+        for idx in self.tree.selectionModel().selectedIndexes():
+            if idx.column() == 0:
+                walk(idx)
         hosts = [self.ctx.assets.get(h) for h in ids]
         return [h for h in hosts if h]
+
+    def _start_scan_all(self) -> None:
+        self.tree.selectAll()
+        self._start_scan()
 
     def _param_hints(self) -> list[dict]:
         """룰팩의 모든 번들이 선언한 파라미터(중복 제거) — 자산 편집 힌트용."""

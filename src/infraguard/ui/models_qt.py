@@ -32,14 +32,12 @@ class AssetTreeModel(QStandardItemModel):
             if h.project not in projects:
                 p = QStandardItem(h.project)
                 p.setEditable(False)
-                p.setSelectable(False)
                 projects[h.project] = p
                 root.appendRow(p)
             gk = (h.project, h.group)
             if gk not in groups:
                 g = QStandardItem(h.group)
                 g.setEditable(False)
-                g.setSelectable(False)
                 groups[gk] = g
                 projects[h.project].appendRow(g)
 

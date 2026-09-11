@@ -90,6 +90,8 @@ QTreeView, QTableView, QTableWidget, QTreeWidget, QListWidget {{
     alternate-background-color: #10151C; gridline-color: {BG3};
     selection-background-color: {ACCENT_DIM}; selection-color: white; outline: 0;
 }}
+/* 셀에 직접 브러시(판정 색)를 준 항목이 선택되면 Windows 스타일에서 검게 그려진다 → 선택 색을 명시로 강제 */
+QTableView::item:selected, QTableWidget::item:selected {{ background: {ACCENT_DIM}; color: white; }}
 QTreeView::item, QListWidget::item {{ padding: 3px 4px; }}
 QTreeView::item:hover, QListWidget::item:hover {{ background: {BG1}; }}
 QTreeView::branch {{ background: transparent; }}
