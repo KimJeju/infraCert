@@ -49,6 +49,8 @@ EXCLUDES = [
 HIDDEN = [
     "infraguard.rules.unix",          # load_all() 안에서 import — 정적 분석 누락 대비
     "infraguard.rules.declarative",
+    "winrm", "winrm.protocol", "winrm.transport",   # transport/winrm.py 가 connect() 안에서 lazy import
+    "requests_ntlm", "spnego",                       # pywinrm NTLM 인증 경로(조건부 import)
 ]
 
 
