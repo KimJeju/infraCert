@@ -10,7 +10,7 @@ platforms:
 - hpux
 collect:
 - key: w
-  cmd: find "$ORACLE_HOME/network/admin" "$ORACLE_HOME/dbs" -type f \( -name '*.ora' -o -name 'orapw*' \) -perm -o+w 2>/dev/null
+  cmd: find -L "$ORACLE_HOME/network/admin" "$ORACLE_HOME/dbs" -type f \( -name '*.ora' -o -name 'orapw*' \) -perm -o+w 2>/dev/null
   timeout: 90
 - key: ls
   cmd: ls -l "$ORACLE_HOME/network/admin"/*.ora "$ORACLE_HOME/dbs"/orapw* 2>/dev/null

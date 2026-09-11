@@ -10,8 +10,8 @@ platforms:
 - hpux
 collect:
 - key: q
-  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT DISTINCT owner FROM dba_objects WHERE owner NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"','"'"'SYSMAN'"'"','"'"'DBSNMP'"'"','"'"'OUTLN'"'"','"'"'XDB'"'"','"'"'WMSYS'"'"','"'"'CTXSYS'"'"','"'"'MDSYS'"'"','"'"'ORDSYS'"'"','"'"'ORDDATA'"'"','"'"'OLAPSYS'"'"','"'"'EXFSYS'"'"','"'"'APEX_PUBLIC_USER'"'"','"'"'ANONYMOUS'"'"','"'"'DIP'"'"','"'"'ORACLE_OCM'"'"','"'"'APPQOSSYS'"'"','"'"'AUDSYS'"'"','"'"'GSMADMIN_INTERNAL'"'"','"'"'DBSFWUSER'"'"','"'"'GGSYS'"'"','"'"'LBACSYS'"'"','"'"'OJVMSYS'"'"','"'"'REMOTE_SCHEDULER_AGENT'"'"','"'"'SYSBACKUP'"'"','"'"'SYSDG'"'"','"'"'SYSKM'"'"','"'"'SYSRAC'"'"','"'"'SYS$UMF'"'"','"'"'DVSYS'"'"','"'"'DVF'"'"','"'"'MDDATA'"'"','"'"'ORDPLUGINS'"'"','"'"'SI_INFORMTN_SCHEMA'"'"','"'"'XS$NULL'"'"','"'"'OJVMSYS'"'"')
-    ORDER BY 1;' | sqlplus -S -L / as sysdba 2>&1
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT DISTINCT owner FROM dba_objects WHERE owner<>'"'"'PUBLIC'"'"' AND owner NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"','"'"'SYSMAN'"'"','"'"'DBSNMP'"'"','"'"'OUTLN'"'"','"'"'XDB'"'"','"'"'WMSYS'"'"','"'"'CTXSYS'"'"','"'"'MDSYS'"'"','"'"'ORDSYS'"'"','"'"'ORDDATA'"'"','"'"'OLAPSYS'"'"','"'"'EXFSYS'"'"','"'"'APEX_PUBLIC_USER'"'"','"'"'ANONYMOUS'"'"','"'"'DIP'"'"','"'"'ORACLE_OCM'"'"','"'"'APPQOSSYS'"'"','"'"'AUDSYS'"'"','"'"'GSMADMIN_INTERNAL'"'"','"'"'DBSFWUSER'"'"','"'"'GGSYS'"'"','"'"'LBACSYS'"'"','"'"'OJVMSYS'"'"','"'"'REMOTE_SCHEDULER_AGENT'"'"','"'"'SYSBACKUP'"'"','"'"'SYSDG'"'"','"'"'SYSKM'"'"','"'"'SYSRAC'"'"','"'"'SYS$UMF'"'"','"'"'DVSYS'"'"','"'"'DVF'"'"','"'"'MDDATA'"'"','"'"'ORDPLUGINS'"'"','"'"'SI_INFORMTN_SCHEMA'"'"','"'"'XS$NULL'"'"','"'"'OJVMSYS'"'"')
+    AND owner NOT IN (SELECT username FROM dba_users WHERE oracle_maintained='"'"'Y'"'"') ORDER BY 1;' | sqlplus -S -L / as sysdba 2>&1
   timeout: 90
 extract:
 - from: q
@@ -28,5 +28,5 @@ verdict:
 - else: MANUAL
 evidence:
 - q
-note: 시스템 스키마 외 오브젝트 소유자는 인가 여부 판단
+note: Oracle 관리 계정(oracle_maintained) 제외. 남는 소유자는 인가 여부 판단
 remediation: Object Owner를 SYS, SYSTEM, 관리자 계정으로 제한 설정

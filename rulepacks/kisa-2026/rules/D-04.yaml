@@ -10,7 +10,8 @@ platforms:
 - hpux
 collect:
 - key: q
-  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT grantee FROM dba_role_privs WHERE granted_role='"'"'DBA'"'"' AND grantee NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"');' | sqlplus -S -L / as sysdba 2>&1
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT grantee FROM dba_role_privs WHERE granted_role='"'"'DBA'"'"' AND grantee NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"') AND grantee NOT IN (SELECT username FROM dba_users
+    WHERE oracle_maintained='"'"'Y'"'"');' | sqlplus -S -L / as sysdba 2>&1
   timeout: 90
 extract:
 - from: q

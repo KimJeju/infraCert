@@ -10,7 +10,7 @@ platforms:
 - hpux
 collect:
 - key: q
-  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT value FROM v$parameter WHERE name='"'"'O7_DICTIONARY_ACCESSIBILITY'"'"';' | sqlplus -S -L / as sysdba 2>&1
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT value FROM v$parameter WHERE LOWER(name)='"'"'o7_dictionary_accessibility'"'"';' | sqlplus -S -L / as sysdba 2>&1
   timeout: 90
 - key: pub
   cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT count(*) FROM dba_tab_privs WHERE grantee='"'"'PUBLIC'"'"' AND owner='"'"'SYS'"'"' AND table_name LIKE '"'"'DBA_%'"'"';' | sqlplus -S -L / as sysdba 2>&1
@@ -35,8 +35,15 @@ verdict:
     q:
       regex: (?i)FALSE
   then: GOOD
+- when:
+    q:
+      absent: true
+    pub:
+      eq: '0'
+  then: GOOD
 - else: MANUAL
 evidence:
 - q
 - pub
+note: O7_DICTIONARY_ACCESSIBILITY 가 없는 버전(23ai+ 제거)은 FALSE 동작 — PUBLIC 의 DBA_ 뷰 권한 0 이면 양호
 remediation: 시스템 테이블에 일반 사용자 계정이 접근할 수 없도록 설정

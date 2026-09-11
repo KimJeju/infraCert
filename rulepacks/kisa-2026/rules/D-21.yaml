@@ -11,7 +11,7 @@ platforms:
 collect:
 - key: q
   cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT grantee||'"'"':'"'"'||owner||'"'"'.'"'"'||table_name FROM dba_tab_privs WHERE grantable='"'"'YES'"'"' AND grantee NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"') AND grantee
-    NOT IN (SELECT role FROM dba_roles) AND owner NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"','"'"'XDB'"'"','"'"'MDSYS'"'"','"'"'CTXSYS'"'"','"'"'ORDSYS'"'"','"'"'WMSYS'"'"');' | sqlplus -S -L / as sysdba 2>&1
+    NOT IN (SELECT role FROM dba_roles) AND owner NOT IN (SELECT username FROM dba_users WHERE oracle_maintained='"'"'Y'"'"') AND grantee NOT IN (SELECT username FROM dba_users WHERE oracle_maintained='"'"'Y'"'"');' | sqlplus -S -L / as sysdba 2>&1
   timeout: 90
 extract:
 - from: q
@@ -28,5 +28,5 @@ verdict:
 - else: VULN
 evidence:
 - q
-note: 롤이 아닌 일반 계정에 WITH GRANT OPTION 이 있으면 취약
+note: Oracle 관리 계정·객체 제외. 롤이 아닌 일반 계정에 WITH GRANT OPTION 이 있으면 취약(11g 는 oracle_maintained 없어 MANUAL)
 remediation: WITH_GRANT_OPTION이 ROLE에 의하여 설정되도록 변경
