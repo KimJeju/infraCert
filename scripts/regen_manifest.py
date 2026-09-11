@@ -36,6 +36,23 @@ def normalize_lf(p: Path) -> bool:
     return False
 
 
+def _guide_categories(pack_dir: Path) -> dict[str, str]:
+    """guide/all.json 의 '1. 계정 관리' → '계정관리' (YAML 룰 표기와 맞춤). 가이드 없으면 빈 dict."""
+    import json  # noqa: PLC0415
+    import re  # noqa: PLC0415
+    f = pack_dir / "guide" / "all.json"
+    if not f.exists():
+        return {}
+    out = {}
+    for it in json.loads(f.read_text(encoding="utf-8")):
+        c = re.sub(r"^\d+\.\s*", "", str(it.get("category") or "")).replace(" ", "").replace("디렉토리", "디렉터리")
+        if c.startswith("파일및디렉터리"):
+            c = "파일및디렉터리"
+        if c:
+            out[str(it["id"])] = c
+    return out
+
+
 def rule_key(rid: str) -> tuple[str, int]:
     pre, num = rid.rsplit("-", 1)
     return pre, int(num)
@@ -65,11 +82,17 @@ def main(pack_dir: Path) -> int:
     man["native"] = native
 
     meta = {r["id"]: r for r in man.get("rules") or []}
+    # 분류는 YAML 룰이 정본. YAML 이 없는 항목(파이썬 룰·번들 전용)은 가이드 분류를 YAML 표기로 정규화해 채운다.
+    guide_cat = _guide_categories(pack_dir)
+    for rid, m in meta.items():
+        if rid not in specs and rid in guide_cat and m.get("category") in (None, "", "Unix", "DBMS", "WEB", "native"):
+            m["category"] = guide_cat[rid]
     for rid, spec in specs.items():
         m = meta.setdefault(rid, {"id": rid})
         m.setdefault("name", spec.name)
         m.setdefault("severity", spec.severity)
-        m.setdefault("category", spec.category)
+        if spec.category:
+            m["category"] = spec.category
         m["manual"] = bool(spec.manual)     # YAML 이 정본. 이전 값이 남아 N/A 를 수동확인으로 덮지 않게 덮어쓴다
         if spec.remediation:
             m["remediation"] = spec.remediation

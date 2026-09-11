@@ -25,7 +25,9 @@ from infraguard.rulepack.guide import format_guide
 from infraguard.rulepack.loader import Profile, RulePack, save_profile
 
 ID_ROLE = int(Qt.ItemDataRole.UserRole) + 1
-KIND_ROLE = int(Qt.ItemDataRole.UserRole) + 2   # "bundle" | "native"
+KIND_ROLE = int(Qt.ItemDataRole.UserRole) + 2   # "bundle" | "native" | "group"
+PLATFORM_GROUP = {"U": "Unix (Linux/AIX/Solaris/HP-UX)", "W": "Windows 서버", "D": "Oracle DB",
+                  "N": "네트워크 장비 (Cisco IOS / Junos)", "WEB": "웹 서비스", "PC": "PC", "HV": "가상화", "CA": "클라우드"}
 
 
 class RulePackPage(QWidget):
@@ -65,6 +67,8 @@ class RulePackPage(QWidget):
         self.tree.setHeaderHidden(True)
         self.model = QStandardItemModel()
         self.tree.setModel(self.model)
+        self._syncing = False
+        self.model.itemChanged.connect(self._on_item_changed)
         self.tree.clicked.connect(self._show_detail)
         body.addWidget(self.tree, 2)
 
@@ -128,16 +132,41 @@ class RulePackPage(QWidget):
             b_root.appendRow(it)
         root.appendRow(b_root)
 
-        n_root = QStandardItem(f"네이티브 룰 — SSH 직접점검 ({len(pack.native)})")
+        # 네이티브 룰: 플랫폼 → 분류 → 룰. 그룹 체크는 하위 전부 토글(_on_item_changed).
+        n_root = QStandardItem(f"네이티브 룰 — 직접점검 ({len(pack.native)})")
         n_root.setEditable(False)
+        plat_nodes: dict[str, QStandardItem] = {}
+        cat_nodes: dict[tuple[str, str], QStandardItem] = {}
         for rid in pack.native:
             m = pack.rules.get(rid)
+            plat = PLATFORM_GROUP.get(rid.split("-")[0], "기타")
+            if plat not in plat_nodes:
+                g = QStandardItem(plat)
+                g.setEditable(False)
+                g.setCheckable(True)
+                g.setData("group", KIND_ROLE)
+                plat_nodes[plat] = g
+                n_root.appendRow(g)
+            cat = (m.category if m and m.category else "기타")
+            key = (plat, cat)
+            if key not in cat_nodes:
+                c = QStandardItem(cat)
+                c.setEditable(False)
+                c.setCheckable(True)
+                c.setData("group", KIND_ROLE)
+                cat_nodes[key] = c
+                plat_nodes[plat].appendRow(c)
             it = QStandardItem(f"{rid}  {m.name if m else ''}   {m.severity if m else ''}")
             it.setEditable(False)
             it.setCheckable(True)
             it.setData(rid, ID_ROLE)
             it.setData("native", KIND_ROLE)
-            n_root.appendRow(it)
+            cat_nodes[key].appendRow(it)
+        for plat, g in plat_nodes.items():
+            n = sum(cat_nodes[k].rowCount() for k in cat_nodes if k[0] == plat)
+            g.setText(f"{plat} ({n})")
+        for (_, cat), c in cat_nodes.items():
+            c.setText(f"{cat} ({c.rowCount()})")
         root.appendRow(n_root)
 
         cats: dict[str, QStandardItem] = {}
@@ -197,24 +226,58 @@ class RulePackPage(QWidget):
 
     # ---------------------------------------------------------------- 프로파일
     def _iter_checkable(self):  # noqa: ANN202
-        root = self.model.invisibleRootItem()
-        for i in range(root.rowCount()):
-            grp = root.child(i)
-            for j in range(grp.rowCount()):
-                it = grp.child(j)
-                if it.isCheckable():
-                    yield it
+        """체크 가능한 말단(번들·룰)만. 그룹 노드는 제외 — 깊이 무관하게 재귀."""
+        def walk(node):  # noqa: ANN001,ANN202
+            for i in range(node.rowCount()):
+                ch = node.child(i)
+                if ch.data(KIND_ROLE) in ("bundle", "native"):
+                    yield ch
+                else:
+                    yield from walk(ch)
+        yield from walk(self.model.invisibleRootItem())
+
+    def _on_item_changed(self, item) -> None:  # noqa: ANN001
+        """그룹 체크 → 하위 전부. 말단 체크 → 상위 그룹 상태(전부/일부/없음) 갱신."""
+        if self._syncing:
+            return
+        self._syncing = True
+        try:
+            if item.data(KIND_ROLE) == "group":
+                st = item.checkState()
+                if st != Qt.CheckState.PartiallyChecked:
+                    def down(node):  # noqa: ANN001
+                        for i in range(node.rowCount()):
+                            ch = node.child(i)
+                            if ch.isCheckable():
+                                ch.setCheckState(st)
+                            down(ch)
+                    down(item)
+            parent = item.parent()
+            while parent is not None and parent.data(KIND_ROLE) == "group":
+                states = {parent.child(i).checkState() for i in range(parent.rowCount())}
+                parent.setCheckState(Qt.CheckState.Checked if states == {Qt.CheckState.Checked}
+                                     else Qt.CheckState.Unchecked if states == {Qt.CheckState.Unchecked}
+                                     else Qt.CheckState.PartiallyChecked)
+                parent = parent.parent()
+        finally:
+            self._syncing = False
 
     def _apply_profile_checks(self) -> None:
         if not self._pack:
             return
         pid = self.profile.currentData()
         prof = self._pack.profiles.get(pid) if pid else None
-        for it in self._iter_checkable():
-            rid, kind = it.data(ID_ROLE), it.data(KIND_ROLE)
-            on = bool(prof) and ((kind == "bundle" and rid in prof.bundles) or
-                                 (kind == "native" and rid in prof.native))
-            it.setCheckState(Qt.CheckState.Checked if on else Qt.CheckState.Unchecked)
+        self._syncing = True
+        try:
+            for it in self._iter_checkable():
+                rid, kind = it.data(ID_ROLE), it.data(KIND_ROLE)
+                on = bool(prof) and ((kind == "bundle" and rid in prof.bundles) or
+                                     (kind == "native" and rid in prof.native))
+                it.setCheckState(Qt.CheckState.Checked if on else Qt.CheckState.Unchecked)
+        finally:
+            self._syncing = False
+        for it in list(self._iter_checkable()):
+            self._on_item_changed(it)          # 상위 그룹 상태 재계산
 
     def current_selection(self) -> tuple[list[str], list[str]]:
         bundles, native = [], []
