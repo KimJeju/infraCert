@@ -55,7 +55,7 @@ def main(argv: list[str]) -> int:
     rules = pack.profiles[a.profile].native
     t1 = time.monotonic()
     findings, errors = run_native(conn, env, rules, progress=lambda rid, i, n: print(f"\r{rid} ({i}/{n})", end=""))
-    print(f"\r{len(rules)}룰 {time.monotonic() - t1:.1f}s")
+    print(f"\r{len(rules)}룰 {time.monotonic() - t1:.1f}s" + " " * 20)   # 진행표시 잔상 지움
     conn.close()
 
     c: Counter[str] = Counter()
