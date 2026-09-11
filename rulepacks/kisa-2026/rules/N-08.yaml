@@ -1,0 +1,33 @@
+# N-08 VTY 접속 시 안전한 프로토콜 사용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-08
+name: VTY 접속 시 안전한 프로토콜 사용
+severity: 중
+category: 접근관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+extract:
+- from: cfg
+  regex: (?s)(?P<vty>^line vty.*?(?=^line |^!|\Z))
+verdict:
+- when:
+    vty:
+      regex: transport input (telnet|all)
+  then: VULN
+- when:
+    vty:
+      regex: transport input ssh
+  then: GOOD
+- when:
+    vty:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- cfg
+note: transport input ssh 만 허용. 미설정은 기본 all/telnet
+remediation: 암호화 프로토콜만 VTY에 접근할 수 있도록 설정

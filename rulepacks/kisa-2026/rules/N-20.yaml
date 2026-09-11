@@ -1,0 +1,24 @@
+# N-20 SNMP Community 권한 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-20
+name: SNMP Community 권한 설정
+severity: 상
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^snmp-server community
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^snmp-server community \S+ (view \S+ )?RW
+  then: VULN
+- else: GOOD
+evidence:
+- ev
+remediation: SNMP Community String 권한 설정 (RW 권한 삭제 권고)

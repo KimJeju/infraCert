@@ -91,6 +91,7 @@ class RuleSpec(BaseModel):
     evidence: list[str] = Field(default_factory=list)   # 근거로 남길 collect 키
     note: str = ""                                       # 근거에 덧붙일 기준 설명
     remediation: str = ""
+    shell: Literal["sh", "powershell", "raw"] = "sh"     # sh: POSIX, powershell: WinRM/로컬, raw: 장비 CLI 한 줄
 
     @field_validator("id")
     @classmethod
@@ -155,13 +156,32 @@ OPERATORS: dict[str, Any] = {
 
 
 # ------------------------------------------------------------------ 평가기
-def evaluate(spec: RuleSpec, conn: Connection, _env: RemoteEnvironment) -> NativeOutcome:
+SHELLS: dict[str, Any] = {
+    "sh": lambda c: ["sh", "-c", c],
+    "powershell": lambda c: ["powershell", "-NoProfile", "-NonInteractive", "-Command", c],
+    "raw": lambda c: [c],
+}
+
+
+def build_argv(spec: RuleSpec, cmd: str, params: dict[str, str]) -> list[str]:
+    """수집 명령 argv. sh 룰은 호스트 파라미터를 `env K=V` 로 앞에 붙인다(값은 validate_env 통과분만)."""
+    argv = SHELLS[spec.shell](cmd)
+    if spec.shell == "sh" and params:
+        from infraguard.orchestrator.remote_runner import (
+            validate_env,  # noqa: PLC0415 - 계층 역참조 최소화
+        )
+        validate_env(params)
+        argv = ["env", *[f"{k}={v}" for k, v in params.items()], *argv]
+    return argv
+
+
+def evaluate(spec: RuleSpec, conn: Connection, env: RemoteEnvironment) -> NativeOutcome:
     vars_: dict[str, Any] = {}
     raw: dict[str, str] = {}
 
     for c in spec.collect:
-        r = conn.exec(["sh", "-c", c.cmd], timeout=c.timeout)
-        out = r.stdout or ""
+        r = conn.exec(build_argv(spec, c.cmd, env.params), timeout=c.timeout)
+        out = (r.stdout or "").replace("\r\n", "\n").replace("\r", "\n")   # PowerShell/장비 CRLF → 값 끝 \r 제거
         raw[c.key] = out
         vars_[c.key] = out.strip()
         vars_[c.key + "_ok"] = bool(r.ok and not r.error)

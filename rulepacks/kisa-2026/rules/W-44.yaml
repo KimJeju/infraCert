@@ -1,0 +1,25 @@
+# W-44 원격으로 액세스할 수 있는 레지스트리 경로 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-44
+name: 원격으로 액세스할 수 있는 레지스트리 경로
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: (Get-Service RemoteRegistry -ErrorAction SilentlyContinue).Status
+  timeout: 60
+verdict:
+- when:
+    svc:
+      eq: Running
+  then: VULN
+- when:
+    svc:
+      exists: true
+  then: GOOD
+- else: GOOD
+evidence:
+- svc
+note: Remote Registry 중지·없음이면 양호

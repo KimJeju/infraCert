@@ -1,0 +1,28 @@
+# W-64 윈도우 방화벽 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-64
+name: 윈도우 방화벽 설정
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: fw
+  cmd: Get-NetFirewallProfile -ErrorAction SilentlyContinue | Select-Object Name,Enabled | Format-Table -AutoSize | Out-String
+  timeout: 60
+verdict:
+- when:
+    fw_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    fw:
+      absent: true
+  then: MANUAL
+- when:
+    fw:
+      regex: (?m)\bFalse\b
+  then: VULN
+- else: GOOD
+evidence:
+- fw

@@ -93,6 +93,11 @@ class RulePack:
     def manual_rules(self) -> set[str]:
         return {r.id for r in self.rules.values() if r.manual}
 
+    def criteria_map(self) -> dict[str, str]:
+        """리포트용 rule id → 판단기준(가이드 양호/취약). 가이드 없는 항목은 없다."""
+        from infraguard.rulepack.guide import criteria_line  # noqa: PLC0415
+        return {rid: c for rid, g in self.guide.items() if (c := criteria_line(g))}
+
     def remediation_map(self) -> dict[str, str]:
         """리포트용 rule id → 조치방법. 가이드 항목이 있으면 그것, 없으면 manifest 메타."""
         out = {rid: m.remediation for rid, m in self.rules.items() if m.remediation}

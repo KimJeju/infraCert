@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
-from typing import Callable, Protocol
+from typing import Protocol
 
 import paramiko
 

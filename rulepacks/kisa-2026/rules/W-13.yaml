@@ -1,0 +1,25 @@
+# W-13 콘솔 로그온 시 로컬 계정에서 빈 암호 사용 제한 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-13
+name: 콘솔 로그온 시 로컬 계정에서 빈 암호 사용 제한
+severity: 중
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'LimitBlankPasswordUse' -ErrorAction SilentlyContinue).'LimitBlankPasswordUse'
+  timeout: 60
+verdict:
+- when:
+    v:
+      eq: '1'
+  then: GOOD
+- when:
+    v:
+      eq: '0'
+  then: VULN
+- else: GOOD
+evidence:
+- v
+note: 값 없음 = 기본값 1(사용)

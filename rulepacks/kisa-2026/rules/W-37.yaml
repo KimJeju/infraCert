@@ -1,0 +1,19 @@
+# W-37 예약된 작업에 의심스러운 명령이 등록되어 있는지 점검 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-37
+name: 예약된 작업에 의심스러운 명령이 등록되어 있는지 점검
+severity: 중
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: tasks
+  cmd: Get-ScheduledTask -ErrorAction SilentlyContinue | Where-Object {$_.State -ne 'Disabled' -and $_.TaskPath -notlike '\Microsoft\*'} | Select-Object TaskPath,TaskName,State | Format-Table -AutoSize
+    | Out-String -Width 200
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- tasks
+note: Microsoft 기본 작업 제외 목록. 명령·파일의 정당성은 분석자 판단

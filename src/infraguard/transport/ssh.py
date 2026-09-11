@@ -12,7 +12,6 @@ from __future__ import annotations
 import logging
 import posixpath
 import shlex
-import socket
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -183,7 +182,7 @@ class SSHConnection(Connection):
                     timed_out = True
                     break
                 time.sleep(0.01)
-        except socket.timeout:
+        except TimeoutError:
             timed_out = True
         except Exception as e:  # noqa: BLE001
             return ExecResult(

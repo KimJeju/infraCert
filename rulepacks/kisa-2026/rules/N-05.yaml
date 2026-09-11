@@ -1,0 +1,22 @@
+# N-05 사용자·명령어별 권한 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-05
+name: 사용자·명령어별 권한 설정
+severity: 중
+category: 계정관리
+platforms:
+- cisco-ios
+shell: raw
+manual: true
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^username|^privilege
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- ev
+note: 계정별 privilege 레벨을 보고 업무 적합성 판단
+remediation: 업무에 맞게 계정별 권한 차등(관리자 권한 최소화) 부여※한 명의 관리자가 네트워크 장비를 관리할 경우는 해당하지 않음

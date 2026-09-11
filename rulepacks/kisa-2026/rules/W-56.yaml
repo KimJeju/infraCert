@@ -1,0 +1,29 @@
+# W-56 SMB 세션 중단 관리 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-56
+name: SMB 세션 중단 관리 설정
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: t
+  cmd: $p=Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Services\LanmanServer\Parameters' -ErrorAction SilentlyContinue; foreach($n in @('EnableForcedLogoff','AutoDisconnect')){ "$n=$($p.$n)"
+    }
+  timeout: 60
+extract:
+- from: t
+  regex: (?m)^EnableForcedLogoff=(?P<fl>.*)$
+- from: t
+  regex: (?m)^AutoDisconnect=(?P<ad>.*)$
+verdict:
+- when:
+    fl:
+      eq: '1'
+    ad:
+      le: 15
+  then: GOOD
+- else: VULN
+evidence:
+- t
+note: '기준: 로그온 시간 만료 시 연결 끊기 사용, 유휴 15분 이하'

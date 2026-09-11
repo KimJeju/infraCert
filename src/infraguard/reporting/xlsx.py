@@ -34,7 +34,7 @@ THIN = Side(style="thin", color="BFBFBF")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
 RESULT_HEADERS = ["호스트", "항목코드", "점검항목", "중요도", "진단결과",
-                  "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법"]
+                  "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법", "판단기준"]
 
 
 def _style_header(ws: Worksheet, ncols: int, row: int = 1) -> None:
@@ -60,13 +60,14 @@ def _body_font(ws: Worksheet, first_row: int = 2) -> None:
             cell.alignment = Alignment(vertical="top", wrap_text=True)
 
 
-def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None) -> Path:
-    """remediation: rule id → 조치방법(룰팩 메타/가이드). 없으면 빈 컬럼 — 추측해 채우지 않는다."""
+def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None,
+          criteria: dict[str, str] | None = None) -> Path:
+    """remediation/criteria: rule id → 조치방법/판단기준(룰팩 메타·가이드). 없으면 빈 컬럼 — 추측해 채우지 않는다."""
     wb = Workbook()
 
     ws_res = wb.active
     ws_res.title = "결과"
-    _write_results(ws_res, scan, remediation or {})
+    _write_results(ws_res, scan, remediation or {}, criteria or {})
 
     _write_summary(wb.create_sheet("요약", 0), scan, ws_res.title)
     _write_manual(wb.create_sheet("수동확인"), scan)
@@ -80,7 +81,7 @@ def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None
 
 
 # ------------------------------------------------------------------- 결과
-def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str]) -> None:
+def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str], criteria: dict[str, str]) -> None:
     ws.append(RESULT_HEADERS)
     for h in scan.hosts:
         for r in h.results:
@@ -95,9 +96,10 @@ def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str])
                 "스크립트" if r.verdict_source == "script" else "분석자",
                 r.analyst_note or "",
                 remediation.get(r.rule_id, "") if r.status is Status.FAIL or r.status is Status.UNKNOWN else "",
+                criteria.get(r.rule_id, ""),
             ])
     _style_header(ws, len(RESULT_HEADERS))
-    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40])
+    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40])
     _body_font(ws)
     # 진단결과 컬럼 색상
     for row in ws.iter_rows(min_row=2, min_col=5, max_col=5):

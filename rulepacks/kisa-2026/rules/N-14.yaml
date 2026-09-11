@@ -1,0 +1,25 @@
+# N-14 정책에 따른 로깅 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-14
+name: 정책에 따른 로깅 설정
+severity: 중
+category: 로그관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^logging
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^logging (buffered|trap|host|\d)
+  then: MANUAL
+- else: VULN
+evidence:
+- ev
+note: 로깅 설정이 있으면 기관 정책과 대조, 없으면 취약
+remediation: 로그 기록 정책을 수립하고 정책에 따른 로깅 설정

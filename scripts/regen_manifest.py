@@ -75,9 +75,17 @@ def main(pack_dir: Path) -> int:
             m["remediation"] = spec.remediation
     man["rules"] = [meta[k] for k in sorted(meta, key=rule_key)]
 
+    # *-native 프로파일: platforms 가 선언돼 있으면 그 플랫폼을 다루는 룰만, 없으면 전체(이전 동작)
+    py_rules = load_all()
+    def plats(rid: str) -> set[str]:
+        if rid in specs:
+            return set(specs[rid].platforms)
+        return set(py_rules[rid].platforms) if rid in py_rules else set()
     for p in man.get("profiles") or []:
         if str(p.get("id", "")).endswith("-native"):
-            p["native"] = native
+            want = set(p.get("platforms") or [])
+            prefix = str(p.get("prefix") or "")
+            p["native"] = [r for r in native if (not want or plats(r) & want) and r.startswith(prefix)]
 
     order = ["name", "version", "license", "description", "bundles", "rule_files", "native",
              "rules", "profiles"]

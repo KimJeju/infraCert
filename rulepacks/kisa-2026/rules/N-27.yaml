@@ -1,0 +1,29 @@
+# N-27 웹 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-27
+name: 웹 서비스 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^ip http|^no ip http
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^ip http (secure-)?server
+  then: VULN
+- when:
+    cfg:
+      regex: (?m)^no ip http (secure-)?server
+  then: GOOD
+- else: MANUAL
+evidence:
+- ev
+note: ip http server 활성이면 취약(access-class 로 제한했더라도 필요성 확인)
+remediation: HTTP 서비스 차단 또는 HTTP 서버를 관리하는 관리자 접속 IP 설정

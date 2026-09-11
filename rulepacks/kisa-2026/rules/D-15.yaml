@@ -1,0 +1,24 @@
+# D-15 관리자 이외의 사용자가 오라클 리스너의 접속을 통해 리스너 로그 및 trace 파일에 대한 변경 제한 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-15
+name: 관리자 이외의 사용자가 오라클 리스너의 접속을 통해 리스너 로그 및 trace 파일에 대한 변경 제한
+severity: 하
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: lsn
+  cmd: grep -i 'ADMIN_RESTRICTIONS' "$ORACLE_HOME/network/admin/listener.ora" 2>/dev/null
+  timeout: 90
+verdict:
+- when:
+    lsn:
+      regex: (?i)=\s*ON
+  then: GOOD
+- else: VULN
+evidence:
+- lsn
+note: listener.ora 에 ADMIN_RESTRICTIONS_<리스너>=ON
+remediation: 주요 파일 및 로그 파일에 대한 권한을 관리자로 제한

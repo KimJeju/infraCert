@@ -1,0 +1,29 @@
+# W-20 NetBIOS 바인딩 서비스 구동 점검 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-20
+name: NetBIOS 바인딩 서비스 구동 점검
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: nb
+  cmd: Get-CimInstance Win32_NetworkAdapterConfiguration -Filter 'IPEnabled=true' | Select-Object -ExpandProperty TcpipNetbiosOptions
+  timeout: 60
+verdict:
+- when:
+    nb_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    nb:
+      absent: true
+  then: MANUAL
+- when:
+    nb:
+      regex: (?m)^[01]$
+  then: VULN
+- else: GOOD
+evidence:
+- nb
+note: TcpipNetbiosOptions 2=NetBIOS over TCP/IP 사용 안 함. 0(기본)/1 이면 바인딩됨

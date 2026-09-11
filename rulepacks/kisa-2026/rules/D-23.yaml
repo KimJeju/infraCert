@@ -1,0 +1,20 @@
+# D-23 xp_cmdshell 사용 제한 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-23
+name: xp_cmdshell 사용 제한
+severity: 상
+category: 옵션관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: x
+  cmd: 'true'
+  timeout: 90
+verdict:
+- else: NA
+evidence:
+- x
+note: MSSQL 전용 항목
+remediation: xp_cmdshell 설정 값을 0 또는 False로 설정

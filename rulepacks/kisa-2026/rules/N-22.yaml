@@ -1,0 +1,29 @@
+# N-22 Spoofing 방지 필터링 적용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-22
+name: Spoofing 방지 필터링 적용
+severity: 상
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include verify unicast|deny ip
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^\s*ip verify unicast
+  then: GOOD
+- when:
+    cfg:
+      regex: (?m)^\s*deny ip (10\.0\.0\.0|172\.16\.0\.0|192\.168\.0\.0|127\.0\.0\.0|0\.0\.0\.0)
+  then: GOOD
+- else: MANUAL
+evidence:
+- ev
+note: uRPF 또는 사설/루프백 대역 deny ACL 이 있으면 양호, 없으면 경계 장비 여부로 판단
+remediation: 경계 라우터 또는 보안 장비에서 스푸핑 방지 필터링 적용

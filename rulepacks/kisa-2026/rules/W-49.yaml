@@ -1,0 +1,18 @@
+# W-49 원격 시스템에서 강제로 시스템 종료 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-49
+name: 원격 시스템에서 강제로 시스템 종료
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: adm
+  cmd: Get-LocalGroupMember -SID S-1-5-32-544 | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- adm
+note: SeRemoteShutdownPrivilege 는 secedit 전용 — 로컬 보안 정책에서 확인

@@ -1,0 +1,25 @@
+# N-31 Directed-broadcast 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-31
+name: Directed-broadcast 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include directed-broadcast
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^\s+ip directed-broadcast
+  then: VULN
+- else: GOOD
+evidence:
+- ev
+note: IOS 12 이후 기본 비활성
+remediation: 장치별로 Directed Broadcasts 제한 설정

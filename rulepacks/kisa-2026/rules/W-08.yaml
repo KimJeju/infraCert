@@ -1,0 +1,33 @@
+# W-08 계정 잠금 기간 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-08
+name: 계정 잠금 기간 설정
+severity: 중
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: acc
+  cmd: net accounts | ForEach-Object { $_ }
+  timeout: 60
+extract:
+- from: acc
+  regex: (?im)^\s*(?:Lockout duration|잠금 기간)[^:]*:\s*(?P<dur>\S+)
+  missing: MANUAL
+- from: acc
+  regex: (?im)^\s*(?:Lockout observation window|잠금 관찰 기간|다음 시간 후 잠금 수 원래대로)[^:]*:\s*(?P<win>\S+)
+verdict:
+- when:
+    dur:
+      ge: 60
+    win:
+      ge: 60
+  then: GOOD
+- when:
+    dur:
+      ge: 60
+  then: MANUAL
+- else: VULN
+evidence:
+- acc
+note: '기준: 잠금 기간·원래대로 설정 기간 60분 이상'

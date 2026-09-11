@@ -1,0 +1,17 @@
+# W-38 주기적 보안 패치 및 벤더 권고사항 적용 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-38
+name: 주기적 보안 패치 및 벤더 권고사항 적용
+severity: 상
+category: 패치관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: hf
+  cmd: Get-HotFix -ErrorAction SilentlyContinue | Sort-Object InstalledOn | Select-Object -Last 10 HotFixID,InstalledOn | Format-Table -AutoSize | Out-String
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- hf

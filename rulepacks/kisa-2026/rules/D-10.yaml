@@ -1,0 +1,24 @@
+# D-10 원격에서 DB 서버로의 접속 제한 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-10
+name: 원격에서 DB 서버로의 접속 제한
+severity: 상
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: sqlnet
+  cmd: cat "$ORACLE_HOME/network/admin/sqlnet.ora" 2>/dev/null | grep -iv '^#'
+  timeout: 90
+verdict:
+- when:
+    sqlnet:
+      regex: (?is)(?=.*tcp\.validnode_checking\s*=\s*yes)(?=.*tcp\.invited_nodes)
+  then: GOOD
+- else: VULN
+evidence:
+- sqlnet
+note: sqlnet.ora 에 TCP.VALIDNODE_CHECKING=yes 와 TCP.INVITED_NODES 가 있어야 양호
+remediation: DB 서버에 대해 지정된 IP주소에서만 접근 가능하도록 설정

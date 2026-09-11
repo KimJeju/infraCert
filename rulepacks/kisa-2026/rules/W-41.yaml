@@ -1,0 +1,24 @@
+# W-41 NTP 및 시각 동기화 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-41
+name: NTP 및 시각 동기화 설정
+severity: 중
+category: 로그관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: ntp
+  cmd: w32tm /query /status 2>&1 | Out-String
+  timeout: 60
+verdict:
+- when:
+    ntp:
+      regex: (?i)Local CMOS Clock|로컬 CMOS 시계|Free-running
+  then: VULN
+- when:
+    ntp:
+      regex: '(?i)(Source|원본)\s*:'
+  then: GOOD
+- else: MANUAL
+evidence:
+- ntp

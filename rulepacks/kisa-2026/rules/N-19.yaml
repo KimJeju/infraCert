@@ -1,0 +1,29 @@
+# N-19 SNMP ACL 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-19
+name: SNMP ACL 설정
+severity: 상
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^snmp-server community
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^snmp-server community \S+ (RO|RW|view \S+ (RO|RW)) \S+
+  then: GOOD
+- when:
+    cfg:
+      regex: (?m)^snmp-server community
+  then: VULN
+- else: GOOD
+evidence:
+- ev
+note: community 뒤에 ACL 번호/이름이 붙어야 양호
+remediation: SNMP 접근에 대한 ACL(Access List) 설정

@@ -1,0 +1,24 @@
+# N-16 Timestamp 로그 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-16
+name: Timestamp 로그 설정
+severity: 하
+category: 로그관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^service timestamps
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^service timestamps log datetime
+  then: GOOD
+- else: VULN
+evidence:
+- ev
+remediation: 로그에 시간 정보가 기록될 수 있도록 timestamp 로그 설정

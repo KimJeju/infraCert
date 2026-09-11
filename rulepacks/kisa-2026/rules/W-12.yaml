@@ -1,0 +1,22 @@
+# W-12 익명 SID/이름 변환 허용 해제 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-12
+name: 익명 SID/이름 변환 허용 해제
+severity: 중
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'TurnOffAnonymousBlock' -ErrorAction SilentlyContinue).'TurnOffAnonymousBlock'
+  timeout: 60
+verdict:
+- when:
+    v:
+      eq: '1'
+  then: VULN
+- else: MANUAL
+evidence:
+- v
+note: LSAAnonymousNameLookup 은 secedit 전용. 레지스트리 TurnOffAnonymousBlock=1 이면 취약 확정, 아니면 정책 확인

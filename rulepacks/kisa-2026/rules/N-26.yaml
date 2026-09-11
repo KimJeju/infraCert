@@ -1,0 +1,25 @@
+# N-26 Finger 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-26
+name: Finger 서비스 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include finger
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^(ip finger|service finger)
+  then: VULN
+- else: GOOD
+evidence:
+- ev
+note: IOS 12 이후 finger 기본 비활성 — 활성 설정이 없으면 양호
+remediation: 장비별 Finger 서비스 제한 설정

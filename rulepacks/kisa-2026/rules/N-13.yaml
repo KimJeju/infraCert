@@ -1,0 +1,32 @@
+# N-13 로깅 버퍼 크기 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-13
+name: 로깅 버퍼 크기 설정
+severity: 중
+category: 로그관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^logging buffered
+  timeout: 60
+extract:
+- from: cfg
+  regex: (?m)^logging buffered (?P<n>\d+)
+verdict:
+- when:
+    n:
+      ge: 16384
+  then: GOOD
+- when:
+    n:
+      exists: true
+  then: MANUAL
+- else: VULN
+evidence:
+- ev
+note: logging buffered 16384 이상이면 양호, 작으면 로그량 대비 판단
+remediation: 로그에 대한 정보를 확인하여 장비 성능을 고려한 최대 버퍼 크기를 설정

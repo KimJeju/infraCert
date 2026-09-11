@@ -1,0 +1,25 @@
+# W-48 로그온하지 않고 시스템 종료 허용 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-48
+name: 로그온하지 않고 시스템 종료 허용
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'ShutdownWithoutLogon' -ErrorAction SilentlyContinue).'ShutdownWithoutLogon'
+  timeout: 60
+verdict:
+- when:
+    v:
+      eq: '0'
+  then: GOOD
+- when:
+    v:
+      eq: '1'
+  then: VULN
+- else: MANUAL
+evidence:
+- v
+note: 값 없음은 서버(0)/워크스테이션(1) 기본값이 달라 확인

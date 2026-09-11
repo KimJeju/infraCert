@@ -1,0 +1,36 @@
+# D-12 안전한 리스너 비밀번호 설정 및 사용 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-12
+name: 안전한 리스너 비밀번호 설정 및 사용
+severity: 상
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: lsn
+  cmd: grep -i 'PASSWORDS_' "$ORACLE_HOME/network/admin/listener.ora" 2>/dev/null | sed 's/=.*/= <설정됨>/'
+  timeout: 90
+- key: ver
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; sqlplus -v 2>&1 | grep -oE '[0-9]+\.[0-9]+' | head -1
+  timeout: 90
+verdict:
+- when:
+    lsn:
+      exists: true
+  then: GOOD
+- when:
+    ver:
+      ge: 12
+  then: NA
+- when:
+    ver:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- lsn
+- ver
+note: 12c 이상은 리스너 비밀번호가 폐기되고 로컬 OS 인증으로 대체 → 해당없음
+remediation: Listener 비밀번호 설정

@@ -1,0 +1,22 @@
+# W-33 HTTP/FTP/SMTP 배너 차단 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-33
+name: HTTP/FTP/SMTP 배너 차단
+severity: 하
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: svc
+  cmd: Get-Service -Name W3SVC,ftpsvc,MSFTPSVC,SMTPSVC -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: NA
+- else: MANUAL
+evidence:
+- svc
+note: 서비스가 있으면 배너 응답을 직접 확인

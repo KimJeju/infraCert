@@ -1,0 +1,24 @@
+# N-15 NTP 및 시각 동기화 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-15
+name: NTP 및 시각 동기화 설정
+severity: 중
+category: 로그관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^ntp
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^ntp server
+  then: GOOD
+- else: VULN
+evidence:
+- ev
+remediation: NTP 사용 시 신뢰할 수 있는 서버로 설정

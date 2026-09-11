@@ -1,0 +1,29 @@
+# N-30 CDP 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-30
+name: CDP 서비스 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include cdp
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^no cdp run
+  then: GOOD
+- when:
+    cfg:
+      regex: (?m)^\s+no cdp enable
+  then: MANUAL
+- else: VULN
+evidence:
+- ev
+note: 전역 no cdp run 양호. 인터페이스별 no cdp enable 은 범위 확인
+remediation: Ÿ장비별 CDP 서비스 제한 설정ŸCDP는 Cisco 전용 프로토콜이지만 일부 다른 벤더도 지원하며, CDP와 유사한 IEEE 표준인 LLDP(Link Layer Discovery Protocol, IEEE 802.1AB)도 불필요할 경우 비활성화

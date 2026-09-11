@@ -36,6 +36,7 @@ class RemoteEnvironment(BaseModel):
     privileged: bool | None = None
     shell: str | None = None
     locale: str | None = None
+    params: dict[str, str] = Field(default_factory=dict)   # 호스트별 파라미터(ORACLE_HOME 등). 네이티브 룰 env 접두
     encoding: str | None = None
     available_commands: dict[str, bool] = Field(default_factory=dict)
     incomplete: bool = False

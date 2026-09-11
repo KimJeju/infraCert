@@ -25,6 +25,7 @@ from PySide6.QtWidgets import (
 
 from infraguard.core.models import ScanResult
 from infraguard.core.status import Status
+from infraguard.rulepack.guide import format_guide
 
 # 분석자가 선택 가능한 최종 판정
 CHOICES = [("양호", Status.PASS), ("취약", Status.FAIL), ("해당없음", Status.SKIPPED)]
@@ -110,21 +111,7 @@ class ManualBenchPage(QWidget):
         if not g:
             rem = self._remediation.get(rule_id)
             return f"조치방법: {rem}" if rem else "(이 항목의 가이드 없음 — 룰팩에 guide/ 가 없거나 항목 미포함)"
-        j = g.get("judgment") or {}
-        out = []
-        if j:
-            out.append(f"양호: {j.get('good', '')}\n취약: {j.get('vuln', '')}")
-        if g.get("remediation"):
-            out.append(f"조치방법: {g['remediation']}")
-        if g.get("impact"):
-            out.append(f"조치 시 영향: {g['impact']}")
-        for pr in g.get("procedures") or []:
-            out.append(f"[{pr.get('platform', '')}]")
-            for k, v in (pr.get("variants") or {}).items():
-                out.append(f"  ({k})")
-                out.extend("   " + st for st in v.get("steps") or [])
-            out.extend("  " + st for st in pr.get("steps") or [])
-        return "\n".join(out)
+        return format_guide(g)
 
     def load(self, scan: ScanResult | None) -> None:
         self._scan = scan

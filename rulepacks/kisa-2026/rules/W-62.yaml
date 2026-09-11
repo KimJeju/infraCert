@@ -1,0 +1,17 @@
+# W-62 시작 프로그램 목록 분석 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-62
+name: 시작 프로그램 목록 분석
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: st
+  cmd: Get-CimInstance Win32_StartupCommand -ErrorAction SilentlyContinue | Select-Object Name,Command,Location | Format-Table -AutoSize | Out-String -Width 200
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- st

@@ -1,0 +1,18 @@
+# W-03 불필요한 계정 제거 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-03
+name: 불필요한 계정 제거
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: users
+  cmd: Get-LocalUser | Select-Object Name,Enabled,LastLogon,Description | Format-Table -AutoSize | Out-String -Width 200
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- users
+note: 계정 목록을 보고 퇴직·테스트 계정 여부를 분석자가 판단

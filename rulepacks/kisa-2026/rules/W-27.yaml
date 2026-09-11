@@ -1,0 +1,22 @@
+# W-27 최신 Windows OS Build 버전 적용 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-27
+name: 최신 Windows OS Build 버전 적용
+severity: 상
+category: 패치관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: os
+  cmd: $o=Get-CimInstance Win32_OperatingSystem; $o.Caption+' '+$o.Version+' build '+$o.BuildNumber
+  timeout: 60
+- key: hf
+  cmd: Get-HotFix -ErrorAction SilentlyContinue | Sort-Object InstalledOn | Select-Object -Last 5 HotFixID,InstalledOn | Format-Table -AutoSize | Out-String
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- os
+- hf
+note: 빌드·핫픽스 목록을 벤더 최신과 대조

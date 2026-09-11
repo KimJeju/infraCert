@@ -1,0 +1,31 @@
+# D-04 데이터베이스 관리자 권한을 꼭 필요한 계정 및 그룹에 대해서만 허용 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-04
+name: 데이터베이스 관리자 권한을 꼭 필요한 계정 및 그룹에 대해서만 허용
+severity: 상
+category: 계정관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT grantee FROM dba_role_privs WHERE granted_role='"'"'DBA'"'"' AND grantee NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"');' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      absent: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- q
+note: SYS/SYSTEM 외 DBA 롤 보유자는 필요성 판단
+remediation: 관리자 권한이 필요한 계정 및 그룹에만 관리자 권한 부여

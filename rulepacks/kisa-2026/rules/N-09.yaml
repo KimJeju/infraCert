@@ -1,0 +1,29 @@
+# N-09 불필요한 보조 입출력 포트 사용 금지 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-09
+name: 불필요한 보조 입출력 포트 사용 금지
+severity: 중
+category: 접근관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+extract:
+- from: cfg
+  regex: (?s)(?P<aux>^line aux.*?(?=^line |^!|\Z))
+verdict:
+- when:
+    aux:
+      regex: no exec|transport input none
+  then: GOOD
+- when:
+    aux:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- cfg
+note: line aux 에 no exec 또는 transport input none
+remediation: 불필요한 포트 및 인터페이스 사용 제한 또는 비활성화

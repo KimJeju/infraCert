@@ -1,0 +1,21 @@
+# W-53 이동식 미디어 포맷 및 꺼내기 허용 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-53
+name: 이동식 미디어 포맷 및 꺼내기 허용
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon' -Name 'AllocateDASD' -ErrorAction SilentlyContinue).'AllocateDASD'
+  timeout: 60
+verdict:
+- when:
+    v:
+      regex: ^[12]$
+  then: VULN
+- else: GOOD
+evidence:
+- v
+note: 값 없음/0 = Administrators 만

@@ -1,0 +1,34 @@
+# W-16 공유 권한 및 사용자 그룹 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-16
+name: 공유 권한 및 사용자 그룹 설정
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: sh
+  cmd: Get-SmbShare -ErrorAction SilentlyContinue | Where-Object {$_.Name -notmatch '\$$'} | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: acl
+  cmd: Get-SmbShare -ErrorAction SilentlyContinue | Where-Object {$_.Name -notmatch '\$$'} | Get-SmbShareAccess -ErrorAction SilentlyContinue | Select-Object Name,AccountName,AccessRight | Format-Table
+    -AutoSize | Out-String -Width 200
+  timeout: 60
+verdict:
+- when:
+    sh_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    sh:
+      absent: true
+  then: GOOD
+- when:
+    acl:
+      regex: (?i)Everyone
+  then: VULN
+- else: GOOD
+evidence:
+- sh
+- acl
+note: 일반 공유 없음 또는 공유 권한에 Everyone 없음

@@ -68,6 +68,21 @@ note: "기준: 소유자 root, 권한 644 이하"
 - 룰 파일은 `manifest.yaml` 의 `rule_files` 에 SHA-256 으로 등록돼야 한다. 미등록·불일치는 실행 차단.
 - OS 분기·PAM 파싱처럼 선언형으로 어색한 룰은 `src/infraguard/rules/*.py` 에 파이썬으로 두고 같은 id 로 등록한다. 스키마 정본은 `rules/declarative.py` 의 pydantic 모델.
 
+## 플랫폼별 네이티브 점검 (Unix · Windows · Oracle · Cisco)
+
+자산의 **플랫폼**이 전송 계층을 고른다(`ui/workers.build_connection`). 룰은 전부 선언형 YAML 이고 `shell:` 로 명령 종류를 정한다.
+
+| 자산 플랫폼 | 전송 | 룰 shell | 프로파일 | 룰 |
+|---|---|---|---|---|
+| linux / unix | SSH exec | `sh` | linux-native · aix-native | U-01~67 (YAML 61 + 파이썬 6) |
+| windows / pc | WinRM(pywinrm, NTLM, 5985/5986) | `powershell` | windows-native | W-01~64 (조회 전용; secedit 전용 정책은 수동확인) |
+| linux/unix + `ORACLE_HOME`·`ORACLE_SID` 파라미터 | SSH exec → `sqlplus / as sysdba` | `sh` | oracle-native | D-01~26 (SELECT 만; MSSQL 전용 항목은 NA) |
+| network | SSH 대화형 셸(장비 CLI) | `raw` | cisco-native | N-01~38 (Cisco IOS `show` 만, running-config 세션 캐시) |
+
+- `sh` 룰은 호스트 파라미터를 `env K=V` 접두로 받는다(값은 `validate_env` 통과분만). PowerShell/장비 출력의 CRLF 는 평가기가 정규화한다.
+- Windows 룰은 이 개발기(Win11)에서 `transport/local.LocalConnection` 으로 64개 전부 실행 검증했다(예외 0). Oracle·Cisco 는 canned 출력 테스트만 — 실장비 검증 대기.
+- Junos 는 룰 platforms 에 없어 플랫폼 불일치 SKIPPED 로 드러난다. 생성기: `scripts/gen_rules_{windows,oracle,netdev}.py`.
+
 ## 부분 룰팩 — 고객사 자산에 맞는 항목만 가지고 다닌다
 
 전 항목(380)을 반입할 필요가 없다. 컨설턴트가 PC 에서 필요한 번들·룰만 골라 zip 을 만들고, 툴의 **룰팩 탭 → 룰팩 가져오기(.zip)** 로 올린다.

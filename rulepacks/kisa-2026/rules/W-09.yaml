@@ -1,0 +1,35 @@
+# W-09 비밀번호 관리 정책 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-09
+name: 비밀번호 관리 정책 설정
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: acc
+  cmd: net accounts | ForEach-Object { $_ }
+  timeout: 60
+extract:
+- from: acc
+  regex: (?im)^\s*(?:Minimum password length|최소 암호 길이)[^:]*:\s*(?P<minlen>\S+)
+  missing: MANUAL
+- from: acc
+  regex: (?im)^\s*(?:Maximum password age|최대 암호 사용 기간)[^:]*:\s*(?P<maxage>\S+)
+- from: acc
+  regex: (?im)^\s*(?:Minimum password age|최소 암호 사용 기간)[^:]*:\s*(?P<minage>\S+)
+- from: acc
+  regex: (?im)^\s*(?:Length of password history|암호 기록 유지)[^:]*:\s*(?P<hist>\S+)
+verdict:
+- when:
+    minlen:
+      ge: 8
+    maxage:
+      le: 90
+    minage:
+      ge: 1
+  then: GOOD
+- else: VULN
+evidence:
+- acc
+note: '기준: 최소 길이 8, 최대 사용 90일, 최소 사용 1일. 복잡성 정책은 secedit 없이 조회 불가 → 별도 확인'

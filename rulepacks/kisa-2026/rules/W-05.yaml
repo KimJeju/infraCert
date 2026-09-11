@@ -1,0 +1,18 @@
+# W-05 해독 가능한 암호화를 사용하여 암호 저장 해제 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-05
+name: 해독 가능한 암호화를 사용하여 암호 저장 해제
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: acc
+  cmd: net accounts | ForEach-Object { $_ }
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- acc
+note: ClearTextPassword 정책은 secedit 내보내기(파일 생성) 없이 읽을 수 없어 로컬 보안 정책에서 직접 확인

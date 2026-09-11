@@ -1,0 +1,24 @@
+# W-51 SAM 계정과 공유의 익명 열거 허용 안 함 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-51
+name: SAM 계정과 공유의 익명 열거 허용 안 함
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'RestrictAnonymous' -ErrorAction SilentlyContinue).'RestrictAnonymous'
+  timeout: 60
+verdict:
+- when:
+    v:
+      eq: '1'
+  then: GOOD
+- when:
+    v:
+      eq: '0'
+  then: VULN
+- else: MANUAL
+evidence:
+- v

@@ -1,0 +1,29 @@
+# N-01 비밀번호 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-01
+name: 비밀번호 설정
+severity: 상
+category: 계정관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include ^enable|^username|^ line|^line
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^enable secret
+  then: GOOD
+- when:
+    cfg:
+      regex: (?m)^enable password
+  then: MANUAL
+- else: VULN
+evidence:
+- ev
+note: enable secret 이면 양호. enable password 만 있으면 기본값 변경 여부 확인
+remediation: 기본 비밀번호를 관리기관의 비밀번호 작성규칙을 준용하여 변경

@@ -1,0 +1,29 @@
+# W-46 SAM 파일 접근 통제 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-46
+name: SAM 파일 접근 통제 설정
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: acl
+  cmd: icacls "$env:SystemRoot\System32\config\SAM" 2>&1 | Out-String
+  timeout: 60
+verdict:
+- when:
+    acl_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    acl:
+      regex: (?im)^\s*(?!.*(Administrators|SYSTEM|관리자|성공|processed|파일을|Successfully))\S.*:\(
+  then: VULN
+- when:
+    acl:
+      regex: (?i)Administrators|SYSTEM
+  then: GOOD
+- else: MANUAL
+evidence:
+- acl
+note: Administrators·SYSTEM 외 ACE 가 있으면 취약

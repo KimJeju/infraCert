@@ -1,0 +1,34 @@
+# N-04 계정 잠금 임계값 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-04
+name: 계정 잠금 임계값 설정
+severity: 상
+category: 계정관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include login block-for|max-fail
+  timeout: 60
+extract:
+- from: cfg
+  regex: (?m)^login block-for \d+ attempts (?P<n>\d+)
+- from: cfg
+  regex: (?m)^aaa local authentication attempts max-fail (?P<m>\d+)
+verdict:
+- when:
+    n:
+      le: 5
+  then: GOOD
+- when:
+    m:
+      le: 5
+  then: GOOD
+- else: VULN
+evidence:
+- ev
+note: login block-for … attempts N 또는 aaa local authentication attempts max-fail N, N≤5
+remediation: 로그인 실패 임계값을 5회 이하로 설정

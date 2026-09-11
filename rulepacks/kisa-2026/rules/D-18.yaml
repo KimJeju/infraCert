@@ -1,0 +1,31 @@
+# D-18 응용프로그램 또는 DBA 계정의 Role이 Public으로 설정되지 않도록 조정 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-18
+name: 응용프로그램 또는 DBA 계정의 Role이 Public으로 설정되지 않도록 조정
+severity: 상
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT granted_role FROM dba_role_privs WHERE grantee='"'"'PUBLIC'"'"';' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      absent: true
+  then: GOOD
+- else: VULN
+evidence:
+- q
+note: PUBLIC 에 부여된 롤이 없어야 양호
+remediation: DBA 계정의 Role 설정에서 Public 그룹 권한 취소

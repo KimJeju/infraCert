@@ -1,0 +1,32 @@
+# W-30 SNMP Community String 복잡성 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-30
+name: SNMP Community String 복잡성 설정
+severity: 중
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: Get-Service -Name SNMP -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: comm
+  cmd: (Get-Item -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Services\SNMP\Parameters\ValidCommunities' -ErrorAction SilentlyContinue).Property
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: GOOD
+- when:
+    comm:
+      regex: (?im)^(public|private)$
+  then: VULN
+- when:
+    comm:
+      exists: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- svc
+- comm

@@ -1,0 +1,31 @@
+# D-01 기본 계정의 비밀번호, 정책 등을 변경하여 사용 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-01
+name: 기본 계정의 비밀번호, 정책 등을 변경하여 사용
+severity: 상
+category: 계정관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT username FROM dba_users_with_defpwd WHERE username IN (SELECT username FROM dba_users WHERE account_status='"'"'OPEN'"'"');' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      absent: true
+  then: GOOD
+- else: VULN
+evidence:
+- q
+note: 기본 비밀번호를 그대로 쓰는 OPEN 계정(dba_users_with_defpwd)이 없으면 양호
+remediation: 기본(관리자) 계정의 초기 비밀번호 및 권한 정책 변경

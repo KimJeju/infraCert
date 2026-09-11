@@ -1,0 +1,28 @@
+# W-06 관리자 그룹에 최소한의 사용자 포함 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-06
+name: 관리자 그룹에 최소한의 사용자 포함
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: adm
+  cmd: Get-LocalGroupMember -SID S-1-5-32-544 | Select-Object -ExpandProperty Name
+  timeout: 60
+extract:
+- from: adm
+  lines: n
+verdict:
+- when:
+    adm_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    n:
+      le: 1
+  then: GOOD
+- else: MANUAL
+evidence:
+- adm
+note: Administrators 구성원 1명 이하면 양호, 그 이상은 필요성 판단

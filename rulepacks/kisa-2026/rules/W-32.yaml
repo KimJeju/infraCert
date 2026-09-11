@@ -1,0 +1,32 @@
+# W-32 DNS 서비스 구동 점검 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-32
+name: DNS 서비스 구동 점검
+severity: 중
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: Get-Service -Name DNS -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: dyn
+  cmd: Get-DnsServerZone -ErrorAction SilentlyContinue | Where-Object {-not $_.IsAutoCreated} | Select-Object ZoneName,DynamicUpdate | Format-Table -AutoSize | Out-String -Width 200
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: GOOD
+- when:
+    dyn:
+      regex: NonsecureAndSecure
+  then: VULN
+- when:
+    dyn:
+      regex: \bNone\b|\bSecure\b
+  then: GOOD
+- else: MANUAL
+evidence:
+- svc
+- dyn

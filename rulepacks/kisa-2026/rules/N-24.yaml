@@ -1,0 +1,26 @@
+# N-24 사용하지 않는 인터페이스 비활성화 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-24
+name: 사용하지 않는 인터페이스 비활성화
+severity: 상
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: br
+  cmd: show ip interface brief
+  timeout: 30
+verdict:
+- when:
+    br:
+      regex: (?mi)\s+down\s+down\s*$
+  then: VULN
+- when:
+    br:
+      exists: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- br
+note: '''down down''(shutdown 아닌 미사용 링크다운)이 있으면 취약. administratively down 은 양호'
+remediation: 네트워크 장비에서 사용하지 않는 모든 인터페이스 비활성화 설정

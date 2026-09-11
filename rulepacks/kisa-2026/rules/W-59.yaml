@@ -1,0 +1,25 @@
+# W-59 LAN Manager 인증 수준 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-59
+name: LAN Manager 인증 수준
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'LmCompatibilityLevel' -ErrorAction SilentlyContinue).'LmCompatibilityLevel'
+  timeout: 60
+verdict:
+- when:
+    v:
+      ge: 3
+  then: GOOD
+- when:
+    v:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- v
+note: '기준: 3 이상(NTLMv2 응답만 보냄). 값 없음은 OS 기본값(2008R2+ 는 3)이라 확인'

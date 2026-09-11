@@ -1,0 +1,21 @@
+# W-24 FTP 접근 제어 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-24
+name: FTP 접근 제어 설정
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: svc
+  cmd: Get-Service -Name ftpsvc,MSFTPSVC -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: NA
+- else: MANUAL
+evidence:
+- svc

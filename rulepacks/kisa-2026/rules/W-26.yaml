@@ -1,0 +1,29 @@
+# W-26 RDS(Remote Data Services)제거 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-26
+name: RDS(Remote Data Services)제거
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: major
+  cmd: '[Environment]::OSVersion.Version.Major'
+  timeout: 60
+- key: iis
+  cmd: Get-Service -Name W3SVC -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- when:
+    iis:
+      absent: true
+  then: GOOD
+- when:
+    major:
+      ge: 6
+  then: GOOD
+- else: MANUAL
+evidence:
+- major
+- iis
+note: IIS 미사용 또는 Windows 2008 이상이면 양호

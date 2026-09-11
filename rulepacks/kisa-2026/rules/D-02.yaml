@@ -1,0 +1,32 @@
+# D-02 데이터베이스의 불필요 계정을 제거하거나, 잠금설정 후 사용 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-02
+name: 데이터베이스의 불필요 계정을 제거하거나, 잠금설정 후 사용
+severity: 상
+category: 계정관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT username||'"'"':'"'"'||account_status FROM dba_users WHERE username IN ('"'"'SCOTT'"'"','"'"'HR'"'"','"'"'OE'"'"','"'"'SH'"'"','"'"'PM'"'"','"'"'IX'"'"','"'"'BI'"'"','"'"'ADAMS'"'"','"'"'JONES'"'"','"'"'CLARK'"'"','"'"'BLAKE'"'"')
+    AND account_status LIKE '"'"'OPEN%'"'"';' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      absent: true
+  then: GOOD
+- else: VULN
+evidence:
+- q
+note: 데모 계정이 OPEN 이면 취약
+remediation: 계정별 용도를 파악한 후 불필요한 계정 삭제

@@ -1,0 +1,32 @@
+# W-47 화면 보호기 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-47
+name: 화면 보호기 설정
+severity: 하
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: ss
+  cmd: $p=Get-ItemProperty -LiteralPath 'HKCU:\Control Panel\Desktop' -ErrorAction SilentlyContinue; foreach($n in @('ScreenSaveActive','ScreenSaveTimeOut','ScreenSaverIsSecure')){ "$n=$($p.$n)" }
+  timeout: 60
+extract:
+- from: ss
+  regex: (?m)^ScreenSaveActive=(?P<act>.*)$
+- from: ss
+  regex: (?m)^ScreenSaveTimeOut=(?P<to>.*)$
+- from: ss
+  regex: (?m)^ScreenSaverIsSecure=(?P<sec>.*)$
+verdict:
+- when:
+    act:
+      eq: '1'
+    to:
+      le: 600
+    sec:
+      eq: '1'
+  then: GOOD
+- else: VULN
+evidence:
+- ss
+note: '접속 계정(HKCU) 기준. 기준: 사용, 10분(600초) 이하, 암호 보호'

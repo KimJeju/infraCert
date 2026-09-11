@@ -1,0 +1,28 @@
+# N-06 VTY 접근(ACL) 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-06
+name: VTY 접근(ACL) 설정
+severity: 상
+category: 접근관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+extract:
+- from: cfg
+  regex: (?s)(?P<vty>^line vty.*?(?=^line |^!|\Z))
+verdict:
+- when:
+    vty:
+      regex: access-class
+  then: GOOD
+- when:
+    vty:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- cfg
+remediation: 가상 터미널(VTY)에 특정 IP주소만 접근할 수 있도록 설정

@@ -1,0 +1,24 @@
+# W-43 이벤트 로그 파일 접근 통제 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-43
+name: 이벤트 로그 파일 접근 통제 설정
+severity: 중
+category: 로그관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: acl
+  cmd: icacls "$env:SystemRoot\System32\winevt\Logs" 2>&1 | Out-String
+  timeout: 60
+verdict:
+- when:
+    acl_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    acl:
+      regex: (?i)Everyone
+  then: VULN
+- else: GOOD
+evidence:
+- acl

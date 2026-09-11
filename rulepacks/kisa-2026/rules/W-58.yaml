@@ -1,0 +1,25 @@
+# W-58 사용자별 홈 디렉터리 권한 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-58
+name: 사용자별 홈 디렉터리 권한 설정
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: acl
+  cmd: Get-ChildItem "$env:SystemDrive\Users" -Directory -ErrorAction SilentlyContinue | Where-Object {$_.Name -notin @('Public','Default','Default User','All Users')} | ForEach-Object { icacls $_.FullName
+    2>&1 } | Out-String -Width 200
+  timeout: 60
+verdict:
+- when:
+    acl_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    acl:
+      regex: (?i)Everyone
+  then: VULN
+- else: GOOD
+evidence:
+- acl

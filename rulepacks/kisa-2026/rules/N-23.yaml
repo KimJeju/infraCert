@@ -1,0 +1,21 @@
+# N-23 DDoS 공격 방어 설정 또는 DDoS 장비 사용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-23
+name: DDoS 공격 방어 설정 또는 DDoS 장비 사용
+severity: 상
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+manual: true
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include tcp intercept|rate-limit|police|control-plane
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- ev
+remediation: DDoS 공격 방어 설정 점검

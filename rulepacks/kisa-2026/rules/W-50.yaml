@@ -1,0 +1,21 @@
+# W-50 보안 감사를 로그 할 수 없는 경우 즉시 시스템 종료 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-50
+name: 보안 감사를 로그 할 수 없는 경우 즉시 시스템 종료
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'CrashOnAuditFail' -ErrorAction SilentlyContinue).'CrashOnAuditFail'
+  timeout: 60
+verdict:
+- when:
+    v:
+      regex: ^[12]$
+  then: VULN
+- else: GOOD
+evidence:
+- v
+note: 값 없음 = 기본값 0(사용 안 함)

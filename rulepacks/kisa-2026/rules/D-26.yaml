@@ -1,0 +1,45 @@
+# D-26 데이터베이스의 접근, 변경, 삭제 등의 감사 기록이 기관의 감사 기록 정책에 적합하도록 설정 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-26
+name: 데이터베이스의 접근, 변경, 삭제 등의 감사 기록이 기관의 감사 기록 정책에 적합하도록 설정
+severity: 상
+category: 로그관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT value FROM v$parameter WHERE name='"'"'audit_trail'"'"';' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+- key: uni
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT count(*) FROM audit_unified_enabled_policies;' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      regex: (?i)^NONE$
+    uni:
+      eq: '0'
+  then: VULN
+- when:
+    q:
+      regex: (?i)DB|OS|XML
+  then: GOOD
+- when:
+    uni:
+      gt: 0
+  then: GOOD
+- else: MANUAL
+evidence:
+- q
+- uni
+note: audit_trail 이 NONE 이고 통합감사 정책도 0개면 취약
+remediation: DBMS에 대한 감사 로그 저장 정책 수립, 적용

@@ -1,0 +1,28 @@
+# W-57 로그온 시 경고 메시지 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-57
+name: 로그온 시 경고 메시지 설정
+severity: 하
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: t
+  cmd: $p=Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -ErrorAction SilentlyContinue; foreach($n in @('LegalNoticeCaption','LegalNoticeText')){ "$n=$($p.$n)"
+    }
+  timeout: 60
+extract:
+- from: t
+  regex: (?m)^LegalNoticeCaption=(?P<cap>.*)$
+- from: t
+  regex: (?m)^LegalNoticeText=(?P<txt>.*)$
+verdict:
+- when:
+    cap:
+      regex: \S
+    txt:
+      regex: \S
+  then: GOOD
+- else: VULN
+evidence:
+- t

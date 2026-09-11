@@ -1,0 +1,29 @@
+# W-34 Telnet 서비스 비활성화 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-34
+name: Telnet 서비스 비활성화
+severity: 중
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: Get-Service -Name TlntSvr -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: auth
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\TelnetServer\1.0' -Name 'NTLM' -ErrorAction SilentlyContinue).'NTLM'
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: GOOD
+- when:
+    auth:
+      eq: '2'
+  then: GOOD
+- else: VULN
+evidence:
+- svc
+- auth
+note: Telnet 미실행 또는 NTLM 전용 인증(NTLM=2)

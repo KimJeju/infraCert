@@ -1,0 +1,29 @@
+# W-01 Administrator 계정 이름 변경 등 보안성 강화 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-01
+name: Administrator 계정 이름 변경 등 보안성 강화
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: adm
+  cmd: Get-LocalUser | Where-Object {$_.SID -like '*-500'} | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- when:
+    adm_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    adm:
+      eq: Administrator
+  then: VULN
+- when:
+    adm:
+      exists: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- adm
+note: RID 500 계정명이 Administrator 그대로면 취약. 비밀번호 강도는 별도 확인

@@ -1,0 +1,25 @@
+# N-03 암호화된 비밀번호 사용 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-03
+name: 암호화된 비밀번호 사용
+severity: 상
+category: 계정관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include password-encryption|^enable
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?ms)(?=.*^service password-encryption)(?=.*^enable secret)
+  then: GOOD
+- else: VULN
+evidence:
+- ev
+note: service password-encryption + enable secret
+remediation: 비밀번호 암호화 설정 적용

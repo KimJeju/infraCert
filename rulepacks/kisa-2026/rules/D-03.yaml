@@ -1,0 +1,36 @@
+# D-03 비밀번호 사용 기간 및 복잡도를 기관의 정책에 맞도록 설정 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-03
+name: 비밀번호 사용 기간 및 복잡도를 기관의 정책에 맞도록 설정
+severity: 상
+category: 계정관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT resource_name||'"'"'='"'"'||limit FROM dba_profiles WHERE profile='"'"'DEFAULT'"'"' AND resource_name IN ('"'"'PASSWORD_LIFE_TIME'"'"','"'"'PASSWORD_VERIFY_FUNCTION'"'"');'
+    | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      regex: PASSWORD_LIFE_TIME=UNLIMITED|PASSWORD_VERIFY_FUNCTION=NULL
+  then: VULN
+- when:
+    q:
+      regex: PASSWORD_LIFE_TIME=\d+
+  then: GOOD
+- else: MANUAL
+evidence:
+- q
+note: DEFAULT 프로파일 기준. 다른 프로파일을 쓰면 별도 확인
+remediation: 기관 정책에 맞게 비밀번호 사용 기간 및 복잡도 정책 설정

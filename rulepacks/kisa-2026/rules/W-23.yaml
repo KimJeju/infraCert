@@ -1,0 +1,31 @@
+# W-23 공유 서비스에 대한 익명 접근 제한 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-23
+name: 공유 서비스에 대한 익명 접근 제한 설정
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: Get-Service -Name ftpsvc,MSFTPSVC -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Lsa' -Name 'RestrictAnonymous' -ErrorAction SilentlyContinue).'RestrictAnonymous'
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+    v:
+      eq: '1'
+  then: GOOD
+- when:
+    svc:
+      absent: true
+  then: MANUAL
+- else: MANUAL
+evidence:
+- svc
+- v
+note: FTP 익명 인증은 IIS 설정 확인. 공유 익명 접근은 RestrictAnonymous=1

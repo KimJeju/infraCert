@@ -1,0 +1,25 @@
+# N-38 mask-reply 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-38
+name: mask-reply 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include mask-reply
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^\s+ip mask-reply
+  then: VULN
+- else: GOOD
+evidence:
+- ev
+note: 기본 비활성
+remediation: 각 인터페이스에서 mask-reply 비활성화

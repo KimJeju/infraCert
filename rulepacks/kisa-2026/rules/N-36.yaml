@@ -1,0 +1,25 @@
+# N-36 Domain Lookup 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-36
+name: Domain Lookup 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include domain-lookup|domain lookup
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^no ip domain[- ]lookup
+  then: GOOD
+- else: VULN
+evidence:
+- ev
+note: 기본 활성 → no ip domain-lookup 필요
+remediation: Domain Lookup 비활성화

@@ -171,6 +171,25 @@ class MainWindow(QMainWindow):
             f"저장됨: {path}\n번들 {st['bundles']} · 네이티브 룰 {st['native']} · 항목 메타 {st['rules_meta']} · 가이드 {st['guide']}",
         )
 
+    def _delete_rulepack(self, name: str) -> None:
+        import shutil
+
+        root = rp_loader.rulepacks_root().resolve()
+        target = (root / name).resolve() if name else None
+        if not name or target.parent != root or not target.exists():
+            return
+        if self._scanning:
+            QMessageBox.information(self, "룰팩 삭제", "진단 중에는 삭제할 수 없습니다.")
+            return
+        if QMessageBox.question(self, "룰팩 삭제", f"'{name}' 폴더를 완전히 지울까요?\n{target}") \
+                != QMessageBox.StandardButton.Yes:
+            return
+        shutil.rmtree(target)
+        self.pack = self._load_rulepack()
+        self.ctx.config["rulepack"] = self.pack.name if self.pack else ""
+        config.save(self.ctx.config)
+        self._refresh_profiles()
+
     def _refresh_profiles(self) -> None:
         self.rulepack.set_packs([p.name for p in rp_loader.list_packs()], self.pack.name if self.pack else None)
         self.rulepack.load(self.pack)
@@ -260,6 +279,7 @@ class MainWindow(QMainWindow):
         self.rulepack.profiles_changed.connect(self._refresh_profiles)
         self.rulepack.import_requested.connect(self._import_rulepack)
         self.rulepack.build_requested.connect(self._build_rulepack)
+        self.rulepack.delete_requested.connect(self._delete_rulepack)
         self.rulepack.pack_selected.connect(self._switch_rulepack)
         self.tabs.addTab(self.rulepack, "룰팩")
         pk_label = f"{self.pack.name} {self.pack.version}" if self.pack else "(없음)"
@@ -636,10 +656,11 @@ class MainWindow(QMainWindow):
         from pathlib import Path
         try:
             rem = self.pack.remediation_map() if self.pack else {}
+            crit = self.pack.criteria_map() if self.pack else {}
             if fmt == "xlsx":
-                xlsx_report.build(scan, Path(path), rem)
+                xlsx_report.build(scan, Path(path), rem, crit)
             else:
-                html_report.build(scan, Path(path), rem)
+                html_report.build(scan, Path(path), rem, crit)
             self._unexported = False
             QMessageBox.information(self, "내보내기", f"저장됨: {path}")
         except Exception as e:  # noqa: BLE001

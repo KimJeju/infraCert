@@ -1,0 +1,29 @@
+# W-63 도메인 컨트롤러-사용자의 시간 동기화 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-63
+name: 도메인 컨트롤러-사용자의 시간 동기화
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: t
+  cmd: $p=Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Services\W32Time\Config' -ErrorAction SilentlyContinue; foreach($n in @('MaxPosPhaseCorrection','MaxNegPhaseCorrection')){ "$n=$($p.$n)"
+    }
+  timeout: 60
+extract:
+- from: t
+  regex: (?m)^MaxPosPhaseCorrection=(?P<pos>.*)$
+- from: t
+  regex: (?m)^MaxNegPhaseCorrection=(?P<neg>.*)$
+verdict:
+- when:
+    pos:
+      le: 300
+    neg:
+      le: 300
+  then: GOOD
+- else: VULN
+evidence:
+- t
+note: '기준: 최대 허용 오차 5분(300초) 이하'

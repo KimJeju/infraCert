@@ -1,0 +1,21 @@
+# W-15 사용자 개인키 사용 시 암호 입력 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-15
+name: 사용자 개인키 사용 시 암호 입력
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Cryptography' -Name 'ForceKeyProtection' -ErrorAction SilentlyContinue).'ForceKeyProtection'
+  timeout: 60
+verdict:
+- when:
+    v:
+      eq: '2'
+  then: GOOD
+- else: VULN
+evidence:
+- v
+note: '기준: ForceKeyProtection=2(항상 암호 입력)'

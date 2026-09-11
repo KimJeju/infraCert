@@ -1,0 +1,25 @@
+# N-28 TCP/UDP small 서비스 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-28
+name: TCP/UDP small 서비스 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include small-servers
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^service (tcp|udp)-small-servers
+  then: VULN
+- else: GOOD
+evidence:
+- ev
+note: IOS 12 이후 기본 비활성
+remediation: TCP/UDP Small Service 제한 설정

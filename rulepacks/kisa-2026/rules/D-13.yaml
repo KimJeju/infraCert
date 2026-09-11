@@ -1,0 +1,20 @@
+# D-13 불필요한 ODBC/OLE-DB 데이터 소스와 드라이브를 제거하여 사용 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-13
+name: 불필요한 ODBC/OLE-DB 데이터 소스와 드라이브를 제거하여 사용
+severity: 중
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: x
+  cmd: 'true'
+  timeout: 90
+verdict:
+- else: NA
+evidence:
+- x
+note: Unix 호스트의 Oracle 에는 ODBC/OLE-DB 드라이버 개념이 없음. 클라이언트 PC 에서 확인
+remediation: 불필요한 ODBC/OLE-DB 제거

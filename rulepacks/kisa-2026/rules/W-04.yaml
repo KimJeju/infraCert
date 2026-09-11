@@ -1,0 +1,29 @@
+# W-04 계정 잠금 임계값 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-04
+name: 계정 잠금 임계값 설정
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: acc
+  cmd: net accounts | ForEach-Object { $_ }
+  timeout: 60
+extract:
+- from: acc
+  regex: (?im)^\s*(?:Lockout threshold|잠금 임계값)[^:]*:\s*(?P<lock>\S+)
+  missing: MANUAL
+verdict:
+- when:
+    lock:
+      regex: ^(?:Never|안|없음)
+  then: VULN
+- when:
+    lock:
+      le: 5
+  then: GOOD
+- else: VULN
+evidence:
+- acc
+note: '기준: 잠금 임계값 5 이하'

@@ -1,0 +1,39 @@
+# W-36 원격터미널 접속 타임아웃 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-36
+name: 원격터미널 접속 타임아웃 설정
+severity: 중
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: deny
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -ErrorAction SilentlyContinue).'fDenyTSConnections'
+  timeout: 60
+- key: pol
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services' -Name 'MaxIdleTime' -ErrorAction SilentlyContinue).'MaxIdleTime'
+  timeout: 60
+- key: tcp
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' -Name 'MaxIdleTime' -ErrorAction SilentlyContinue).'MaxIdleTime'
+  timeout: 60
+verdict:
+- when:
+    deny:
+      eq: '1'
+  then: GOOD
+- when:
+    pol:
+      gt: 0
+      le: 1800000
+  then: GOOD
+- when:
+    tcp:
+      gt: 0
+      le: 1800000
+  then: GOOD
+- else: VULN
+evidence:
+- deny
+- pol
+- tcp
+note: '기준: 유휴 세션 제한 30분(1800000ms) 이하. 원격 데스크톱 미사용이면 양호'

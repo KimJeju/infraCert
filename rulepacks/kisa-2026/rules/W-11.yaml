@@ -1,0 +1,22 @@
+# W-11 로컬 로그온 허용 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-11
+name: 로컬 로그온 허용
+severity: 중
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: adm
+  cmd: Get-LocalGroupMember -SID S-1-5-32-544 | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: usr
+  cmd: Get-LocalGroupMember -SID S-1-5-32-545 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- else: MANUAL
+evidence:
+- adm
+- usr
+note: SeInteractiveLogonRight 는 secedit 없이 조회 불가 — 그룹 구성원만 근거로

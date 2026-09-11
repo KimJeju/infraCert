@@ -1,0 +1,21 @@
+# W-21 암호화되지 않는 FTP 서비스 비활성화 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-21
+name: 암호화되지 않는 FTP 서비스 비활성화
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: Get-Service -Name ftpsvc,MSFTPSVC -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- svc
+note: FTP 실행 중이면 Secure FTP(TLS) 여부 확인

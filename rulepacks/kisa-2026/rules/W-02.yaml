@@ -1,0 +1,24 @@
+# W-02 Guest 계정 비활성화 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-02
+name: Guest 계정 비활성화
+severity: 상
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: g
+  cmd: (Get-LocalUser | Where-Object {$_.SID -like '*-501'}).Enabled
+  timeout: 60
+verdict:
+- when:
+    g:
+      eq: 'False'
+  then: GOOD
+- when:
+    g:
+      eq: 'True'
+  then: VULN
+- else: MANUAL
+evidence:
+- g

@@ -1,0 +1,33 @@
+# N-07 Session Timeout 설정 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-07
+name: Session Timeout 설정
+severity: 상
+category: 접근관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+extract:
+- from: cfg
+  regex: (?s)(?P<vty>^line vty.*?(?=^line |^!|\Z))
+verdict:
+- when:
+    vty:
+      regex: exec-timeout 0 0
+  then: VULN
+- when:
+    vty:
+      regex: 'exec-timeout (?:1[1-9]|[2-9]\d|\d{3,}) '
+  then: VULN
+- when:
+    vty:
+      exists: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- cfg
+note: 기준 10분 이하. 설정 없음 = IOS 기본 10분(양호), exec-timeout 0 0 은 무제한(취약)
+remediation: Session Timeout 설정 (10분 이하 권고)

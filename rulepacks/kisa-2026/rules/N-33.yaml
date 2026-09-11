@@ -1,0 +1,25 @@
+# N-33 Proxy ARP 차단 — Cisco IOS 선언형 룰(show 명령 전용). 생성: scripts/gen_rules_netdev.py
+id: N-33
+name: Proxy ARP 차단
+severity: 중
+category: 기능관리
+platforms:
+- cisco-ios
+shell: raw
+collect:
+- key: cfg
+  cmd: show running-config
+  timeout: 60
+- key: ev
+  cmd: show running-config | include proxy-arp|^interface
+  timeout: 60
+verdict:
+- when:
+    cfg:
+      regex: (?m)^\s+no ip proxy-arp
+  then: GOOD
+- else: VULN
+evidence:
+- ev
+note: 인터페이스별 no ip proxy-arp(기본 활성)
+remediation: 각 인터페이스에서 Proxy ARP 비활성화 설정

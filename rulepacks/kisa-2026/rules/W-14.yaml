@@ -1,0 +1,26 @@
+# W-14 원격터미널 접속 가능한 사용자 그룹 제한 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-14
+name: 원격터미널 접속 가능한 사용자 그룹 제한
+severity: 중
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+manual: true
+collect:
+- key: rdu
+  cmd: Get-LocalGroupMember -SID S-1-5-32-555 -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name
+  timeout: 60
+- key: deny
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' -Name 'fDenyTSConnections' -ErrorAction SilentlyContinue).'fDenyTSConnections'
+  timeout: 60
+verdict:
+- when:
+    deny:
+      eq: '1'
+  then: NA
+- else: MANUAL
+evidence:
+- rdu
+- deny
+note: 원격 데스크톱 비활성(fDenyTSConnections=1)이면 해당없음. Remote Desktop Users 구성원을 보고 판단

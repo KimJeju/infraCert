@@ -1,0 +1,28 @@
+# D-07 root 권한으로 서비스 구동 제한 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-07
+name: root 권한으로 서비스 구동 제한
+severity: 중
+category: 계정관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: ps
+  cmd: ps -eo user,comm 2>/dev/null | grep -E 'pmon|tnslsnr' | grep -v grep
+  timeout: 90
+verdict:
+- when:
+    ps:
+      absent: true
+  then: MANUAL
+- when:
+    ps:
+      regex: (?m)^root\s
+  then: VULN
+- else: GOOD
+evidence:
+- ps
+note: pmon/tnslsnr 이 root 로 떠 있으면 취약
+remediation: DBMS 구동 계정 변경

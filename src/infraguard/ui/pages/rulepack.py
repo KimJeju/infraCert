@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from infraguard.rulepack.guide import format_guide
 from infraguard.rulepack.loader import Profile, RulePack, save_profile
 
 ID_ROLE = int(Qt.ItemDataRole.UserRole) + 1
@@ -31,6 +32,7 @@ class RulePackPage(QWidget):
     profiles_changed = Signal()
     import_requested = Signal()          # zip 가져오기 (파일 선택·풀기는 메인윈도가)
     build_requested = Signal(list, list) # (bundles, native) 체크한 항목으로 부분 룰팩 zip
+    delete_requested = Signal(str)       # rulepacks/<name> 삭제(확인은 메인윈도가)
     pack_selected = Signal(str)          # rulepacks/<name> 전환
 
     def __init__(self) -> None:
@@ -52,6 +54,10 @@ class RulePackPage(QWidget):
         imp = QPushButton("룰팩 가져오기(.zip)")
         imp.clicked.connect(self.import_requested.emit)
         top.addWidget(imp)
+        rm = QPushButton("룰팩 삭제")
+        rm.setToolTip("현재 선택한 룰팩 폴더를 rulepacks/ 에서 지운다(가져온 부분 룰팩 정리용)")
+        rm.clicked.connect(lambda: self.delete_requested.emit(self.packs.currentData() or ""))
+        top.addWidget(rm)
         root.addLayout(top)
 
         body = QHBoxLayout()
@@ -186,6 +192,7 @@ class RulePackPage(QWidget):
                 + ({"yaml": "네이티브 룰 — 선언형 YAML (rulepacks/…/rules/, 해시 검증)",
                     "python": "네이티브 룰 — 파이썬 (앱 동봉, 분기 로직)"}.get(r.kind, "")) + "\n"
                 f"{('조치권고: ' + r.remediation) if r.remediation else ''}"
+                + (("\n\n— 가이드 —\n" + format_guide(self._pack.guide[rid])) if rid in self._pack.guide else "")
             )
 
     # ---------------------------------------------------------------- 프로파일

@@ -1,0 +1,20 @@
+# D-16 Windows 인증 모드 사용 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-16
+name: Windows 인증 모드 사용
+severity: 하
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: x
+  cmd: 'true'
+  timeout: 90
+verdict:
+- else: NA
+evidence:
+- x
+note: MSSQL 전용 항목
+remediation: Windows 인증 모드 사용

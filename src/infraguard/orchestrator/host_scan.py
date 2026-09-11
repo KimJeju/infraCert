@@ -49,6 +49,7 @@ class HostJob:
     native: list[str] = field(default_factory=list)                          # native rule ids
     manual_rules: set[str] = field(default_factory=set)
     exclude: set[str] = field(default_factory=set)
+    params: dict[str, str] = field(default_factory=dict)   # 호스트 파라미터 → RemoteEnvironment.params
 
 
 def _noop(_stage: str) -> None: ...
@@ -172,6 +173,8 @@ def scan_host(
             host.environment = conn.probe()
         except Exception as e:  # noqa: BLE001 - probe 실패가 진단 전체를 죽이지 않게
             host.environment = RemoteEnvironment(incomplete=True, notes=[f"probe 실패: {e}"])
+        if job.params:
+            host.environment = host.environment.model_copy(update={"params": dict(job.params)})
 
         for spec, provides in job.bundles:
             if should_cancel():

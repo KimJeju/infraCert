@@ -179,6 +179,134 @@ bundles:
     label: WebLogic DOMAIN_HOME (config/config.xml 상위)
     example: /u01/oracle/user_projects/domains/base_domain
 rule_files:
+- path: rules/D-01.yaml
+  sha256: eb5bd6eccae3218b7758cadd4fb30fceea623eab2eb3a0d3179d04537a505fbc
+- path: rules/D-02.yaml
+  sha256: 8c8a0fbdb2fcefa0594c4e68858a0ad5e2abe8d086029fec76788b84461450fd
+- path: rules/D-03.yaml
+  sha256: 434682161cd394926171374f45b90ec2474a17ff94ce927f1c685a0654caba7a
+- path: rules/D-04.yaml
+  sha256: 690b9edfa999c569fe075f5d02cae36540f7bc36959cac5869d1c56dba5a9625
+- path: rules/D-05.yaml
+  sha256: 4faf8eb33bfa20875851ca8e4291bc919f2db4082d5d4b07a94caa59a562469a
+- path: rules/D-06.yaml
+  sha256: e3a1c4d150fbb772d743e97208443aba8bb92699a5ba468b41db54d6c0a42a47
+- path: rules/D-07.yaml
+  sha256: 66ec39815c9c7811050a7168273bca5b6f581a6a15313b9556a5a1eecd701ddb
+- path: rules/D-08.yaml
+  sha256: a53f07c29a4ff5833d6c773c9349e84941513639f3096c3343bf913cfa4108f7
+- path: rules/D-09.yaml
+  sha256: 372d1bf5b7db6d30647abf9f0fc257e90d948f80f7f0488764e5907e7d0194b3
+- path: rules/D-10.yaml
+  sha256: 4bd2c5530b209ea993a1314b2e128e76a3b7f1d6fced6847f5e0ffca83f2a023
+- path: rules/D-11.yaml
+  sha256: bdb31bccab8075722e27647353cad363aa1a4cc4ba7c03740838b3cf63f66bf9
+- path: rules/D-12.yaml
+  sha256: ad53f47b624e14ec63ac43441bb0c8cf71de036c62da27ab780eb0f74059e7f4
+- path: rules/D-13.yaml
+  sha256: 13c04e9721f1b6563d31057462c267d2bd4612092e66c708c0a4379c31cca604
+- path: rules/D-14.yaml
+  sha256: 261b9652f06e78563761b094036636f7f8a114a1b55a6f80ab06e9e45917c30c
+- path: rules/D-15.yaml
+  sha256: a8cb7d5bfd0521ba7480dca90071eb7e923eae7b5dbca454333897614ed5b496
+- path: rules/D-16.yaml
+  sha256: 845f8eaa79ca6660cfcaf4d78fdd035c3675f124a32208e0476526d2dbdd8034
+- path: rules/D-17.yaml
+  sha256: 671df1f0c600ace4ce1ab3eade2fdd41562fea24bfb7e5e204c57d3d461b32a3
+- path: rules/D-18.yaml
+  sha256: 564aff4aee2b61f9081f66c33ec112cb5e8b5a2cd9e559df7996065f5969a54b
+- path: rules/D-19.yaml
+  sha256: 5a364996e9b8af9eacee31d47a2cdf0322048fcf3daccc342563cd704598fd59
+- path: rules/D-20.yaml
+  sha256: 560a2919102c8b5838a2460df86f1ab9654fab8be7c3e8a8d0f2486d7a3093aa
+- path: rules/D-21.yaml
+  sha256: acd3027de5078b00a94518fc5edb7435e7685f9744367d2439c08316419940bd
+- path: rules/D-22.yaml
+  sha256: 668e5873273df6ac8d02e3edbe1b74199274d6eef7ca3ac06c76fb990767b4ea
+- path: rules/D-23.yaml
+  sha256: 41b56515df93367e02844e0198207556b637ae488d8c891c6d80ca22c2deb0a6
+- path: rules/D-24.yaml
+  sha256: 2fb49bd3ba5e373866a0829b284e4a0b369e4e930170c1540cc8ee5ddcb54fa6
+- path: rules/D-25.yaml
+  sha256: 5b902bec5b2afa8d07e66df6098e4b99de1f111cdda41e52a6eee3a059f2990e
+- path: rules/D-26.yaml
+  sha256: 806a3742238061308214a8905e812cea83832bdd0ddc259d57f43e96e985b854
+- path: rules/N-01.yaml
+  sha256: 3a8a5339a2340698f54b7ce2a4c9a8f9a2fa83a16151320ed8f4c50efaa0590c
+- path: rules/N-02.yaml
+  sha256: fcf8e0b4f20e2612021a3068fc5fbb41ede0f9a667571ff27a1d2bc63156fc80
+- path: rules/N-03.yaml
+  sha256: abc9b0650f8199aeccc4293dc24a019c35e3ed7b49a508866913ef653f3b2b9d
+- path: rules/N-04.yaml
+  sha256: e23d279a3f09ac95cb953e64492319ad2de7af667797db63dbc2d35e645e9265
+- path: rules/N-05.yaml
+  sha256: cd71be4552fd6fe18d57f934ab2b60e335bb9610bfd2da0748072db156ec09c2
+- path: rules/N-06.yaml
+  sha256: 2a299fcccdbb3f39af3f645f786754ddb338c7b9ceb1209db6d89ccd7a032dce
+- path: rules/N-07.yaml
+  sha256: 0e9078fa3b7a0c62bc30a4362621822e846735af4973931c15c06a7c6d6d2055
+- path: rules/N-08.yaml
+  sha256: 52bdef16ddcab5e9929ca1600bfc9fd894c5b8e21a1f9848e25d7ffe514af75f
+- path: rules/N-09.yaml
+  sha256: 7798f917951093851dc6008aa720511e0aa3b9a7f08da86c08b3966edd3e43f2
+- path: rules/N-10.yaml
+  sha256: 1eff0f915700bf2c5de8220440f9147d73d16de4c1d0470b14e5c8b9eafdee6d
+- path: rules/N-11.yaml
+  sha256: 7d33c0e7985732941803e5b15c73dd8d808c71d2792e702047945960fc0118a5
+- path: rules/N-12.yaml
+  sha256: 3c677e0317a7e851840f8006c41e782803282f6670c035a0a6a4e37fc32d5707
+- path: rules/N-13.yaml
+  sha256: 936b451674716a788451f0006ac1e79b1daa5db9ff9bc35dddf5b90b556fb92b
+- path: rules/N-14.yaml
+  sha256: 8df169f03fe023fb84b9608bdbbf04dac01e9d1a30dff053bcec052ec98a1f0c
+- path: rules/N-15.yaml
+  sha256: decd300279211a00a0abc8a6a031a9d2d7faa6b2a3fa41dd3f6843844d0b6b9a
+- path: rules/N-16.yaml
+  sha256: b82339de44d53e5fd440b400e68fef39ae38de4d1235f712ccc33501480d580a
+- path: rules/N-17.yaml
+  sha256: 9a51da8b60421168056c688abe9e27e40719fb6c922038f0116a40bfbefc5ecb
+- path: rules/N-18.yaml
+  sha256: b32fc14c473e4951f97cc547be09f0f8f4b4bdf019d50121993f69b595f3d8d3
+- path: rules/N-19.yaml
+  sha256: b7321a562bb55913c279356ede5bb2d56655844d1d0b11730aebc532d18a44aa
+- path: rules/N-20.yaml
+  sha256: bf9b28162adf2d58fe4c2fd7dea8702c6c31981ec4bf5cf74a7cd47cbf7ac667
+- path: rules/N-21.yaml
+  sha256: fbffc91e285d01abcce8ce0c3f840139cc8dcd73a5868e4b80a5444a54d2bb9a
+- path: rules/N-22.yaml
+  sha256: e083ef60771fcf0a0ab4a45af328ef335b8909e8b214e814474a6fccf9537189
+- path: rules/N-23.yaml
+  sha256: a8d2e213076058e3389482a9d8300d4805889861d8683e12ebaa0d4422ca2f07
+- path: rules/N-24.yaml
+  sha256: 1fe6de731d7fc86faaeb9366363a52c481c43b63af9d4f9cda68b5bbb1655018
+- path: rules/N-25.yaml
+  sha256: ef9ea54de58afd1d45e7a04383a45ee3da6c96e0f07dc8d06d9c8392f79a35f8
+- path: rules/N-26.yaml
+  sha256: 1e6838b5558b0896e75cf0e77f671427e6a15d6e87b090d019f564b4529a100b
+- path: rules/N-27.yaml
+  sha256: e33ba28bf6f3fa0f95a781aaf76d2b50cc76cc6b95520bc37d43d235d8d7f414
+- path: rules/N-28.yaml
+  sha256: c81a79ac3c28f0a7b8c7ed4fb18e31ba1f422700e3b52b81ded914980ad6f2c7
+- path: rules/N-29.yaml
+  sha256: a24eb497f19df3ea35962fc61747c8bbe75e6545a083ed2c412f65d730d33ee7
+- path: rules/N-30.yaml
+  sha256: 31087df02a31e5dd6054c604f96a4f8e1f4f0bf19353665b71a4171c44c84aaf
+- path: rules/N-31.yaml
+  sha256: e60b17b593eaa5484ea993654e3674983b4c914ddc4f088493f7448b900c806c
+- path: rules/N-32.yaml
+  sha256: df57c8183c995ff86ecad8166cc3efdd51498bb362702d0e3ce360e11992eb47
+- path: rules/N-33.yaml
+  sha256: 1ca2fdb233399286baa2212faa00e7c3f5b8ea43832b3e564f8d0699060650de
+- path: rules/N-34.yaml
+  sha256: 23d5d40b8f6792c90b181699b1698d457a1bc71196512b6f9609d2dbeae17d40
+- path: rules/N-35.yaml
+  sha256: c736d2854ae6976114c1a80fd930eabe2a5259eff8a4cf9b2ed2882e2b615e38
+- path: rules/N-36.yaml
+  sha256: 0fcc9e2b5d64aca7ec830115cab958610caacf20a19aa179a7e83f837a5e3f3a
+- path: rules/N-37.yaml
+  sha256: 547ba8144e682d31d98492d6da2487c312e9e2fb67ac243471512b632f4ed376
+- path: rules/N-38.yaml
+  sha256: 581fd13bef70a5c0cd4802ab48c3ac114a4929372e1a3e6dab90fbecb02e3c6e
 - path: rules/U-05.yaml
   sha256: 4a2095980d18091221fe8741d0ab04d6fcf4db1d2e57a7495d9452fc14d6dbdb
 - path: rules/U-07.yaml
@@ -301,7 +429,199 @@ rule_files:
   sha256: 6fed1406b5152b1a46f9091523896979ba3e62b9915cf516e6ed84ad3369f11c
 - path: rules/U-67.yaml
   sha256: 7b0ae8a5b622c47323cc06326b7a536182740141ce9b35e45ce327493a806671
-native: &id001
+- path: rules/W-01.yaml
+  sha256: 9343726cb013718a307d12630276a8c7fedee8f4312515e9cb8a2d05ad9d44d3
+- path: rules/W-02.yaml
+  sha256: aaf3c410755f782056eafd5620a490e3b1a1b5a60e3e5330d11b588c3db760ee
+- path: rules/W-03.yaml
+  sha256: 473a0ccac2ea529c346c0d2671c6bb3fa13481ff35bc980bec2558ebebee024c
+- path: rules/W-04.yaml
+  sha256: 2de501d18cc9740bbaead4f6e9cd4590a88ff08d354f36b1bff1ca4feaadf00e
+- path: rules/W-05.yaml
+  sha256: 1b284a4f211248f32f80372ea01cf3542fd58f412526ea5bacf3891e491edd3f
+- path: rules/W-06.yaml
+  sha256: fb013aca81fea52ec51ec4995ff3b52709e3d0172434273c9172fe3b07b7c1a6
+- path: rules/W-07.yaml
+  sha256: a44616da0c9e32f75566143d521b51653380f681bc003b33deec10bd07d17a94
+- path: rules/W-08.yaml
+  sha256: cf241789b84630ac5dd699de1245ebac279d2ea75b497661361d60bf4ceb0bd3
+- path: rules/W-09.yaml
+  sha256: fdc82e9b60fe436f2f2d475fafa9e9ec8fb3364612c95405a3cee4b3df669344
+- path: rules/W-10.yaml
+  sha256: 08173c2b489049eeb1097cab92eee9d179f3024be95e8aee8615c19d465f88af
+- path: rules/W-11.yaml
+  sha256: 5e22b5432a9b5602967c9fafbb2df999e78e6995e5d7b722722ab79bc2c89ac1
+- path: rules/W-12.yaml
+  sha256: 5f613401ee96d0d1b1c628f3214c42623207935b13683c60b0b674978e6d9cb5
+- path: rules/W-13.yaml
+  sha256: 648405192dcca4432b035ab82742f6f28888b5b8c8cb6e71b4df0c6e29ab5cc2
+- path: rules/W-14.yaml
+  sha256: d579ee19c6f9bda6007b84840eab7d1c5b8b3633d9d4635867c5079b76762030
+- path: rules/W-15.yaml
+  sha256: fcd187bfa3a1f9f77f50e7ab2ac1c42bde58b4a28658bec8564f3705fccaf8dd
+- path: rules/W-16.yaml
+  sha256: 7c65e0133f332fbe0f16724d7536d2e9c9275cf54b3a02474dfd7c40d47e8b5f
+- path: rules/W-17.yaml
+  sha256: 99ab0aefbda0d9c48cf85df2749b64e08eaf9f040cfc320d36d6d3ecb8e7ea03
+- path: rules/W-18.yaml
+  sha256: 6b904d98a8ca550c34d77da6caaeeb3d86a22b8d11c237dea152aaca375fb264
+- path: rules/W-19.yaml
+  sha256: d9c91b4d9fa1db7cd6e876b843cc9913edaa6d99ba86e9706b71a6e4123b3999
+- path: rules/W-20.yaml
+  sha256: 62379e3c60b8d231693ba36692ebddd5fe6e57cd037d44bc2035bbb2eed0c1fc
+- path: rules/W-21.yaml
+  sha256: 8b417591f37911e844b8bcd8868c790a446b1dbca04029272e46f61b6af78006
+- path: rules/W-22.yaml
+  sha256: c8d080e19e069a57ebb4fad83173c50396538ef73151e310903bdcb0252a8dcc
+- path: rules/W-23.yaml
+  sha256: e761c48506cac902f35fc683ea49916ca04c6bb7965fec68b9185a44292bd22f
+- path: rules/W-24.yaml
+  sha256: 7f14a6902f276cbd09ff349f1604e91d6445419e8d059c2ee1f306cedd7f46e3
+- path: rules/W-25.yaml
+  sha256: 063836e02a053a19237da96d6b8f46640a9f6a4438a36b553410a3feaaa6f768
+- path: rules/W-26.yaml
+  sha256: 3004da03b4fb05802fd23ffebbf15c5ab0215d99a186e74b9c09896d7458a6d7
+- path: rules/W-27.yaml
+  sha256: c9f51866ca403501eeff4a0eb45b2e04f692c6d28191239a126b39b1206695a9
+- path: rules/W-28.yaml
+  sha256: 1b1037529e34e0a69c4c74aee73a0968f0c3003548dd754e8161e73bbabdf09a
+- path: rules/W-29.yaml
+  sha256: 074b5580144af79f1119273f86c5f6f2304200dd5b139ddbbadddfcd7f0d2fde
+- path: rules/W-30.yaml
+  sha256: cf5ce032be3c6dea53893de887b33c052af73d59107128e705b809f096cedd09
+- path: rules/W-31.yaml
+  sha256: d21eeef0010abec853eb2694f2f069b2531b3366416d222e500b4054f77d123d
+- path: rules/W-32.yaml
+  sha256: 400ce3b20c4d1e16ed5630dfb808aab423d6cd2dda022815a066b1e942c04d4c
+- path: rules/W-33.yaml
+  sha256: 4c233415a9fc503b45c1e64fdf99bca50006879c881cb0485b956114ea5f9e62
+- path: rules/W-34.yaml
+  sha256: c19c7fa0470213f97664323e0035c2e148ae067f8f801c23adf0cd577745eaa0
+- path: rules/W-35.yaml
+  sha256: 4121c59db9a5383dadf2a0264b9acbfd095d0e972906174422db52039ea7bea0
+- path: rules/W-36.yaml
+  sha256: a68348addda57c39ef9deac56ad97ca3724b8a13750f31a3b89af9fe4a917dd5
+- path: rules/W-37.yaml
+  sha256: e562b2d6701028dc98a3755d40aae9ccd1ed12c2c1565d2a374c8c5d3db243a0
+- path: rules/W-38.yaml
+  sha256: 331bf9497730b904eeb01ba75c7837a02011152c55cd41ed4f83aa452fcab627
+- path: rules/W-39.yaml
+  sha256: b6e6d1b0b1a0b279d57d752d4d5176297551311ffdfd46da7c127110d66fe3e9
+- path: rules/W-40.yaml
+  sha256: 85627011a0798f0df1499cf0ba79f85746b4705f68a46f47277916b7f40756e1
+- path: rules/W-41.yaml
+  sha256: 74f4c963141e1e3e7a8e34ae2d3580e1e8ca58e97eb6c3a7211bbe958200fd5a
+- path: rules/W-42.yaml
+  sha256: fab81a74cbf32a649acabea9e5c604b7024c6218cb2ef8e9e4f1e5f92bdd2e10
+- path: rules/W-43.yaml
+  sha256: a2eed4eef841174c66b23a1d42d443f1f3b25a46d68aba57d0cb17959a217c1c
+- path: rules/W-44.yaml
+  sha256: c7c29187a5b0d7f3b6a7626f8cc7fccb419943d31f0b56fc357bf8b5d3396872
+- path: rules/W-45.yaml
+  sha256: 5cea51cbe4f53d75497833bb8fbd5474111331f9c3b9ad8b053f2eb2fb0c7c93
+- path: rules/W-46.yaml
+  sha256: 2d8ba9fff9a8d289b859fbb3ca7910346a9c62fb1dc76ac98d5659b2fc4f6d9f
+- path: rules/W-47.yaml
+  sha256: e9f72f6e75612541f51deac736461ec11ae9c69be798d54d63ccf889d7cd24a3
+- path: rules/W-48.yaml
+  sha256: e66ee94c609eca15ce1d728480d6151b97ee34aa27a76e152285ef3539b25e1a
+- path: rules/W-49.yaml
+  sha256: f83e84d40d0bdc8c260d198e893a1e8e5597d4c6c5a2b06ac93ace936a338bb7
+- path: rules/W-50.yaml
+  sha256: 82f19c353b9a6d88800ce0ba192723187b54a8a149d1ea69bfbad581c9a24f15
+- path: rules/W-51.yaml
+  sha256: ea266b1b96ff782c713fc4b4b810b3e28541f6d7b028c31885a4783395d45cdc
+- path: rules/W-52.yaml
+  sha256: e655ec10edb685bf3a04788687fb6b12e66209752b848e0ada5892927ad1f7d9
+- path: rules/W-53.yaml
+  sha256: 12fe18d5ea830fc094961b4767565d50853f1b7132704e2d3f9f0a1ec21ee54c
+- path: rules/W-54.yaml
+  sha256: a5096a2f7c8cb3f8b5385612eaa42cfa209a521f03833f1a5e835e678de0e001
+- path: rules/W-55.yaml
+  sha256: ba7fc406501c03c3b03dbdd3cc8da125de2a9dce35977c01ec3117b3f9fe1acb
+- path: rules/W-56.yaml
+  sha256: aab8e122fbb4bdd3e7375fab7293cfd3ceb16120c9040bb698ca250b16b5e89c
+- path: rules/W-57.yaml
+  sha256: cbff1a712bc4543d251aa55fd242e6d429966c9b9c7d883af77f8b7fa2716c85
+- path: rules/W-58.yaml
+  sha256: 0259d774bd4e0c8deb58c4c82a64a8299a3d18e4c86b8ec05db27718b8617a17
+- path: rules/W-59.yaml
+  sha256: 931d2e16f6c4e48662fcdf65685eda1504f3a234b5323dadc3a040637c6827a8
+- path: rules/W-60.yaml
+  sha256: 38488c52d2b6d210d6f54726c94422f4e8bdf27d19aa7bcae67d1f9be7821d2b
+- path: rules/W-61.yaml
+  sha256: a0a8c4a5a5fc9b67a66eb59ac33a52861082ba9f743568fccdcf459b43872d65
+- path: rules/W-62.yaml
+  sha256: e1026b031850f464fbab94d4f69658e20af5418b7f1852d4a619a338a700d1a5
+- path: rules/W-63.yaml
+  sha256: efcea3a38e9c8c1287aef83462718d59ba32d9f58aa3e1cc0ea4060cc60ebc48
+- path: rules/W-64.yaml
+  sha256: 6f03223fb620699e3ca4f24bf90f6769487b5cc85d3c1498358131e613700f36
+native:
+- D-01
+- D-02
+- D-03
+- D-04
+- D-05
+- D-06
+- D-07
+- D-08
+- D-09
+- D-10
+- D-11
+- D-12
+- D-13
+- D-14
+- D-15
+- D-16
+- D-17
+- D-18
+- D-19
+- D-20
+- D-21
+- D-22
+- D-23
+- D-24
+- D-25
+- D-26
+- N-01
+- N-02
+- N-03
+- N-04
+- N-05
+- N-06
+- N-07
+- N-08
+- N-09
+- N-10
+- N-11
+- N-12
+- N-13
+- N-14
+- N-15
+- N-16
+- N-17
+- N-18
+- N-19
+- N-20
+- N-21
+- N-22
+- N-23
+- N-24
+- N-25
+- N-26
+- N-27
+- N-28
+- N-29
+- N-30
+- N-31
+- N-32
+- N-33
+- N-34
+- N-35
+- N-36
+- N-37
+- N-38
 - U-01
 - U-02
 - U-03
@@ -369,92 +689,457 @@ native: &id001
 - U-65
 - U-66
 - U-67
+- W-01
+- W-02
+- W-03
+- W-04
+- W-05
+- W-06
+- W-07
+- W-08
+- W-09
+- W-10
+- W-11
+- W-12
+- W-13
+- W-14
+- W-15
+- W-16
+- W-17
+- W-18
+- W-19
+- W-20
+- W-21
+- W-22
+- W-23
+- W-24
+- W-25
+- W-26
+- W-27
+- W-28
+- W-29
+- W-30
+- W-31
+- W-32
+- W-33
+- W-34
+- W-35
+- W-36
+- W-37
+- W-38
+- W-39
+- W-40
+- W-41
+- W-42
+- W-43
+- W-44
+- W-45
+- W-46
+- W-47
+- W-48
+- W-49
+- W-50
+- W-51
+- W-52
+- W-53
+- W-54
+- W-55
+- W-56
+- W-57
+- W-58
+- W-59
+- W-60
+- W-61
+- W-62
+- W-63
+- W-64
 rules:
 - id: D-01
   name: 기본 계정의 비밀번호/정책 변경
   severity: 상
   category: DBMS
   remediation: 기본(관리자) 계정의 초기 비밀번호 및 권한 정책 변경
+  manual: false
 - id: D-02
   name: 불필요(데모/샘플) 계정 제거
   severity: 상
   category: DBMS
   remediation: 계정별 용도를 파악한 후 불필요한 계정 삭제
+  manual: false
 - id: D-03
   name: 비밀번호 사용기간/복잡도 (DEFAULT 프로파일 기준)
   severity: 상
   category: DBMS
   remediation: 기관 정책에 맞게 비밀번호 사용 기간 및 복잡도 정책 설정
+  manual: false
 - id: D-04
   name: DBA(관리자) 권한 최소화
   severity: 상
   category: DBMS
   remediation: 관리자 권한이 필요한 계정 및 그룹에만 관리자 권한 부여
+  manual: false
 - id: D-05
   name: 비밀번호 재사용 제약 (DEFAULT 프로파일)
   severity: 중
   category: DBMS
   remediation: PASSWORD_REUSE_TIME, PASSWORD_REUSE_MAX 파라미터 설정
+  manual: false
 - id: D-06
   name: 사용자 계정 개별 부여
   severity: 중
   category: DBMS
   remediation: 사용자별 계정 생성 및 권한 부여
+  manual: true
+- id: D-07
+  name: root 권한으로 서비스 구동 제한
+  severity: 중
+  category: 계정관리
+  manual: false
+  remediation: DBMS 구동 계정 변경
 - id: D-08
   name: 안전한 암호화 알고리즘 (SHA-2 이상; password_versions 에 12C 포함)
   severity: 상
   category: DBMS
   remediation: SHA-256 이상의 암호화 알고리즘 적용
+  manual: false
 - id: D-09
   name: 로그인 실패 잠금 (DEFAULT 프로파일 FAILED_LOGIN_ATTEMPTS)
   severity: 중
   category: DBMS
   remediation: 로그인 시도 횟수 제한 값 설정
+  manual: false
+- id: D-10
+  name: 원격에서 DB 서버로의 접속 제한
+  severity: 상
+  category: 접근관리
+  manual: false
+  remediation: DB 서버에 대해 지정된 IP주소에서만 접근 가능하도록 설정
 - id: D-11
   name: 시스템 테이블 비인가 접근 제한 (가이드 쿼리)
   severity: 상
   category: DBMS
   remediation: 시스템 테이블에 일반 사용자 계정이 접근할 수 없도록 설정
+  manual: false
+- id: D-12
+  name: 안전한 리스너 비밀번호 설정 및 사용
+  severity: 상
+  category: 접근관리
+  manual: false
+  remediation: Listener 비밀번호 설정
+- id: D-13
+  name: 불필요한 ODBC/OLE-DB 데이터 소스와 드라이브를 제거하여 사용
+  severity: 중
+  category: 접근관리
+  manual: false
+  remediation: 불필요한 ODBC/OLE-DB 제거
+- id: D-14
+  name: 데이터베이스의 주요 설정 파일, 비밀번호 파일 등과 같은 주요 파일들의 접근 권한 설정
+  severity: 중
+  category: 접근관리
+  manual: false
+  remediation: 주요 설정 파일 및 디렉터리의 권한 설정 변경
+- id: D-15
+  name: 관리자 이외의 사용자가 오라클 리스너의 접속을 통해 리스너 로그 및 trace 파일에 대한 변경 제한
+  severity: 하
+  category: 접근관리
+  manual: false
+  remediation: 주요 파일 및 로그 파일에 대한 권한을 관리자로 제한
+- id: D-16
+  name: Windows 인증 모드 사용
+  severity: 하
+  category: 접근관리
+  manual: false
+  remediation: Windows 인증 모드 사용
 - id: D-17
   name: Audit Table(AUD$) 접근 제한
   severity: 하
   category: DBMS
   remediation: Audit Table 접근 권한을 관리자 계정으로 제한
+  manual: false
 - id: D-18
   name: DBA Role 이 PUBLIC 에 부여되지 않을 것
   severity: 상
   category: DBMS
   remediation: DBA 계정의 Role 설정에서 Public 그룹 권한 취소
+  manual: false
 - id: D-19
   name: OS_ROLES / REMOTE_OS_AUTHENT / REMOTE_OS_ROLES = FALSE
   severity: 상
   category: DBMS
   remediation: OS_ROLES, REMOTE_OS_AUTHENTICATION, REMOTE_OS_ROLES 설정을 FALSE로 변경
+  manual: false
 - id: D-20
   name: 인가되지 않은 Object Owner 제한 (가이드 쿼리)
   severity: 하
   category: DBMS
   remediation: Object Owner를 SYS, SYSTEM, 관리자 계정으로 제한 설정
+  manual: false
 - id: D-21
   name: 인가되지 않은 GRANT OPTION 제한 (가이드 쿼리)
   severity: 중
   category: DBMS
   remediation: WITH_GRANT_OPTION이 ROLE에 의하여 설정되도록 변경
+  manual: false
 - id: D-22
   name: RESOURCE_LIMIT = TRUE
   severity: 하
   category: DBMS
   remediation: RESOURCE_LIMIT 설정을 TRUE로 설정 변경
+  manual: false
+- id: D-23
+  name: xp_cmdshell 사용 제한
+  severity: 상
+  category: 옵션관리
+  manual: false
+  remediation: xp_cmdshell 설정 값을 0 또는 False로 설정
+- id: D-24
+  name: Registry Procedure 권한 제한
+  severity: 상
+  category: 옵션관리
+  manual: false
+  remediation: guest/public에게 부여된 시스템 확장 저장 프로시저 권한 제거
 - id: D-25
   name: 보안 패치/버전
   severity: 상
   category: DBMS
   remediation: 보안 패치가 적용된 버전으로 업데이트
+  manual: true
 - id: D-26
   name: 감사 기록 설정 (audit_trail / Unified Auditing)
   severity: 상
   category: DBMS
   remediation: DBMS에 대한 감사 로그 저장 정책 수립, 적용
+  manual: false
+- id: N-01
+  name: 비밀번호 설정
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: 기본 비밀번호를 관리기관의 비밀번호 작성규칙을 준용하여 변경
+- id: N-02
+  name: 비밀번호 복잡성 설정
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: 관리기관의 비밀번호 작성규칙에 맞게 비밀번호 복잡성 정책 및 비밀번호 설정
+- id: N-03
+  name: 암호화된 비밀번호 사용
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: 비밀번호 암호화 설정 적용
+- id: N-04
+  name: 계정 잠금 임계값 설정
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: 로그인 실패 임계값을 5회 이하로 설정
+- id: N-05
+  name: 사용자·명령어별 권한 설정
+  severity: 중
+  category: 계정관리
+  manual: true
+  remediation: 업무에 맞게 계정별 권한 차등(관리자 권한 최소화) 부여※한 명의 관리자가 네트워크 장비를 관리할 경우는 해당하지 않음
+- id: N-06
+  name: VTY 접근(ACL) 설정
+  severity: 상
+  category: 접근관리
+  manual: false
+  remediation: 가상 터미널(VTY)에 특정 IP주소만 접근할 수 있도록 설정
+- id: N-07
+  name: Session Timeout 설정
+  severity: 상
+  category: 접근관리
+  manual: false
+  remediation: Session Timeout 설정 (10분 이하 권고)
+- id: N-08
+  name: VTY 접속 시 안전한 프로토콜 사용
+  severity: 중
+  category: 접근관리
+  manual: false
+  remediation: 암호화 프로토콜만 VTY에 접근할 수 있도록 설정
+- id: N-09
+  name: 불필요한 보조 입출력 포트 사용 금지
+  severity: 중
+  category: 접근관리
+  manual: false
+  remediation: 불필요한 포트 및 인터페이스 사용 제한 또는 비활성화
+- id: N-10
+  name: 로그인 시 경고 메시지 설정
+  severity: 중
+  category: 접근관리
+  manual: false
+  remediation: 네트워크 장비 접속 시 경고 메시지 설정
+- id: N-11
+  name: 원격로그 서버 사용
+  severity: 중
+  category: 패치관리
+  manual: false
+  remediation: Syslog 등을 이용하여 로그 저장 설정
+- id: N-12
+  name: 주기적 보안 패치 및 벤더 권고사항 적용
+  severity: 상
+  category: 패치관리
+  manual: true
+  remediation: 장비별 제공하는 최신 취약점 정보를 파악 후 최신 패치 및 업그레이드를 수행
+- id: N-13
+  name: 로깅 버퍼 크기 설정
+  severity: 중
+  category: 로그관리
+  manual: false
+  remediation: 로그에 대한 정보를 확인하여 장비 성능을 고려한 최대 버퍼 크기를 설정
+- id: N-14
+  name: 정책에 따른 로깅 설정
+  severity: 중
+  category: 로그관리
+  manual: false
+  remediation: 로그 기록 정책을 수립하고 정책에 따른 로깅 설정
+- id: N-15
+  name: NTP 및 시각 동기화 설정
+  severity: 중
+  category: 로그관리
+  manual: false
+  remediation: NTP 사용 시 신뢰할 수 있는 서버로 설정
+- id: N-16
+  name: Timestamp 로그 설정
+  severity: 하
+  category: 로그관리
+  manual: false
+  remediation: 로그에 시간 정보가 기록될 수 있도록 timestamp 로그 설정
+- id: N-17
+  name: SNMP 서비스 확인
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: 장비별 제공하는 최신 취약점 정보를 파악 후 최신 패치 및 업그레이드를 수행
+- id: N-18
+  name: SNMP Community String 복잡성 설정
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: 'public, private 외 복잡성 기준에 맞는 Community String을 설정※SNMP Community String 복잡성 기준 : 영어 대·소문자, 숫자, 특수문자 중 3종류
+    이상을 조합하여 8자리 이상으로 구성'
+- id: N-19
+  name: SNMP ACL 설정
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: SNMP 접근에 대한 ACL(Access List) 설정
+- id: N-20
+  name: SNMP Community 권한 설정
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: SNMP Community String 권한 설정 (RW 권한 삭제 권고)
+- id: N-21
+  name: TFTP 서비스 차단
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: 네트워크 장비의 불필요한 TFTP 서비스를 비활성화 설정
+- id: N-22
+  name: Spoofing 방지 필터링 적용
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: 경계 라우터 또는 보안 장비에서 스푸핑 방지 필터링 적용
+- id: N-23
+  name: DDoS 공격 방어 설정 또는 DDoS 장비 사용
+  severity: 상
+  category: 기능관리
+  manual: true
+  remediation: DDoS 공격 방어 설정 점검
+- id: N-24
+  name: 사용하지 않는 인터페이스 비활성화
+  severity: 상
+  category: 기능관리
+  manual: false
+  remediation: 네트워크 장비에서 사용하지 않는 모든 인터페이스 비활성화 설정
+- id: N-25
+  name: TCP Keepalive 서비스 설정
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 네트워크 장비에서 TCP Keepalive 서비스를 사용하도록 설정
+- id: N-26
+  name: Finger 서비스 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 장비별 Finger 서비스 제한 설정
+- id: N-27
+  name: 웹 서비스 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: HTTP 서비스 차단 또는 HTTP 서버를 관리하는 관리자 접속 IP 설정
+- id: N-28
+  name: TCP/UDP small 서비스 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: TCP/UDP Small Service 제한 설정
+- id: N-29
+  name: Bootp 서비스 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 장비별 BOOTP 서비스 제한 설정
+- id: N-30
+  name: CDP 서비스 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: Ÿ장비별 CDP 서비스 제한 설정ŸCDP는 Cisco 전용 프로토콜이지만 일부 다른 벤더도 지원하며, CDP와 유사한 IEEE 표준인 LLDP(Link Layer Discovery Protocol,
+    IEEE 802.1AB)도 불필요할 경우 비활성화
+- id: N-31
+  name: Directed-broadcast 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 장치별로 Directed Broadcasts 제한 설정
+- id: N-32
+  name: Source Routing 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 각 인터페이스에서 ip-source-route 차단 설정
+- id: N-33
+  name: Proxy ARP 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 각 인터페이스에서 Proxy ARP 비활성화 설정
+- id: N-34
+  name: ICMP unreachable, redirect 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 각 인터페이스에서 ICMP unreachables, ICMP redirects 비활성화
+- id: N-35
+  name: identd 서비스 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: idnetd 서비스 비활성화
+- id: N-36
+  name: Domain Lookup 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: Domain Lookup 비활성화
+- id: N-37
+  name: pad 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: PAD 서비스 비활성화
+- id: N-38
+  name: mask-reply 차단
+  severity: 중
+  category: 기능관리
+  manual: false
+  remediation: 각 인터페이스에서 mask-reply 비활성화
 - id: U-01
   name: root 계정 원격 접속 제한
   severity: 상
@@ -861,6 +1546,392 @@ rules:
   category: Unix
   manual: false
   remediation: 디렉터리 내 로그 파일 소유자 및 권한 변경 설정
+- id: W-01
+  name: Administrator 계정 이름 변경 등 보안성 강화
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: Administrator 기본 계정 이름 변경 및 보안성이 있는 비밀번호 설정
+- id: W-02
+  name: Guest 계정 비활성화
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: Guest 계정 비활성화
+- id: W-03
+  name: 불필요한 계정 제거
+  severity: 상
+  category: 계정관리
+  manual: true
+  remediation: 현재 계정 현황 확인 후 불필요한 계정 삭제
+- id: W-04
+  name: 계정 잠금 임계값 설정
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: 계정 잠금 임계값을 5 이하의 값으로 설정
+- id: W-05
+  name: 해독 가능한 암호화를 사용하여 암호 저장 해제
+  severity: 상
+  category: 계정관리
+  manual: true
+  remediation: “해독 가능한 암호화를 사용하여 암호 저장”을 “사용 안 함”으로 설정
+- id: W-06
+  name: 관리자 그룹에 최소한의 사용자 포함
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: Administrators 그룹에 포함된 불필요한 계정 제거
+- id: W-07
+  name: Everyone 사용 권한을 익명 사용자에 적용
+  severity: 중
+  category: 계정관리
+  manual: false
+  remediation: “Everyone 사용 권한을 익명 사용자에게 적용”정책을 “사용 안 함”으로 설정
+- id: W-08
+  name: 계정 잠금 기간 설정
+  severity: 중
+  category: 계정관리
+  manual: false
+  remediation: “계정 잠금 기간” 및 “잠금 기간 원래대로 설정 기간” 60분 이상으로 설정
+- id: W-09
+  name: 비밀번호 관리 정책 설정
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: 비밀번호 복잡성, 최소 비밀번호 길이, 최대/최소 사용 기간을 기준에 맞게 설정
+- id: W-10
+  name: 마지막 사용자 이름 표시 안 함
+  severity: 중
+  category: 계정관리
+  manual: false
+  remediation: '※Windows NT: 마지막으로 로그온한 사용자 이름 표시 안 함 설정※Windows 2000: 로그온 스크린에 마지막 사용자 이름 표시 안 함 사용 설정※Windows 2003, 2008,
+    2012, 2016, 2019, 2022: 대화형 로그온: 마지막 사용자 이름 표시 안 함 사용 설정'
+- id: W-11
+  name: 로컬 로그온 허용
+  severity: 중
+  category: 계정관리
+  manual: true
+  remediation: Administrators, IUSR_ 외 다른 계정 및 그룹의 로컬 로그온 제한
+- id: W-12
+  name: 익명 SID/이름 변환 허용 해제
+  severity: 중
+  category: 계정관리
+  manual: true
+  remediation: '“네트워크 액세스: 익명 SID/이름 변환 허용” 정책 “사용 안 함” 설정'
+- id: W-13
+  name: 콘솔 로그온 시 로컬 계정에서 빈 암호 사용 제한
+  severity: 중
+  category: 계정관리
+  manual: false
+  remediation: '“계정: 콘솔 로그온 시 로컬 계정에서 빈 암호 사용 제한” 정책을 “사용”으로 설정'
+- id: W-14
+  name: 원격터미널 접속 가능한 사용자 그룹 제한
+  severity: 중
+  category: 계정관리
+  manual: true
+  remediation: 관리자 계정과 이외의 계정을 생성, 권한을 제한 사용 설정
+- id: W-15
+  name: 사용자 개인키 사용 시 암호 입력
+  severity: 상
+  category: 계정관리
+  manual: false
+  remediation: '“시스템 암호화: 컴퓨터에 저장된 사용자 키에 대해 강력한 키 보호 사용” 정책을 “키를 사용할 때마다 암호를 매 번 입력해야 함”으로 적용'
+- id: W-16
+  name: 공유 권한 및 사용자 그룹 설정
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 공유 디렉터리 접근 권한에서 Everyone 권한 제거 후 필요한 계정 추가
+- id: W-17
+  name: 하드디스크 기본 공유 제거
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 기본 공유 중지 후 레지스트리 값 설정(IPC$, 일반 공유 제외)
+- id: W-18
+  name: 불필요한 서비스 제거
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 서비스 중지 후 “사용 안 함” 설정
+- id: W-19
+  name: 불필요한 IIS 서비스 구동 점검
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: IIS 서비스가 불필요한 경우 IIS 서비스 중지
+- id: W-20
+  name: NetBIOS 바인딩 서비스 구동 점검
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 네트워크 제어판을 이용하여 TCP/IP와 NetBIOS 간의 바인딩(binding) 제거
+- id: W-21
+  name: 암호화되지 않는 FTP 서비스 비활성화
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: FTP 서비스가 필요하지 않다면 서비스 중지 또는 Secure FTP 응용 프로그램 사용
+- id: W-22
+  name: FTP 디렉토리 접근권한 설정
+  severity: 상
+  category: 서비스관리
+  manual: true
+  remediation: FTP 홈 디렉터리에서 Everyone 권한 삭제, 각 사용자에게 적절한 권한 부여
+- id: W-23
+  name: 공유 서비스에 대한 익명 접근 제한 설정
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 공유 서비스를 사용하지 않는 경우 서비스 중지, 사용할 경우 익명 인증 사용 안 함 설정 적용
+- id: W-24
+  name: FTP 접근 제어 설정
+  severity: 상
+  category: 서비스관리
+  manual: true
+  remediation: 특정 IP주소에서만 FTP 서버에 접속하도록 접근 제어 설정
+- id: W-25
+  name: DNS Zone Transfer 설정
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 불필요 시 서비스 중지/사용 안 함 설정, 사용하는 경우 영역 전송을 특정 서버로 제한하거나 “영역 전송 허용”에 체크 해제
+- id: W-26
+  name: RDS(Remote Data Services)제거
+  severity: 상
+  category: 서비스관리
+  manual: false
+  remediation: 사용하지 않는 경우 IIS 서비스 중지/사용 안 함, 사용할 경우 레지스트리 키 값 제거 또는 관련 패치 적용
+- id: W-27
+  name: 최신 Windows OS Build 버전 적용
+  severity: 상
+  category: 패치관리
+  manual: true
+  remediation: 설치에 따른 영향도 확인 후 최신 Build 설치(설치 후 시스템 재시작 필요)
+- id: W-28
+  name: 터미널 서비스 암호화 수준 설정
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: 원격 데스크톱 서비스의 가동을 ‘중지’ 및 ‘사용 안 함’ 설정을 하거나, 부득이하게 사용할 경우 암호화 수준 설정 적용
+- id: W-29
+  name: 불필요한 SNMP 서비스 구동 점검
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: 불필요 시 서비스 중지/사용 안 함
+- id: W-30
+  name: SNMP Community String 복잡성 설정
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: 불필요 시 서비스 중지/사용 안 함, 사용 시 기본 Community String 변경
+- id: W-31
+  name: SNMP Access Control 설정
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: 불필요 시 서비스 중지/사용 안 함, 사용 시 SNMP 패킷 수령 호스트 지정
+- id: W-32
+  name: DNS 서비스 구동 점검
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: DNS 서비스의 동적 업데이트 비활성화 설정
+- id: W-33
+  name: HTTP/FTP/SMTP 배너 차단
+  severity: 하
+  category: 서비스관리
+  manual: true
+  remediation: 사용하지 않는 경우 IIS 서비스 중지/사용 안 함, 사용 시 속성값 수정
+- id: W-34
+  name: Telnet 서비스 비활성화
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: 불필요 시 서비스 중지/사용 안 함 설정, 사용 시 인증 방법으로 NTLM만 사용
+- id: W-35
+  name: 불필요한 ODBC/OLE-DB 데이터 소스와 드라이브 제거
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: 사용하지 않는 불필요한 ODBC 데이터 소스 제거
+- id: W-36
+  name: 원격터미널 접속 타임아웃 설정
+  severity: 중
+  category: 서비스관리
+  manual: false
+  remediation: Timeout 제어 설정 적용
+- id: W-37
+  name: 예약된 작업에 의심스러운 명령이 등록되어 있는지 점검
+  severity: 중
+  category: 서비스관리
+  manual: true
+  remediation: 예약 작업에 대한 주기적인 확인
+- id: W-38
+  name: 주기적 보안 패치 및 벤더 권고사항 적용
+  severity: 상
+  category: 패치관리
+  manual: true
+  remediation: 주기적인 보안 패치 확인 및 설치 적용
+- id: W-39
+  name: 백신 프로그램 업데이트
+  severity: 상
+  category: 패치관리
+  manual: false
+  remediation: 백신 프로그램 환경설정 메뉴를 통해 DB 및 엔진의 최신 업데이트를 하도록 설정
+- id: W-40
+  name: 정책에 따른 시스템 로깅 설정
+  severity: 중
+  category: 로그관리
+  manual: false
+  remediation: 이벤트에 대한 감사 설정
+- id: W-41
+  name: NTP 및 시각 동기화 설정
+  severity: 중
+  category: 로그관리
+  manual: false
+  remediation: NTP 및 시각 동기화 설정
+- id: W-42
+  name: 이벤트 로그 관리 설정
+  severity: 하
+  category: 로그관리
+  manual: false
+  remediation: 최대 로그 크기 “10,204KB”, “90일 이후 이벤트 덮어씀” 설정
+- id: W-43
+  name: 이벤트 로그 파일 접근 통제 설정
+  severity: 중
+  category: 로그관리
+  manual: false
+  remediation: 로그 디렉터리의 접근 권한에 Everyone 제거
+- id: W-44
+  name: 원격으로 액세스할 수 있는 레지스트리 경로
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: 불필요 시 서비스 중지 및 사용 안 함으로 설정
+- id: W-45
+  name: 백신 프로그램 설치
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: 백신 프로그램 설치
+- id: W-46
+  name: SAM 파일 접근 통제 설정
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: SAM 파일 권한 확인 후 Administrator, System 그룹 외 다른 그룹에 설정된 권한 제거
+- id: W-47
+  name: 화면 보호기 설정
+  severity: 하
+  category: 보안관리
+  manual: false
+  remediation: 화면 보호기 사용, 대기 시간 10분 이하, 해제를 위한 암호 사용
+- id: W-48
+  name: 로그온하지 않고 시스템 종료 허용
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: '“시스템 종료: 로그온하지 않고 시스템 종료” 정책을 “사용 안 함” 설정'
+- id: W-49
+  name: 원격 시스템에서 강제로 시스템 종료
+  severity: 상
+  category: 보안관리
+  manual: true
+  remediation: “원격 시스템에서 강제로 시스템 종료” 정책에 “Administrators” 외 다른 계정 및 그룹 제거
+- id: W-50
+  name: 보안 감사를 로그 할 수 없는 경우 즉시 시스템 종료
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: “보안 감사를 로그 할 수 없는 경우 즉시 시스템 종료” 정책을 “사용 안 함”으로 설정
+- id: W-51
+  name: SAM 계정과 공유의 익명 열거 허용 안 함
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: 레지스트리 값 또는, 로컬 보안 정책 설정
+- id: W-52
+  name: Autologon 기능 제어
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: 해당 레지스트리 값이 존재하는 경우 0으로 설정
+- id: W-53
+  name: 이동식 미디어 포맷 및 꺼내기 허용
+  severity: 상
+  category: 보안관리
+  manual: false
+  remediation: “이동식 NTFS 미디어 꺼내기 허용” 정책을 “Administrators”로 설정
+- id: W-54
+  name: Dos 공격 방어 레지스트리 설정
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: 레지스트리 값을 추가 또는 수정
+- id: W-55
+  name: 사용자가 프린터 드라이버를 설치할 수 없게 함
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: “사용자가 프린터 드라이버를 설치할 수 없게 함” 정책을 “사용”으로 설정
+- id: W-56
+  name: SMB 세션 중단 관리 설정
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: Ÿ“로그인 시간이 만료되면 클라이언트 연결 끊기” 정책 “사용” 설정Ÿ“세션 연결을 중단하기 전에 필요한 유휴 시간” 정책 “15분” 이하로 설정
+- id: W-57
+  name: 로그온 시 경고 메시지 설정
+  severity: 하
+  category: 보안관리
+  manual: false
+  remediation: 로그인 메시지 제목 및 메시지 내용에 경고 문구 삽입
+- id: W-58
+  name: 사용자별 홈 디렉터리 권한 설정
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: Everyone 권한 제거
+- id: W-59
+  name: LAN Manager 인증 수준
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: '- Windows 2000: LAN Manager 인증 7수준 - > NTLMv2 응답만 보내기- Windows 2003, 2008, 2012, 2016, 2019: 네트워크 보안: LAN
+    Manager 인증 수준 - > NTMLv2 응답만 보내기'
+- id: W-60
+  name: 보안 채널 데이터 디지털 암호화 또는 서명
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: 보안 채널 데이터를 디지털 암호화·서명 관련 3개 정책 → 사용
+- id: W-61
+  name: 파일 및 디렉토리 보호
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: FAT 파일 시스템을 사용 시 가능한 NTFS 파일 시스템 변환 설정
+- id: W-62
+  name: 시작 프로그램 목록 분석
+  severity: 중
+  category: 보안관리
+  manual: true
+  remediation: 시작 프로그램 목록의 정기적인 검사 실시 및 불필요한 서비스 비활성화 설정
+- id: W-63
+  name: 도메인 컨트롤러-사용자의 시간 동기화
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: Kerberos 사용 시 컴퓨터 시계 동기화 최대 허용 오차값 5분 이하로 설정
+- id: W-64
+  name: 윈도우 방화벽 설정
+  severity: 중
+  category: 보안관리
+  manual: false
+  remediation: Windows 방화벽 “사용”으로 설정
 - id: WEB-01
   name: 기본 관리자 계정/관리자 페이지
   severity: ''
@@ -1006,7 +2077,296 @@ profiles:
   - web-was
 - id: linux-native
   name: Linux 네이티브 (SSH 직접점검)
-  native: *id001
+  native:
+  - U-01
+  - U-02
+  - U-03
+  - U-04
+  - U-05
+  - U-06
+  - U-07
+  - U-08
+  - U-09
+  - U-10
+  - U-11
+  - U-12
+  - U-13
+  - U-14
+  - U-15
+  - U-16
+  - U-17
+  - U-18
+  - U-19
+  - U-20
+  - U-21
+  - U-22
+  - U-23
+  - U-24
+  - U-25
+  - U-26
+  - U-27
+  - U-28
+  - U-29
+  - U-30
+  - U-31
+  - U-32
+  - U-33
+  - U-34
+  - U-35
+  - U-36
+  - U-37
+  - U-38
+  - U-39
+  - U-40
+  - U-41
+  - U-42
+  - U-43
+  - U-44
+  - U-45
+  - U-46
+  - U-47
+  - U-48
+  - U-49
+  - U-50
+  - U-51
+  - U-52
+  - U-53
+  - U-54
+  - U-55
+  - U-56
+  - U-57
+  - U-58
+  - U-59
+  - U-60
+  - U-61
+  - U-62
+  - U-63
+  - U-64
+  - U-65
+  - U-66
+  - U-67
+  platforms:
+  - linux
+  prefix: U-
 - id: aix-native
   name: AIX 네이티브 (SSH 직접점검)
-  native: *id001
+  native:
+  - U-01
+  - U-02
+  - U-03
+  - U-04
+  - U-05
+  - U-06
+  - U-07
+  - U-08
+  - U-09
+  - U-10
+  - U-11
+  - U-12
+  - U-14
+  - U-15
+  - U-16
+  - U-17
+  - U-18
+  - U-19
+  - U-20
+  - U-21
+  - U-22
+  - U-23
+  - U-24
+  - U-25
+  - U-26
+  - U-27
+  - U-28
+  - U-29
+  - U-30
+  - U-31
+  - U-32
+  - U-33
+  - U-34
+  - U-35
+  - U-36
+  - U-37
+  - U-38
+  - U-39
+  - U-40
+  - U-41
+  - U-42
+  - U-43
+  - U-44
+  - U-45
+  - U-46
+  - U-47
+  - U-48
+  - U-49
+  - U-50
+  - U-51
+  - U-52
+  - U-53
+  - U-54
+  - U-55
+  - U-56
+  - U-57
+  - U-58
+  - U-59
+  - U-60
+  - U-61
+  - U-62
+  - U-63
+  - U-64
+  - U-65
+  - U-66
+  - U-67
+  platforms:
+  - aix
+  prefix: U-
+- id: windows-native
+  name: Windows 서버 네이티브 (WinRM PowerShell 조회)
+  platforms:
+  - windows
+  native:
+  - W-01
+  - W-02
+  - W-03
+  - W-04
+  - W-05
+  - W-06
+  - W-07
+  - W-08
+  - W-09
+  - W-10
+  - W-11
+  - W-12
+  - W-13
+  - W-14
+  - W-15
+  - W-16
+  - W-17
+  - W-18
+  - W-19
+  - W-20
+  - W-21
+  - W-22
+  - W-23
+  - W-24
+  - W-25
+  - W-26
+  - W-27
+  - W-28
+  - W-29
+  - W-30
+  - W-31
+  - W-32
+  - W-33
+  - W-34
+  - W-35
+  - W-36
+  - W-37
+  - W-38
+  - W-39
+  - W-40
+  - W-41
+  - W-42
+  - W-43
+  - W-44
+  - W-45
+  - W-46
+  - W-47
+  - W-48
+  - W-49
+  - W-50
+  - W-51
+  - W-52
+  - W-53
+  - W-54
+  - W-55
+  - W-56
+  - W-57
+  - W-58
+  - W-59
+  - W-60
+  - W-61
+  - W-62
+  - W-63
+  - W-64
+  description: 자산 플랫폼 windows/pc, 포트 5985(HTTP)·5986(HTTPS). secedit 전용 정책은 수동확인
+- id: oracle-native
+  name: Oracle DB 네이티브 (SSH→sqlplus SELECT)
+  platforms:
+  - linux
+  - aix
+  - solaris
+  - hpux
+  native:
+  - D-01
+  - D-02
+  - D-03
+  - D-04
+  - D-05
+  - D-06
+  - D-07
+  - D-08
+  - D-09
+  - D-10
+  - D-11
+  - D-12
+  - D-13
+  - D-14
+  - D-15
+  - D-16
+  - D-17
+  - D-18
+  - D-19
+  - D-20
+  - D-21
+  - D-22
+  - D-23
+  - D-24
+  - D-25
+  - D-26
+  description: 호스트 파라미터 ORACLE_HOME·ORACLE_SID 필요, 접속 계정이 / as sysdba 가능해야 함
+  prefix: D-
+- id: cisco-native
+  name: Cisco IOS 네이티브 (show 명령)
+  platforms:
+  - cisco-ios
+  native:
+  - N-01
+  - N-02
+  - N-03
+  - N-04
+  - N-05
+  - N-06
+  - N-07
+  - N-08
+  - N-09
+  - N-10
+  - N-11
+  - N-12
+  - N-13
+  - N-14
+  - N-15
+  - N-16
+  - N-17
+  - N-18
+  - N-19
+  - N-20
+  - N-21
+  - N-22
+  - N-23
+  - N-24
+  - N-25
+  - N-26
+  - N-27
+  - N-28
+  - N-29
+  - N-30
+  - N-31
+  - N-32
+  - N-33
+  - N-34
+  - N-35
+  - N-36
+  - N-37
+  - N-38
+  description: 자산 플랫폼 network. 장비 셸 SSH, running-config 는 세션 내 1회 수집

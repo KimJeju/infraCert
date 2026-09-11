@@ -1,0 +1,42 @@
+# D-11 DBA 이외의 인가되지 않은 사용자가 시스템 테이블에 접근할 수 없도록 설정 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-11
+name: DBA 이외의 인가되지 않은 사용자가 시스템 테이블에 접근할 수 없도록 설정
+severity: 상
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT value FROM v$parameter WHERE name='"'"'O7_DICTIONARY_ACCESSIBILITY'"'"';' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+- key: pub
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT count(*) FROM dba_tab_privs WHERE grantee='"'"'PUBLIC'"'"' AND owner='"'"'SYS'"'"' AND table_name LIKE '"'"'DBA_%'"'"';' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      regex: (?i)TRUE
+  then: VULN
+- when:
+    pub:
+      gt: 0
+  then: VULN
+- when:
+    q:
+      regex: (?i)FALSE
+  then: GOOD
+- else: MANUAL
+evidence:
+- q
+- pub
+remediation: 시스템 테이블에 일반 사용자 계정이 접근할 수 없도록 설정

@@ -1,0 +1,25 @@
+# W-40 정책에 따른 시스템 로깅 설정 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-40
+name: 정책에 따른 시스템 로깅 설정
+severity: 중
+category: 로그관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: audit
+  cmd: auditpol /get /category:* 2>&1 | Out-String -Width 200
+  timeout: 60
+verdict:
+- when:
+    audit_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    audit:
+      regex: (?im)^\s*(Logon|로그온)\s{2,}(No Auditing|감사 안 함)
+  then: VULN
+- else: MANUAL
+evidence:
+- audit
+note: 로그온 감사가 '감사 안 함'이면 취약 확정, 나머지는 기관 감사 정책과 대조(관리자 권한 필요)

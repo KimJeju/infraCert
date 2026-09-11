@@ -1,0 +1,32 @@
+# D-14 데이터베이스의 주요 설정 파일, 비밀번호 파일 등과 같은 주요 파일들의 접근 권한 설정 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-14
+name: 데이터베이스의 주요 설정 파일, 비밀번호 파일 등과 같은 주요 파일들의 접근 권한 설정
+severity: 중
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: w
+  cmd: find "$ORACLE_HOME/network/admin" "$ORACLE_HOME/dbs" -type f \( -name '*.ora' -o -name 'orapw*' \) -perm -o+w 2>/dev/null
+  timeout: 90
+- key: ls
+  cmd: ls -l "$ORACLE_HOME/network/admin"/*.ora "$ORACLE_HOME/dbs"/orapw* 2>/dev/null
+  timeout: 90
+verdict:
+- when:
+    ls:
+      absent: true
+  then: MANUAL
+- when:
+    w:
+      exists: true
+  then: VULN
+- else: GOOD
+evidence:
+- w
+- ls
+note: '*.ora·비밀번호 파일에 other 쓰기 권한이 있으면 취약'
+remediation: 주요 설정 파일 및 디렉터리의 권한 설정 변경

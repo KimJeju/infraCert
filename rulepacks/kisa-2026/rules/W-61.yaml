@@ -1,0 +1,27 @@
+# W-61 파일 및 디렉토리 보호 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-61
+name: 파일 및 디렉토리 보호
+severity: 중
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: fs
+  cmd: Get-Volume -ErrorAction SilentlyContinue | Where-Object {$_.DriveType -eq 'Fixed' -and $_.DriveLetter -and $_.FileSystemType -notin @('NTFS','ReFS')} | Select-Object -ExpandProperty DriveLetter
+  timeout: 60
+- key: all
+  cmd: Get-Volume -ErrorAction SilentlyContinue | Where-Object {$_.DriveLetter} | Select-Object DriveLetter,FileSystemType,DriveType | Format-Table -AutoSize | Out-String
+  timeout: 60
+verdict:
+- when:
+    all_ok:
+      eq: 'False'
+  then: MANUAL
+- when:
+    fs:
+      absent: true
+  then: GOOD
+- else: VULN
+evidence:
+- all

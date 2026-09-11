@@ -16,14 +16,17 @@ from pathlib import Path
 from PySide6.QtCore import QObject, QThread, Signal
 
 from infraguard.assets.models import Host
-from infraguard.core.models import HostResult
+from infraguard.core.models import HostResult, Platform
 from infraguard.credentials.session import Credential
 from infraguard.orchestrator.host_scan import HostJob, scan_host
-from infraguard.orchestrator.remote_runner import RunSpec
+from infraguard.orchestrator.remote_runner import RunSpec, validate_env
 from infraguard.orchestrator.results_store import ResultsStore
 from infraguard.parsing.legacy_csv import Profile as CsvProfile
 from infraguard.rulepack.loader import Profile, RulePack
+from infraguard.transport.base import Connection
+from infraguard.transport.netdev import NetdevConnection, NetdevTarget
 from infraguard.transport.ssh import SSHConnection, SSHTarget
+from infraguard.transport.winrm import WinRMConnection, WinRMTarget
 
 # 진행 바용 단계 순서 (§5.1 코어스)
 STAGES = ["연결 중", "환경 점검", "실행 중", "산출물 회수", "파싱", "네이티브 점검", "완료"]
@@ -46,8 +49,9 @@ def build_job(pack: RulePack, profile: Profile, *, timeout: int | None = None,
                        timeout=timeout or b.timeout, interpreter=b.interpreter,
                        extra_files=list(b.extra_files), env=env)
         bundles.append((spec, list(b.provides)))
+    validate_env(hp)                       # 저장 시 검사했지만 실행 직전에 한 번 더
     return HostJob(bundles=bundles, native=list(profile.native),
-                   manual_rules=pack.manual_rules(), exclude=set(profile.exclude))
+                   manual_rules=pack.manual_rules(), exclude=set(profile.exclude), params=dict(hp))
 
 
 class HostKeyBridge(QObject):
@@ -74,8 +78,17 @@ class HostKeyBridge(QObject):
         self._event.set()
 
 
-def build_connection(host: Host, cred: Credential, approve) -> SSHConnection:  # noqa: ANN001
-    """Host + Credential 로 SSHConnection 을 만든다. reveal() 은 여기서 하지 않는다."""
+def build_connection(host: Host, cred: Credential, approve) -> Connection:  # noqa: ANN001
+    """Host + Credential → 플랫폼별 Connection. reveal() 은 여기서 하지 않는다.
+
+    windows/pc → WinRM(포트 22 그대로면 5985 로), network → 장비 셸(SSH invoke_shell), 그 외 → SSH.
+    """
+    if host.platform in (Platform.WINDOWS, Platform.PC):
+        port = 5985 if host.port == 22 else host.port
+        return WinRMConnection(WinRMTarget(host=host.address, port=port, credential=cred, use_ssl=port == 5986))
+    if host.platform == Platform.NETWORK:
+        return NetdevConnection(NetdevTarget(host=host.address, port=host.port, credential=cred),
+                                approve_host_key=approve)
     target = SSHTarget(host=host.address, port=host.port, credential=cred)
     bastion = None
     if host.use_bastion and host.bastion_host:

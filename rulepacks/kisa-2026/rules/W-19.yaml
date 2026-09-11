@@ -1,0 +1,21 @@
+# W-19 불필요한 IIS 서비스 구동 점검 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-19
+name: 불필요한 IIS 서비스 구동 점검
+severity: 상
+category: 서비스관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: svc
+  cmd: Get-Service -Name W3SVC,IISADMIN -ErrorAction SilentlyContinue | Where-Object {$_.Status -eq 'Running'} | Select-Object -ExpandProperty Name
+  timeout: 60
+verdict:
+- when:
+    svc:
+      absent: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- svc
+note: IIS 실행 중이면 필요성 판단

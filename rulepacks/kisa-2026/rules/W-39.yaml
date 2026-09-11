@@ -1,0 +1,29 @@
+# W-39 백신 프로그램 업데이트 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-39
+name: 백신 프로그램 업데이트
+severity: 상
+category: 패치관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: age
+  cmd: (Get-MpComputerStatus -ErrorAction SilentlyContinue).AntivirusSignatureAge
+  timeout: 60
+- key: av
+  cmd: Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntiVirusProduct -ErrorAction SilentlyContinue | Select-Object -ExpandProperty displayName
+  timeout: 60
+verdict:
+- when:
+    age:
+      le: 7
+  then: GOOD
+- when:
+    age:
+      exists: true
+  then: VULN
+- else: MANUAL
+evidence:
+- age
+- av
+note: Defender 서명 7일 이내면 양호. 타사 백신은 콘솔에서 확인

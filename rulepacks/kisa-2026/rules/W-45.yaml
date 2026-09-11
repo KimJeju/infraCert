@@ -1,0 +1,32 @@
+# W-45 백신 프로그램 설치 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-45
+name: 백신 프로그램 설치
+severity: 상
+category: 보안관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: mp
+  cmd: (Get-MpComputerStatus -ErrorAction SilentlyContinue).AntivirusEnabled
+  timeout: 60
+- key: av
+  cmd: Get-CimInstance -Namespace root/SecurityCenter2 -ClassName AntiVirusProduct -ErrorAction SilentlyContinue | Select-Object -ExpandProperty displayName
+  timeout: 60
+verdict:
+- when:
+    mp:
+      eq: 'True'
+  then: GOOD
+- when:
+    av:
+      exists: true
+  then: GOOD
+- when:
+    mp:
+      eq: 'False'
+  then: VULN
+- else: MANUAL
+evidence:
+- mp
+- av

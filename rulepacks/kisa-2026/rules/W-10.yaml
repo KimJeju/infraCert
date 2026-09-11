@@ -1,0 +1,20 @@
+# W-10 마지막 사용자 이름 표시 안 함 — Windows 선언형 룰(PowerShell 조회 전용). 생성: scripts/gen_rules_windows.py
+id: W-10
+name: 마지막 사용자 이름 표시 안 함
+severity: 중
+category: 계정관리
+platforms:
+- windows
+shell: powershell
+collect:
+- key: v
+  cmd: (Get-ItemProperty -LiteralPath 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'DontDisplayLastUserName' -ErrorAction SilentlyContinue).'DontDisplayLastUserName'
+  timeout: 60
+verdict:
+- when:
+    v:
+      eq: '1'
+  then: GOOD
+- else: VULN
+evidence:
+- v

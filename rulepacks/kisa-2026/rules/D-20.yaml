@@ -1,0 +1,32 @@
+# D-20 인가되지 않은 Object Owner의 제한 — Oracle 선언형 룰(SSH→sqlplus SELECT 전용, ORACLE_HOME/ORACLE_SID 파라미터 필요). 생성: scripts/gen_rules_oracle.py
+id: D-20
+name: 인가되지 않은 Object Owner의 제한
+severity: 하
+category: 접근관리
+platforms:
+- linux
+- aix
+- solaris
+- hpux
+collect:
+- key: q
+  cmd: export PATH="$ORACLE_HOME/bin:$PATH"; printf "set heading off feedback off pagesize 0 linesize 300 trimspool on\n%s\nexit\n" 'SELECT DISTINCT owner FROM dba_objects WHERE owner NOT IN ('"'"'SYS'"'"','"'"'SYSTEM'"'"','"'"'SYSMAN'"'"','"'"'DBSNMP'"'"','"'"'OUTLN'"'"','"'"'XDB'"'"','"'"'WMSYS'"'"','"'"'CTXSYS'"'"','"'"'MDSYS'"'"','"'"'ORDSYS'"'"','"'"'ORDDATA'"'"','"'"'OLAPSYS'"'"','"'"'EXFSYS'"'"','"'"'APEX_PUBLIC_USER'"'"','"'"'ANONYMOUS'"'"','"'"'DIP'"'"','"'"'ORACLE_OCM'"'"','"'"'APPQOSSYS'"'"','"'"'AUDSYS'"'"','"'"'GSMADMIN_INTERNAL'"'"','"'"'DBSFWUSER'"'"','"'"'GGSYS'"'"','"'"'LBACSYS'"'"','"'"'OJVMSYS'"'"','"'"'REMOTE_SCHEDULER_AGENT'"'"','"'"'SYSBACKUP'"'"','"'"'SYSDG'"'"','"'"'SYSKM'"'"','"'"'SYSRAC'"'"','"'"'SYS$UMF'"'"','"'"'DVSYS'"'"','"'"'DVF'"'"','"'"'MDDATA'"'"','"'"'ORDPLUGINS'"'"','"'"'SI_INFORMTN_SCHEMA'"'"','"'"'XS$NULL'"'"','"'"'OJVMSYS'"'"')
+    ORDER BY 1;' | sqlplus -S -L / as sysdba 2>&1
+  timeout: 90
+extract:
+- from: q
+  regex: '(?P<err>ORA-\d+|SP2-\d+|TNS-\d+|sqlplus: not found|Permission denied)'
+verdict:
+- when:
+    err:
+      exists: true
+  then: MANUAL
+- when:
+    q:
+      absent: true
+  then: GOOD
+- else: MANUAL
+evidence:
+- q
+note: 시스템 스키마 외 오브젝트 소유자는 인가 여부 판단
+remediation: Object Owner를 SYS, SYSTEM, 관리자 계정으로 제한 설정
