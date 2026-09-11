@@ -115,8 +115,9 @@ def main(argv: list[str]) -> int:
     # rulepacks 는 exe 옆(app_root()) 으로. workspace/·config.json 은 실행 시 생성된다.
     dst = DIST / "rulepacks"
     shutil.rmtree(dst, ignore_errors=True)
-    shutil.copytree(ROOT / "rulepacks", dst,
-                    ignore=shutil.ignore_patterns("profiles", "__pycache__"))
+    # --no-guide: 가이드 파생물(rulepacks/*/guide/, 수동확인 사례 표시용 4MB)을 반입본에서 뺀다
+    ignored = ["profiles", "__pycache__"] + (["guide"] if "--no-guide" in argv else [])
+    shutil.copytree(ROOT / "rulepacks", dst, ignore=shutil.ignore_patterns(*ignored))
     # 사용자 프로파일은 룰팩 안 profiles/ 에 저장되므로 빈 디렉터리만 마련
     for pack in dst.iterdir():
         if (pack / "manifest.yaml").exists():

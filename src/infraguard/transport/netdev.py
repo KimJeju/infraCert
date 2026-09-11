@@ -96,6 +96,7 @@ class NetdevConnection(Connection):
     def _run(self, cmd: str, timeout: float = READ_TIMEOUT) -> str:
         self._chan.send(cmd + "\n")
         text, _ = self._read_until_prompt(timeout)
+        self._last_prompt = text.rstrip().rsplit("\n", 1)[-1].strip()   # 'FAKE-R1>' — probe 의 hostname
         return _strip_echo(text, cmd)
 
     def exec(self, argv: list[str], *, timeout: int, cwd: str | None = None,
@@ -126,8 +127,10 @@ class NetdevConnection(Connection):
         ver = getattr(self, "_version_text", "") or ""
         m = re.search(r"Version\s+([\w.()\[\]-]+)", ver) or re.search(r"Junos:\s*(\S+)", ver)
         notes = [] if self.os else [f"벤더 미식별(show version): {ver[:80]!r}"]
+        prompt = getattr(self, "_last_prompt", "")
+        host = re.sub(r"\(.*\)$", "", prompt.rstrip("># ")) or _prompt_host(ver)   # 'R1(config)#' → 'R1'
         self._env = RemoteEnvironment(os=self.os, os_version=m.group(1) if m else None,
-                                      hostname=_prompt_host(ver), incomplete=not self.os, notes=notes)
+                                      hostname=host or None, incomplete=not self.os, notes=notes)
         return self._env
 
     def upload(self, local: Path, remote: str) -> None:
