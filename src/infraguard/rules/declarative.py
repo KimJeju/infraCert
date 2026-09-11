@@ -181,6 +181,9 @@ def evaluate(spec: RuleSpec, conn: Connection, env: RemoteEnvironment) -> Native
 
     for c in spec.collect:
         r = conn.exec(build_argv(spec, c.cmd, env.params), timeout=c.timeout)
+        if r.error or r.timed_out:
+            # 전송 계층 실패는 판정(MANUAL)로 위장하지 않는다 — 예외로 올려 native_runner 가 ERROR 로 기록
+            raise RuntimeError(f"collect {c.key!r} 실행 실패: {r.error or f'timeout {c.timeout}s'}")
         out = (r.stdout or "").replace("\r\n", "\n").replace("\r", "\n")   # PowerShell/장비 CRLF → 값 끝 \r 제거
         raw[c.key] = out
         vars_[c.key] = out.strip()

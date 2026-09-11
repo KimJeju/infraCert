@@ -22,7 +22,7 @@ class _Conn(Connection):
         cmd = argv[-1]
         for k in self.fail:
             if k in cmd:
-                return ExecResult(argv, 1, "", "denied", 1, error="denied")
+                return ExecResult(argv, 1, "", "denied", 1)   # 명령 실패(exit 1) — 전송 오류(error=) 아님
         for k, v in self.outputs.items():
             if k in cmd:
                 return ExecResult(argv, 0, v, "", 1)

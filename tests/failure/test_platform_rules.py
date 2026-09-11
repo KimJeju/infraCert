@@ -215,3 +215,29 @@ def test_build_connection_picks_transport_by_platform() -> None:
     assert w2.target.use_ssl
     assert isinstance(build_connection(host(Platform.NETWORK), cred, None), netdev.NetdevConnection)
     assert isinstance(build_connection(host(Platform.LINUX), cred, None), SSHConnection)
+
+
+def test_transport_failure_becomes_error_not_manual() -> None:
+    """전송이 죽으면(SSH session not active·timeout) 판정 어휘로 위장하지 않고 ERROR 로 드러난다."""
+    from infraguard.orchestrator.native_runner import run_native  # noqa: PLC0415
+
+    class Dead(Fake):
+        def exec(self, argv, *, timeout, cwd=None, stdin_data=None, max_output=1 << 20):  # noqa: ANN001,ANN201
+            return ExecResult(list(argv), None, "", "", 1, error="session open failed: SSH session not active")
+
+    class Slow(Fake):
+        def exec(self, argv, *, timeout, cwd=None, stdin_data=None, max_output=1 << 20):  # noqa: ANN001,ANN201
+            return ExecResult(list(argv), None, "", "", 1, timed_out=True)
+
+    env = RemoteEnvironment(os="linux")
+    with pytest.raises(RuntimeError):
+        evaluate(_rule("U-42"), Dead({}), env)
+    with pytest.raises(RuntimeError):
+        evaluate(_rule("U-42"), Slow({}), env)
+    from infraguard.rulepack import loader  # noqa: PLC0415
+    loader.load(RULES.parent)                               # YAML 룰을 레지스트리에 등록
+    findings, errors = run_native(Dead({}), env, ["U-42", "U-58"])
+    assert not findings and len(errors) == 2
+    assert all("SSH session not active" in e.reason for e in errors)
+    # 명령 자체가 실패(exit≠0)한 건 여전히 판정 경로(_ok=False → 룰이 MANUAL 등으로 처리)
+    assert evaluate(_rule("U-42"), Fake({}), env).verdict_raw == "MANUAL"
