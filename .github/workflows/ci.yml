@@ -26,4 +26,6 @@ jobs:
           IG_RULE_COVERAGE: workspace/rule_coverage.json
         run: python -m pytest -q
       - name: rule coverage table
+        env:
+          PYTHONUTF8: "1"
         run: python scripts/rule_coverage.py --json workspace/rule_coverage.json

@@ -25,6 +25,8 @@ VERDICTS = ("GOOD", "VULN", "MANUAL", "NA", "ERROR")
 
 
 def main() -> int:
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")   # CI(cp1252 콘솔)에서 한글 표가 죽지 않게
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", action="store_true")
     ap.add_argument("--json", type=Path, default=DEFAULT_JSON)
