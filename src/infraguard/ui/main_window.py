@@ -201,6 +201,33 @@ class MainWindow(QMainWindow):
         QMessageBox.information(self, "룰팩 내보내기",
                                 f"저장됨: {path}\n번들 {st['bundles']} · 룰 {st['native']} · 가이드 {st['guide']}")
 
+    def _diff_rulepack(self) -> None:
+        """현재 룰팩 vs (설치된 다른 룰팩 | zip). manifest 만 읽는다."""
+        if self.pack is None:
+            return
+        from PySide6.QtWidgets import QInputDialog
+        from infraguard.rulepack import diff as rp_diff
+        others = [p.name for p in rp_loader.list_packs() if p.name != self.pack.name]
+        choices = [*others, "zip 파일 선택…"]
+        pick, ok = QInputDialog.getItem(self, "룰팩 비교", f"기준: {self.pack.name} {self.pack.version}\n비교 대상:",
+                                        choices, 0, False)
+        if not ok:
+            return
+        from pathlib import Path
+        if pick == "zip 파일 선택…":
+            path, _ = QFileDialog.getOpenFileName(self, "룰팩 zip", "", "*.zip")
+            if not path:
+                return
+            target = Path(path)
+        else:
+            target = rp_loader.rulepacks_root() / pick
+        try:
+            d = rp_diff.diff(rp_diff.load_manifest(self.pack.root), rp_diff.load_manifest(target))
+        except Exception as e:  # noqa: BLE001
+            QMessageBox.warning(self, "룰팩 비교 실패", str(e))
+            return
+        self._show_text(f"룰팩 비교 — {d.a} → {d.b}", rp_diff.render(d))
+
     def _delete_rulepack(self, name: str) -> None:
         import shutil
 
@@ -326,6 +353,7 @@ class MainWindow(QMainWindow):
         self.rulepack.export_requested.connect(self._export_rulepack)
         self.rulepack.delete_requested.connect(self._delete_rulepack)
         self.rulepack.pack_selected.connect(self._switch_rulepack)
+        self.rulepack.diff_requested.connect(self._diff_rulepack)
         self.tabs.addTab(self.rulepack, "룰팩")
         pk_label = f"{self.pack.name} {self.pack.version}" if self.pack else "(없음)"
         self.settings = SettingsPage(self.ctx.config, self.ctx.workspace.layout,

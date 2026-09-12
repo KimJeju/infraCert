@@ -23,6 +23,7 @@ from PySide6.QtWidgets import (
 )
 
 from infraguard.rulepack.guide import format_guide
+from infraguard.ui.pages.rule_tester import RuleTesterPanel
 from infraguard.rulepack.loader import Profile, RulePack, save_profile
 
 ID_ROLE = int(Qt.ItemDataRole.UserRole) + 1
@@ -38,6 +39,7 @@ class RulePackPage(QWidget):
     export_requested = Signal()          # 현재 룰팩 전체를 zip 으로
     delete_requested = Signal(str)       # rulepacks/<name> 삭제(확인은 메인윈도가)
     pack_selected = Signal(str)          # rulepacks/<name> 전환
+    diff_requested = Signal()            # 다른 룰팩(설치본 또는 zip)과 manifest 비교
 
     def __init__(self) -> None:
         super().__init__()
@@ -73,11 +75,14 @@ class RulePackPage(QWidget):
         zipb = QPushButton("내보내기(선택 항목만)")
         zipb.setToolTip("체크한 번들·룰(+그 항목의 가이드)만 담은 부분 룰팩. 고객사 반입용.")
         zipb.clicked.connect(lambda: self.build_requested.emit(*self.current_selection()))
+        cmp = QPushButton("비교…")
+        cmp.setToolTip("현재 룰팩과 다른 룰팩(설치본 또는 zip)의 manifest 를 비교 — 추가/삭제/판정 조건·메타 변경/프로파일")
+        cmp.clicked.connect(self.diff_requested.emit)
         rm = QPushButton("삭제")
         rm.setObjectName("danger")
         rm.setToolTip("현재 선택한 룰팩 폴더를 rulepacks/ 에서 지운다(가져온 부분 룰팩 정리용)")
         rm.clicked.connect(lambda: self.delete_requested.emit(self.packs.currentData() or ""))
-        for b in (imp, exp, zipb):
+        for b in (imp, exp, zipb, cmp):
             tb.addWidget(b)
         tb.addStretch(1)
         tb.addWidget(rm)
@@ -102,7 +107,9 @@ class RulePackPage(QWidget):
         self.detail.setReadOnly(True)
         self.detail.setMinimumWidth(300)
         self.detail.setPlaceholderText("왼쪽에서 번들·룰·항목을 선택하세요.")
-        rl.addWidget(self.detail, 1)
+        rl.addWidget(self.detail, 2)
+        self.tester = RuleTesterPanel()
+        rl.addWidget(self.tester, 3)
 
         self.split = QSplitter(Qt.Orientation.Horizontal)
         self.split.addWidget(self.tree)
@@ -244,6 +251,7 @@ class RulePackPage(QWidget):
         rid = index.data(ID_ROLE)
         kind = index.data(KIND_ROLE)
         if kind == "bundle":
+            self.tester.set_spec(None)
             b = self._pack.bundles[rid]
             self.detail.setPlainText(
                 f"{b.id}\n{b.description}\n\n스크립트: {b.script.name}\nSHA-256: {b.sha256}\n"
@@ -254,6 +262,7 @@ class RulePackPage(QWidget):
             )
         elif rid and rid in self._pack.rules:
             r = self._pack.rules[rid]
+            self.tester.set_spec(self._pack.specs.get(rid))
             self.detail.setPlainText(
                 f"{r.id}  {r.name}\n중요도: {r.severity or '-'}   분류: {r.category or '-'}\n"
                 f"수동확인 선언: {'예' if r.manual else '아니오'}\n"

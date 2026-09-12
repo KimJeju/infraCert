@@ -20,7 +20,10 @@ jobs:
         run: |
           python scripts/regen_manifest.py rulepacks/kisa-2026
           git diff --exit-code -- rulepacks/
-      - name: pytest
+      - name: pytest (+ rule fixture coverage)
         env:
           QT_QPA_PLATFORM: offscreen
+          IG_RULE_COVERAGE: workspace/rule_coverage.json
         run: python -m pytest -q
+      - name: rule coverage table
+        run: python scripts/rule_coverage.py --json workspace/rule_coverage.json
