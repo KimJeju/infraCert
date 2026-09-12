@@ -8,6 +8,7 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QComboBox,
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
@@ -45,6 +46,7 @@ from infraguard.ui.host_card import HostCard
 from infraguard.ui.models_qt import HOST_ID_ROLE, AssetTreeModel, StatusDelegate
 from infraguard.ui.pages.dashboard import DashboardPage
 from infraguard.ui.pages.manual import ManualBenchPage
+from infraguard.ui.pages.multiexec import MultiExecPage
 from infraguard.ui.pages.result import ResultPage
 from infraguard.ui.pages.rulepack import RulePackPage
 from infraguard.ui.pages.scan import ScanPage
@@ -315,9 +317,27 @@ class MainWindow(QMainWindow):
         sl.addWidget(st)
         self.filter = QLineEdit()
         self.filter.setClearButtonEnabled(True)
-        self.filter.setPlaceholderText("필터 (이름·주소·그룹)")
+        self.filter.setPlaceholderText("필터 / 쿼리: os=linux env=PROD crit=CRITICAL tag=dmz")
+        self.filter.setToolTip("공백 = AND. key=a,b = OR. key!=v 제외. 키: os env crit role tag group project owner name addr\n"
+                               "그 외 단어는 이름·주소·그룹·고객사 부분일치")
         self.filter.textChanged.connect(self._refresh_assets)
         sl.addWidget(self.filter)
+        grow = QHBoxLayout()
+        self.groups = QComboBox()
+        self.groups.setToolTip("동적 그룹 — 저장한 쿼리. 새 자산이 조건에 맞으면 자동으로 포함된다")
+        self.groups.activated.connect(self._apply_group)
+        grow.addWidget(self.groups, 1)
+        gsave = QPushButton("그룹 저장")
+        gsave.setToolTip("현재 필터 쿼리를 동적 그룹으로 저장(config.json)")
+        gsave.clicked.connect(self._save_group)
+        grow.addWidget(gsave)
+        gdel = QPushButton("×")
+        gdel.setFixedWidth(28)
+        gdel.setToolTip("선택한 동적 그룹 삭제")
+        gdel.clicked.connect(self._delete_group)
+        grow.addWidget(gdel)
+        sl.addLayout(grow)
+        self._fill_groups()
         self.tree = QTreeView()
         self.tree.setHeaderHidden(True)
         self.tree.header().setStretchLastSection(False)          # 긴 호스트 이름 → 가로 스크롤(잘림 대신)
@@ -369,6 +389,12 @@ class MainWindow(QMainWindow):
                                      self._engine_version(), pk_label)
         self.settings.saved.connect(self._on_settings_saved)
         self.settings.sanitize_requested.connect(self._sanitize_now)
+        self.multi = MultiExecPage(self._ensure_cred, self.controller.host_key_bridge.ask,
+                                   self.controller.host_key_bridge.ask_changed,
+                                   self.ctx.workspace.layout.logs / "multiexec",
+                                   user_entries=list(self.ctx.config.get("command_library") or []))
+        self.multi.library_changed.connect(self._save_library)
+        self.tabs.addTab(self.multi, "멀티실행")
         self.tabs.addTab(self.settings, "설정")
         self.FIXED_TABS = self.tabs.count()          # 고정 탭은 닫히지 않는다
         self.tabs.setTabsClosable(True)
@@ -395,6 +421,7 @@ class MainWindow(QMainWindow):
 
         self.dashboard.start_scan_requested.connect(self._start_scan)
         self.dashboard.filter_by_status.connect(self._jump_to_result_status)
+        self.dashboard.filter_by_rule.connect(self._jump_to_result_rule)
         self.scan.start_requested.connect(self._run_scan)
         self.scan.cancel_requested.connect(self.controller.cancel)
         self.scan.retry_requested.connect(self._retry_failed)
@@ -431,6 +458,47 @@ class MainWindow(QMainWindow):
         self.tree.expandAll()
         self.sb_hosts.setText(f"자산 {len(hosts)}대")
         self._update_card()
+        if hasattr(self, "multi"):
+            self.multi.set_hosts(hosts)
+
+    # ------------------------------------------------------------ 동적 그룹
+    def _fill_groups(self) -> None:
+        self.groups.blockSignals(True)
+        self.groups.clear()
+        self.groups.addItem("동적 그룹…", "")
+        for g in self.ctx.config.get("asset_groups") or []:
+            self.groups.addItem(f"{g.get('name')}  ({g.get('query')})", g.get("query", ""))
+        self.groups.blockSignals(False)
+
+    def _apply_group(self, _i: int) -> None:
+        q = self.groups.currentData()
+        if q:
+            self.filter.setText(q)
+            self.tree.selectAll()          # 그룹 = 필터 결과 전부 선택 → 바로 "선택 호스트 진단"
+
+    def _save_group(self) -> None:
+        from PySide6.QtWidgets import QInputDialog
+        q = self.filter.text().strip()
+        if not q:
+            QMessageBox.information(self, "동적 그룹", "먼저 필터에 쿼리를 입력하세요. 예: os=linux env=PROD")
+            return
+        name, ok = QInputDialog.getText(self, "동적 그룹 저장", f"쿼리: {q}\n그룹 이름:")
+        if not ok or not name.strip():
+            return
+        groups = [g for g in (self.ctx.config.get("asset_groups") or []) if g.get("name") != name.strip()]
+        groups.append({"name": name.strip(), "query": q})
+        self.ctx.config["asset_groups"] = groups
+        config.save(self.ctx.config)
+        self._fill_groups()
+        self.groups.setCurrentIndex(self.groups.count() - 1)
+
+    def _delete_group(self) -> None:
+        q = self.groups.currentData()
+        if not q:
+            return
+        self.ctx.config["asset_groups"] = [g for g in (self.ctx.config.get("asset_groups") or []) if g.get("query") != q]
+        config.save(self.ctx.config)
+        self._fill_groups()
 
     def _selected_hosts(self) -> list[Host]:
         """선택된 호스트. 고객사/분류 노드를 고르면 그 아래 호스트 전부(다건 진단). 중복 제거, 트리 순서 유지."""
@@ -616,6 +684,10 @@ class MainWindow(QMainWindow):
         self._terminals.clear()
         self._sftps.clear()
         self._update_bcast_label()
+
+    def _save_library(self, entries: list) -> None:
+        self.ctx.config["command_library"] = entries
+        config.save(self.ctx.config)
 
     def _on_settings_saved(self, values: dict) -> None:
         self.ctx.config.update(values)
@@ -1050,8 +1122,13 @@ class MainWindow(QMainWindow):
         base = self._baseline_for(scan) if scan else None
         self.dashboard.update_fix(_diff.summary(_diff.diff(scan, base)) if scan and base else None,
                                   base.scan_id if base else None)
+        self.dashboard.update_top(scan)
         self.dashboard.set_progress([])
         self.dashboard.set_recent(self.ctx.results.list_scans())
+
+    def _jump_to_result_rule(self, rule_id: str) -> None:
+        self.result.search.setText(rule_id)
+        self.tabs.setCurrentWidget(self.result)
 
     def _jump_to_result_status(self, status: Status) -> None:
         self.result.set_status_filter(status)

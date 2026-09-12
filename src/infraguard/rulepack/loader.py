@@ -271,7 +271,7 @@ def load(pack_dir: Path) -> RulePack:
         integrity_ok=integrity_ok, problems=problems, guide=_load_guide(pack_dir, problems),
         sha256=_sha256(mf), specs=specs,
         rule_shas={Path(rel).stem: sha for rel, sha in declared.items()},
-        meta={k: str(raw[k]) for k in ("guide_version", "author", "created_at") if raw.get(k)},
+        meta={k: str(raw[k]) for k in ("framework", "guide_version", "author", "created_at") if raw.get(k)},
     )
 
 

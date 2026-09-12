@@ -10,6 +10,7 @@ from PySide6.QtCore import QModelIndex, Qt
 from PySide6.QtGui import QColor, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import QStyle, QStyledItemDelegate
 
+from infraguard.assets import query
 from infraguard.assets.models import Host
 from infraguard.ui.theme import BADGE
 
@@ -21,13 +22,13 @@ SUMMARY_ROLE = int(Qt.ItemDataRole.UserRole) + 3
 class AssetTreeModel(QStandardItemModel):
     def rebuild(self, hosts: list[Host], filter_text: str = "") -> None:
         self.clear()
-        ft = filter_text.strip().lower()
+        q = query.parse(filter_text)
         root = self.invisibleRootItem()
         projects: dict[str, QStandardItem] = {}
         groups: dict[tuple[str, str], QStandardItem] = {}
 
         for h in sorted(hosts, key=lambda x: (x.project, x.group, x.label)):
-            if ft and ft not in f"{h.name} {h.address} {h.group} {h.project}".lower():
+            if not q.matches(h):
                 continue
             if h.project not in projects:
                 p = QStandardItem(h.project)

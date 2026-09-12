@@ -72,6 +72,7 @@ def _panel(title: str, body: QWidget) -> QWidget:
 class DashboardPage(QWidget):
     start_scan_requested = Signal()
     filter_by_status = Signal(object)  # Status
+    filter_by_rule = Signal(str)       # rule id — 결과 탭 검색
 
     def __init__(self) -> None:
         super().__init__()
@@ -153,6 +154,18 @@ class DashboardPage(QWidget):
         fix_panel = _panel("조치 현황", fix_body)
         fix_panel.setMaximumHeight(190)
         grid.addWidget(fix_panel, 1, 0, 1, 3)
+        # 취약점 중심(Greenbone 식): 호스트별이 아니라 "어느 취약점이 몇 대에" · "어느 자산이 가장 많이"
+        self.top_assets = QListWidget()
+        self.top_assets.setStyleSheet("QListWidget{border:none;background:transparent}")
+        self.top_findings = QListWidget()
+        self.top_findings.setStyleSheet("QListWidget{border:none;background:transparent}")
+        self.top_findings.itemActivated.connect(lambda it: self.filter_by_rule.emit(it.data(Qt.ItemDataRole.UserRole) or ""))
+        ta = _panel("Top Affected Assets (취약 수)", self.top_assets)
+        tf = _panel("Top Findings (영향 호스트 수) — 더블클릭하면 결과 탭 검색", self.top_findings)
+        ta.setMaximumHeight(220)
+        tf.setMaximumHeight(220)
+        grid.addWidget(ta, 2, 0, 1, 1)
+        grid.addWidget(tf, 2, 1, 1, 2)
         root.addLayout(grid, 1)
 
     def update_counts(self, summary: dict[Status, int]) -> None:
@@ -160,6 +173,31 @@ class DashboardPage(QWidget):
             c.set_value(summary.get(s, 0))
         total = sum(summary.values())
         self.subtitle.setText(f"항목 {total}건" if total else "아직 진단 결과가 없습니다")
+
+    def update_top(self, scan) -> None:  # noqa: ANN001
+        from collections import Counter
+        self.top_assets.clear()
+        self.top_findings.clear()
+        if scan is None:
+            return
+        per_host = Counter()
+        per_rule: dict[str, set[str]] = {}
+        names: dict[str, str] = {}
+        for h in scan.hosts:
+            for r in h.results:
+                if r.status is Status.FAIL:
+                    per_host[h.hostname] += 1
+                    per_rule.setdefault(r.rule_id, set()).add(h.hostname)
+                    names[r.rule_id] = r.name
+        for hn, n in per_host.most_common(8):
+            self.top_assets.addItem(f"{hn:<24} {n}")
+        for rid, hs in sorted(per_rule.items(), key=lambda kv: (-len(kv[1]), kv[0]))[:8]:
+            it = QListWidgetItem(f"{rid:<7} {len(hs)} hosts   {names.get(rid, '')[:40]}")
+            it.setData(Qt.ItemDataRole.UserRole, rid)
+            self.top_findings.addItem(it)
+        if not per_host:
+            self.top_assets.addItem("취약 없음")
+            self.top_findings.addItem("취약 없음")
 
     def update_fix(self, summary: dict[str, int] | None, base_id: str | None) -> None:
         if not summary or base_id is None:

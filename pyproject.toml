@@ -27,7 +27,7 @@ dev = ["pytest>=8", "pytest-cov", "pytest-qt", "ruff", "mypy"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-infraguard = ["ui/theme/*.svg", "parsing/profiles/*"]
+infraguard = ["ui/theme/*.svg", "parsing/profiles/*", "data/*.yaml"]
 
 [tool.ruff]
 line-length = 100

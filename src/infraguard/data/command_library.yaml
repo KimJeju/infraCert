@@ -1,0 +1,51 @@
+# 멀티실행 명령 라이브러리 — 전부 읽기 전용. 로더가 정책 검사로 한 번 더 거른다(쓰기 명령은 등록 불가).
+System:
+  - name: OS 확인
+    sh: "uname -srm; cat /etc/os-release 2>/dev/null | head -3"
+    powershell: "$o=Get-CimInstance Win32_OperatingSystem; $o.Caption+' '+$o.Version+' build '+$o.BuildNumber"
+    raw: "show version"
+  - name: Kernel / 부팅 시각
+    sh: "uname -r; uptime"
+    powershell: "(Get-CimInstance Win32_OperatingSystem).LastBootUpTime"
+  - name: CPU
+    sh: "nproc 2>/dev/null; grep -m1 'model name' /proc/cpuinfo 2>/dev/null; lsconf 2>/dev/null | grep -i processor | head -3"
+    powershell: "Get-CimInstance Win32_Processor | Select-Object Name,NumberOfCores | Format-Table -AutoSize | Out-String"
+  - name: Memory
+    sh: "free -m 2>/dev/null || (lsattr -El sys0 -a realmem 2>/dev/null; svmon -G 2>/dev/null | head -3)"
+    powershell: "$o=Get-CimInstance Win32_OperatingSystem; [int]($o.TotalVisibleMemorySize/1024).ToString()+' MB total, '+[int]($o.FreePhysicalMemory/1024)+' MB free'"
+  - name: Disk
+    sh: "df -hP 2>/dev/null | head -20"
+    powershell: "Get-Volume | Where-Object {$_.DriveLetter} | Select-Object DriveLetter,FileSystemType,@{n='FreeGB';e={[int]($_.SizeRemaining/1GB)}},@{n='SizeGB';e={[int]($_.Size/1GB)}} | Format-Table -AutoSize | Out-String"
+  - name: 시간 / NTP
+    sh: "date; timedatectl 2>/dev/null | head -6; chronyc tracking 2>/dev/null | head -3"
+    powershell: "Get-Date; w32tm /query /status 2>&1 | Out-String"
+Process:
+  - name: 프로세스 목록
+    sh: "ps -ef 2>/dev/null | head -60"
+    powershell: "Get-Process | Sort-Object CPU -Descending | Select-Object -First 30 Name,Id,CPU,WS | Format-Table -AutoSize | Out-String"
+  - name: 리스닝 포트 (ss/netstat)
+    sh: "(ss -ltnp 2>/dev/null || netstat -ltnp 2>/dev/null || netstat -an 2>/dev/null | grep LISTEN) | head -40"
+    powershell: "Get-NetTCPConnection -State Listen | Select-Object LocalAddress,LocalPort,OwningProcess | Sort-Object LocalPort | Format-Table -AutoSize | Out-String"
+    raw: "show ip interface brief"
+  - name: 서비스 상태
+    sh: "systemctl list-units --type=service --state=running 2>/dev/null | head -40 || lssrc -a 2>/dev/null | head -40"
+    powershell: "Get-Service | Where-Object {$_.Status -eq 'Running'} | Select-Object Name,DisplayName | Format-Table -AutoSize | Out-String"
+Security:
+  - name: 계정 (passwd)
+    sh: "cat /etc/passwd 2>/dev/null"
+    powershell: "Get-LocalUser | Select-Object Name,Enabled,LastLogon | Format-Table -AutoSize | Out-String"
+    raw: "show running-config | include username"
+  - name: sudoers
+    sh: "grep -vE '^\\s*#|^\\s*$' /etc/sudoers 2>/dev/null; ls -l /etc/sudoers.d 2>/dev/null"
+  - name: sshd_config
+    sh: "grep -vE '^\\s*#|^\\s*$' /etc/ssh/sshd_config 2>/dev/null"
+  - name: 비밀번호 정책
+    sh: "grep -E '^\\s*(PASS_|ENCRYPT_METHOD)' /etc/login.defs 2>/dev/null; grep -hE 'pam_pwquality|pam_cracklib|minlen' /etc/pam.d/system-auth /etc/pam.d/common-password /etc/security/pwquality.conf 2>/dev/null"
+    powershell: "net accounts"
+  - name: 방화벽
+    sh: "(command -v nft >/dev/null && nft list ruleset 2>/dev/null | head -40) || (command -v iptables >/dev/null && iptables -S 2>/dev/null | head -40) || (command -v firewall-cmd >/dev/null && firewall-cmd --list-all 2>/dev/null)"
+    powershell: "Get-NetFirewallProfile | Select-Object Name,Enabled | Format-Table -AutoSize | Out-String"
+    raw: "show access-lists"
+  - name: 최근 로그인
+    sh: "last -n 20 2>/dev/null; lastlog 2>/dev/null | grep -v Never | head -20"
+    powershell: "Get-WinEvent -FilterHashtable @{LogName='Security';Id=4624} -MaxEvents 20 -ErrorAction SilentlyContinue | Select-Object TimeCreated,@{n='User';e={$_.Properties[5].Value}} | Format-Table -AutoSize | Out-String"

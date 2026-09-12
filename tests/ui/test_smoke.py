@@ -38,7 +38,7 @@ def test_mainwindow_builds_and_shows_tabs(qtbot, ctx):
     titles = [win.tabs.tabText(i) for i in range(win.tabs.count())]
     for key in ("대시보드", "진단", "결과", "수동확인", "룰팩", "설정"):
         assert any(key in t for t in titles), key
-    assert win.tabs.count() == win.FIXED_TABS == 6
+    assert win.tabs.count() == win.FIXED_TABS == 7          # 대시보드·진단·결과·수동확인·룰팩·멀티실행·설정
     assert win.pack is not None and win.pack.runnable, win.pack and win.pack.problems
 
 
