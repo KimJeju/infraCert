@@ -989,10 +989,12 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return
             self.controller.cancel()
-        elif gate == WARN_UNEXPORTED:
+        wipe = bool(self.ctx.config.get("wipe_on_exit", True))
+        if gate == WARN_UNEXPORTED and wipe:
             resp = QMessageBox.question(
                 self, "종료", "아직 내보내지 않은 결과가 있습니다.\n"
-                "삭제하고 종료할까요? (아니오=취소)",
+                "종료하면 작업공간이 완전삭제됩니다(설정 → 작업공간에서 끌 수 있음).\n"
+                "파일 → 진단 세션 내보내기(zip) 로 남길 수 있습니다.\n\n삭제하고 종료할까요? (아니오=취소)",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if resp != QMessageBox.StandardButton.Yes:
@@ -1000,11 +1002,14 @@ class MainWindow(QMainWindow):
                 return
         self._shutdown_sessions()
         self.ctx.creds.lock()
-        rep = self.ctx.workspace.sanitize()
-        if not rep.clean:
-            QMessageBox.warning(
-                self, "잔류물", "삭제되지 않은 경로:\n" + "\n".join(rep.leftovers + rep.errors),
-            )
+        if wipe:
+            rep = self.ctx.workspace.sanitize()
+            if not rep.clean:
+                QMessageBox.warning(
+                    self, "잔류물", "삭제되지 않은 경로:\n" + "\n".join(rep.leftovers + rep.errors),
+                )
+        else:
+            self.ctx.workspace.close_all()        # 삭제 없이 DB 핸들만 정리 — 다음 실행에 결과·자산 유지
         event.accept()
 
     def _about(self) -> None:

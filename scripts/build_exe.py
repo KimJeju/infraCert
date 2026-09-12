@@ -66,6 +66,7 @@ def main(argv: list[str]) -> int:
         "--noconfirm", "--onedir", "--noconsole", "--name", NAME,
         "--paths", str(ROOT / "src"),
         "--add-data", f"{ROOT / 'src' / 'infraguard' / 'parsing' / 'profiles'}{sep}infraguard/parsing/profiles",
+        "--add-data", f"{ROOT / 'src' / 'infraguard' / 'ui' / 'theme'}{sep}infraguard/ui/theme",
         "--collect-submodules", "infraguard",
         "--distpath", str(ROOT / "dist"), "--workpath", str(ROOT / "build"),
         "--specpath", str(ROOT / "build"),

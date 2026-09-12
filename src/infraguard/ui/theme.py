@@ -5,7 +5,15 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from infraguard.core.status import Status
+
+# 화살표·체크 SVG. 서브컨트롤에 QSS 를 주면 Windows 기본 화살표가 사라지므로 직접 그린다(border 삼각형은 스타일에 따라 막대로 깨짐)
+_ASSETS = Path(__file__).resolve().parent / "theme"
+ARROW_DOWN = (_ASSETS / "arrow_down.svg").as_posix()
+ARROW_UP = (_ASSETS / "arrow_up.svg").as_posix()
+CHECK = (_ASSETS / "check.svg").as_posix()
 
 # --- 기본 팔레트 (거의 흑색, 저채도. 둥근 모서리 없음, 선은 1px) ---
 BG0 = "#07090C"      # 캔버스
@@ -84,6 +92,9 @@ QLineEdit, QComboBox, QSpinBox, QPlainTextEdit, QTextEdit {{
 QPlainTextEdit, QTextEdit {{ padding: 6px 8px; }}
 QLineEdit:focus, QComboBox:focus, QSpinBox:focus, QTextEdit:focus {{ border: 1px solid {ACCENT}; }}
 QComboBox::drop-down {{ border: none; width: 22px; subcontrol-origin: padding; subcontrol-position: center right; }}
+QComboBox::down-arrow {{ image: url("{ARROW_DOWN}"); width: 10px; height: 6px; margin-right: 6px; }}
+QComboBox QAbstractItemView::item {{ min-height: 24px; padding: 3px 8px; }}
+QComboBox QAbstractItemView::item:selected {{ background: {ACCENT_DIM}; color: white; }}
 QComboBox QAbstractItemView {{ background: {BG1}; border: 1px solid {BG3}; selection-background-color: {ACCENT_DIM}; }}
 QSpinBox {{ padding-right: 22px; }}
 QSpinBox::up-button, QSpinBox::down-button {{
@@ -92,9 +103,11 @@ QSpinBox::up-button, QSpinBox::down-button {{
 QSpinBox::up-button {{ subcontrol-position: top right; }}
 QSpinBox::down-button {{ subcontrol-position: bottom right; }}
 QSpinBox::up-button:hover, QSpinBox::down-button:hover {{ background: {BG3}; }}
+QSpinBox::up-arrow {{ image: url("{ARROW_UP}"); width: 8px; height: 5px; }}
+QSpinBox::down-arrow {{ image: url("{ARROW_DOWN}"); width: 8px; height: 5px; }}
 QCheckBox, QRadioButton {{ spacing: 6px; }}
 QCheckBox::indicator, QRadioButton::indicator {{ width: 15px; height: 15px; border: 1px solid {BG3}; background: {BG0}; }}
-QCheckBox::indicator:checked, QRadioButton::indicator:checked {{ background: {ACCENT}; border-color: {ACCENT}; }}
+QCheckBox::indicator:checked, QRadioButton::indicator:checked {{ background: {ACCENT}; border-color: {ACCENT}; image: url("{CHECK}"); }}
 
 /* ---- 버튼 ---- */
 QPushButton {{

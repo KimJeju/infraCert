@@ -26,6 +26,9 @@ dev = ["pytest>=8", "pytest-cov", "pytest-qt", "ruff", "mypy"]
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+infraguard = ["ui/theme/*.svg", "parsing/profiles/*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py311"
