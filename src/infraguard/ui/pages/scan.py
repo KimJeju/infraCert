@@ -100,8 +100,12 @@ class ScanPage(QWidget):
         root.addWidget(QLabel("진행"))
         self.table = QTableWidget(0, len(PROG_COLS))
         self.table.setHorizontalHeaderLabels(PROG_COLS)
-        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setColumnWidth(0, 180)
+        self.table.setColumnWidth(1, 160)
+        self.table.setHorizontalScrollMode(QTableWidget.ScrollMode.ScrollPerPixel)
         self.table.verticalHeader().setVisible(False)
         root.addWidget(self.table)
 

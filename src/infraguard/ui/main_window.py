@@ -8,6 +8,7 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
+    QHeaderView,
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
@@ -318,6 +319,9 @@ class MainWindow(QMainWindow):
         sl.addWidget(self.filter)
         self.tree = QTreeView()
         self.tree.setHeaderHidden(True)
+        self.tree.header().setStretchLastSection(False)          # 긴 호스트 이름 → 가로 스크롤(잘림 대신)
+        self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.tree.setHorizontalScrollMode(QTreeView.ScrollMode.ScrollPerPixel)
         self.tree.setSelectionMode(QTreeView.SelectionMode.ExtendedSelection)
         self.model = AssetTreeModel()
         self.tree.setModel(self.model)
@@ -775,6 +779,7 @@ class MainWindow(QMainWindow):
         lay = QVBoxLayout(d)
         ed = QPlainTextEdit(text)
         ed.setReadOnly(True)
+        ed.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)      # 명령 목록은 줄바꿈 대신 가로 스크롤
         ed.setStyleSheet("font-family: Consolas, 'Malgun Gothic', monospace;")
         lay.addWidget(ed)
         bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)

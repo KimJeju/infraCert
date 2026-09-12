@@ -9,6 +9,7 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
+    QHeaderView,
     QComboBox,
     QHBoxLayout,
     QInputDialog,
@@ -91,6 +92,10 @@ class RulePackPage(QWidget):
         # 본문: 트리 | 상세 (스플리터, 기본 3:2)
         self.tree = QTreeView()
         self.tree.setHeaderHidden(True)
+        # 헤더 숨김 + stretchLastSection(기본 True) 조합은 긴 룰 이름을 잘라 버리고 가로 스크롤바를 안 만든다
+        self.tree.header().setStretchLastSection(False)
+        self.tree.header().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.tree.setHorizontalScrollMode(QTreeView.ScrollMode.ScrollPerPixel)
         self.tree.setMinimumWidth(360)
         self.model = QStandardItemModel()
         self.tree.setModel(self.model)

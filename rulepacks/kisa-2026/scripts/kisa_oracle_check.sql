@@ -71,7 +71,10 @@ FROM ( SELECT DISTINCT grantee FROM dba_sys_privs
        WHERE admin_option='YES'
          AND grantee NOT IN ('SYS','SYSTEM','AQ_ADMINISTRATOR_ROLE','DBA','DATAPUMP_IMP_FULL_DATABASE',
              'IMP_FULL_DATABASE','EXP_FULL_DATABASE','SCHEDULER_ADMIN','GSMADMIN_INTERNAL','BACSYS')
-         AND grantee NOT IN (SELECT grantee FROM dba_role_privs WHERE granted_role='DBA') );
+         AND grantee NOT IN (SELECT grantee FROM dba_role_privs WHERE granted_role='DBA')
+          -- Oracle 제공 계정/롤(DV_ACCTMGR, GSMUSER_ROLE, OGG_*, SYSKM ...)은 제외 — 네이티브 D-04 와 동일 보정(2026-09-12)
+          AND grantee NOT IN (SELECT username FROM dba_users WHERE oracle_maintained='Y')
+          AND grantee NOT IN (SELECT role FROM dba_roles WHERE oracle_maintained='Y') );
 
 -- ----------------------------------------------------------------------------
 -- D-05 (중) 비밀번호 재사용 제약 (DEFAULT 프로파일)
