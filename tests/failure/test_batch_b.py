@@ -56,7 +56,7 @@ def test_reports_carry_baseline_columns(tmp_path: Path) -> None:
     from openpyxl import load_workbook
     wb = load_workbook(x)
     row = [c.value for c in wb["결과"][2]]
-    assert row[-2:] == ["취약", "조치됨"]
+    assert row[12:14] == ["취약", "조치됨"]          # 이전결과·변화 (뒤에 위험도·예외 컬럼이 더 있다)
     cells = {r[0].value: r[1].value for r in wb["요약"].iter_rows(min_row=3, max_row=16, max_col=2)}
     assert cells.get("  조치됨") == "1" and cells.get("  조치율") == "100%"
     # baseline 없이도 깨지지 않는다

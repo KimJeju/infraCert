@@ -33,6 +33,7 @@ from infraguard.core.status import Severity, Status
 from infraguard.credentials.session import CredentialSession
 from infraguard.orchestrator.results_store import ResultsStore
 from infraguard.result import diff as _diff
+from infraguard.result import risk as _risk
 from infraguard.reporting import html as html_report
 from infraguard.reporting import xlsx as xlsx_report
 from infraguard.rulepack import loader as rp_loader
@@ -245,6 +246,9 @@ class MainWindow(QMainWindow):
         tl.addWidget(mb)
         self.setMenuWidget(self._top)
         m_file = mb.addMenu("파일")
+        m_file.addAction("진단 세션 내보내기(zip)…", self._export_session)
+        m_file.addAction("진단 세션 가져오기(zip)…", self._import_session)
+        m_file.addSeparator()
         m_file.addAction("완전삭제 후 종료", self.close)
         m_asset = mb.addMenu("자산")
         m_asset.addAction("자산 추가", self._add_asset)
@@ -359,6 +363,7 @@ class MainWindow(QMainWindow):
         self.scan.retry_requested.connect(self._retry_failed)
         self.result.export_requested.connect(self._export)
         self.scan.dryrun_requested.connect(self._dry_run)
+        self.result.exception_requested.connect(self._edit_exception)
         self.manual.verdict_saved.connect(self._save_verdict)
 
         self.sb_hosts = QLabel("")
@@ -662,6 +667,63 @@ class MainWindow(QMainWindow):
     def _show_results(self, scan: ScanResult) -> None:
         self.result.set_baseline(self._baseline_for(scan))
         self.result.load(scan)
+        self.result.set_exceptions(self.ctx.assets.exception_map())
+
+    def _edit_exception(self, host_id: str, rule_id: str, label: str) -> None:
+        from infraguard.ui.dialogs import ExceptionDialog
+        cur = self.ctx.assets.get_exception(host_id, rule_id)
+        if cur and QMessageBox.question(
+            self, "예외", f"{label}\n이미 예외가 있습니다({cur.label()}). 수정할까요? (아니오=예외 해제)",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No | QMessageBox.StandardButton.Cancel,
+        ) == QMessageBox.StandardButton.No:
+            self.ctx.assets.remove_exception(host_id, rule_id)
+            self.result.set_exceptions(self.ctx.assets.exception_map())
+            return
+        dlg = ExceptionDialog(host_id, rule_id, label, cur, parent=self)
+        if dlg.exec():
+            self.ctx.assets.set_exception(dlg.exception())
+            self.result.set_exceptions(self.ctx.assets.exception_map())
+
+    def _rulepack_meta(self) -> dict:
+        return {"name": self.pack.name, "version": self.pack.version, "sha256": self.pack.sha256} if self.pack else {}
+
+    def _export_session(self) -> None:
+        from infraguard.workspace import package
+        default = str(self.ctx.workspace.layout.exports / f"session_{datetime.now():%Y%m%d_%H%M}.zip")
+        path, _ = QFileDialog.getSaveFileName(self, "진단 세션 내보내기", default, "*.zip")
+        if not path:
+            return
+        from pathlib import Path
+        try:
+            package.export_session(Path(path), assets=self.ctx.assets, results=self.ctx.results,
+                                   engine_version=self._engine_version(), rulepack=self._rulepack_meta(),
+                                   audit_dir=self.ctx.workspace.layout.logs)
+            self._unexported = False
+            QMessageBox.information(self, "세션 내보내기", f"저장됨: {path}\n(크리덴셜은 포함되지 않습니다)")
+        except Exception as e:  # noqa: BLE001
+            QMessageBox.warning(self, "세션 내보내기 실패", str(e))
+
+    def _import_session(self) -> None:
+        from infraguard.workspace import package
+        path, _ = QFileDialog.getOpenFileName(self, "진단 세션 가져오기", "", "*.zip")
+        if not path:
+            return
+        from pathlib import Path
+        try:
+            s = package.import_session(Path(path), assets=self.ctx.assets, results=self.ctx.results,
+                                       audit_dir=self.ctx.workspace.layout.logs)
+        except Exception as e:  # noqa: BLE001
+            QMessageBox.warning(self, "세션 가져오기 실패", str(e))
+            return
+        self._refresh_assets()
+        self._refresh_dashboard()
+        rp = s.session.get("rulepack") or {}
+        note = ""
+        if self.pack and rp.get("sha256") and rp["sha256"] != self.pack.sha256:
+            note = f"\n⚠ 패키지 룰팩 {rp.get('name')} {rp.get('version')} ≠ 현재 룰팩(SHA 불일치)"
+        QMessageBox.information(self, "세션 가져오기",
+                                f"호스트 {s.hosts} · 진단 {s.scans} · 예외 {s.exceptions} · 감사기록 {s.audit_files}"
+                                + (f"\n무시된 멤버 {len(s.skipped)}" if s.skipped else "") + note)
 
     def _dry_run(self) -> None:
         hosts = getattr(self, "_pending_hosts", None) or self._selected_hosts()
@@ -772,8 +834,9 @@ class MainWindow(QMainWindow):
         # 리포트 품질 게이트 — 통과 못 해도 막지 않는다. 사실을 보여주고 사용자가 고른다.
         from infraguard.result import gate
         rem = self.pack.remediation_map() if self.pack else {}
+        exc = self.ctx.assets.exception_map()
         items = gate.run(scan, pack_sha256=self.pack.sha256 if self.pack else None, remediation=rem,
-                         db_ok=self.ctx.results.integrity_ok())
+                         db_ok=self.ctx.results.integrity_ok(), exceptions=exc)
         if not gate.passed(items) and QMessageBox.question(
             self, "리포트 품질 검사", "\n".join(i.line() for i in items) + "\n\n그래도 내보낼까요?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No,
@@ -789,9 +852,9 @@ class MainWindow(QMainWindow):
             crit = self.pack.criteria_map() if self.pack else {}
             base = self._baseline_for(scan)
             if fmt == "xlsx":
-                xlsx_report.build(scan, Path(path), rem, crit, baseline=base)
+                xlsx_report.build(scan, Path(path), rem, crit, baseline=base, exceptions=exc)
             else:
-                html_report.build(scan, Path(path), rem, crit, baseline=base)
+                html_report.build(scan, Path(path), rem, crit, baseline=base, exceptions=exc)
             self._unexported = False
             QMessageBox.information(self, "내보내기", f"저장됨: {path}")
         except Exception as e:  # noqa: BLE001
@@ -816,6 +879,7 @@ class MainWindow(QMainWindow):
                     if r.status is Status.FAIL and r.severity:
                         sev[r.severity] += 1
         self.dashboard.update_severity(sev[Severity.HIGH], sev[Severity.MEDIUM], sev[Severity.LOW])
+        self.dashboard.update_risk(_risk.summary(scan) if scan else {})
         self.dashboard.update_hosts(host_rows)
         base = self._baseline_for(scan) if scan else None
         self.dashboard.update_fix(_diff.summary(_diff.diff(scan, base)) if scan and base else None,

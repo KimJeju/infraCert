@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
 from infraguard.result import diff as _diff
+from infraguard.result import risk as _risk
 from infraguard.ui.charts import BarChart, HostHeatmap
 from infraguard.ui.theme import BG1, BG3, FG1, STATUS_FG
 
@@ -112,7 +113,16 @@ class DashboardPage(QWidget):
         grid = QGridLayout()
         grid.setSpacing(12)
         self.sev_chart = BarChart()
-        grid.addWidget(_panel("중요도별 취약", self.sev_chart), 0, 0)
+        self.risk_chart = BarChart(label_w=44)
+        sev_body = QWidget()
+        sl = QVBoxLayout(sev_body)
+        sl.setContentsMargins(0, 0, 0, 0)
+        sl.addWidget(QLabel("가이드 중요도"))
+        sl.addWidget(self.sev_chart)
+        sl.addWidget(QLabel("위험도(중요도 × 자산 중요도)"))
+        sl.addWidget(self.risk_chart)
+        sl.addStretch(1)
+        grid.addWidget(_panel("취약 분포", sev_body), 0, 0)
         self.heat = HostHeatmap()
         grid.addWidget(_panel("호스트별 분포", self.heat), 0, 1)
         self.recent = QListWidget()
@@ -149,6 +159,9 @@ class DashboardPage(QWidget):
         rate = _diff.fix_rate(summary)
         self.fix_label.setText(f"기준 {base_id} · 조치율 " + (f"{rate:.0%}" if rate is not None else "-(전회 취약 없음)"))
         self.fix_chart.set_rows([(_diff.LABEL_KO[k], summary.get(k, 0), _diff.COLOR[k]) for k in _diff.ORDER])
+
+    def update_risk(self, counts: dict[str, int]) -> None:
+        self.risk_chart.set_rows([(_risk.LABEL_KO[k], counts.get(k, 0), _risk.COLOR[k]) for k in _risk.LEVELS])
 
     def update_severity(self, high: int, mid: int, low: int) -> None:
         self.sev_chart.set_rows([("상", high, "#F85149"), ("중", mid, "#D29922"), ("하", low, "#8B949E")])

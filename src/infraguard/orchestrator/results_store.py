@@ -62,6 +62,14 @@ class ResultsStore:
                            (json.dumps(meta, ensure_ascii=False), scan_id))
         self._conn.commit()
 
+    def save_scan(self, scan: ScanResult) -> None:
+        """진단 통째로(세션 패키지 가져오기). 같은 scan_id 는 덮어쓴다."""
+        self.start_scan(scan)
+        for h in scan.hosts:
+            self.save_host(scan.scan_id, h)
+        if scan.finished_at:
+            self.finish_scan(scan.scan_id, scan.finished_at)
+
     def set_verdict(self, scan_id: str, host_id: str, rule_id: str,
                     status: str, note: str) -> None:
         """수동확인 판정 되쓰기. verdict_source=analyst 로 표시한다."""

@@ -6,8 +6,9 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import (
+    QDateEdit,
     QCheckBox,
     QComboBox,
     QDialog,
@@ -23,12 +24,14 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from infraguard.assets.exceptions import RiskException
 from infraguard.assets.models import Host
 from infraguard.core.ids import new_host_id
 from infraguard.core.models import Platform
 from infraguard.credentials.secret import Secret
 from infraguard.credentials.session import Credential
 from infraguard.orchestrator.remote_runner import validate_env
+from infraguard.result import risk as _risk
 
 PLATFORMS = [Platform.LINUX, Platform.UNIX, Platform.WINDOWS, Platform.DBMS,
              Platform.NETWORK, Platform.CLOUD, Platform.PC]
@@ -164,6 +167,17 @@ class AssetEditDialog(QDialog):
         self.use_bastion.setChecked(h.use_bastion)
         self.bastion_host = QLineEdit(h.bastion_host or "")
         self.bastion_user = QLineEdit(h.bastion_user or "")
+        # 자산 메타(위험도 축): 환경·중요도·담당·역할·태그
+        self.environment = QComboBox()
+        self.environment.addItems(list(_risk.ENVIRONMENTS))
+        self.environment.setCurrentText(h.environment)
+        self.criticality = QComboBox()
+        self.criticality.addItems(list(_risk.CRITICALITIES))
+        self.criticality.setCurrentText(h.criticality or _risk.DEFAULT_CRITICALITY)
+        self.owner = QLineEdit(h.owner)
+        self.role = QLineEdit(h.role)
+        self.tags = QLineEdit(", ".join(h.tags))
+        self.tags.setPlaceholderText("쉼표로 구분")
 
         form.addRow("이름", self.name)
         form.addRow("고객사", self.project)
@@ -174,6 +188,16 @@ class AssetEditDialog(QDialog):
         form.addRow("계정", self.username)
         form.addRow("인증방식", self.auth)
         form.addRow("타임아웃(초)", self.timeout)
+        meta = QHBoxLayout()
+        meta.addWidget(QLabel("환경"))
+        meta.addWidget(self.environment)
+        meta.addWidget(QLabel("중요도"))
+        meta.addWidget(self.criticality)
+        meta.addWidget(QLabel("역할"))
+        meta.addWidget(self.role, 1)
+        form.addRow("자산 메타", meta)
+        form.addRow("담당자", self.owner)
+        form.addRow("태그", self.tags)
         # 번들 파라미터: 한 줄에 NAME=value. 스크립트가 환경변수로 받는다(TOMCAT_HOME 등).
         self.params = QPlainTextEdit()
         self.params.setPlainText("\n".join(f"{k}={v}" for k, v in h.params.items()))
@@ -238,4 +262,54 @@ class AssetEditDialog(QDialog):
             use_bastion=self.use_bastion.isChecked(),
             bastion_host=self.bastion_host.text().strip() or None,
             bastion_user=self.bastion_user.text().strip() or None,
+            environment=self.environment.currentText(),
+            criticality=self.criticality.currentText(),
+            owner=self.owner.text().strip(),
+            role=self.role.text().strip(),
+            tags=[t.strip() for t in self.tags.text().split(",") if t.strip()],
         )
+
+
+class ExceptionDialog(QDialog):
+    """예외/보상통제 승인 — 판정은 그대로 두고 옆에 승인·만료를 단다."""
+
+    def __init__(self, host_id: str, rule_id: str, label: str, current: RiskException | None = None,
+                 parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+        self.setWindowTitle(f"예외 승인 — {rule_id}")
+        self._host_id, self._rule_id = host_id, rule_id
+        form = QFormLayout()
+        form.addRow(QLabel(f"<b>{label}</b>"))
+        self.reason = QPlainTextEdit(current.reason if current else "")
+        self.reason.setPlaceholderText("왜 예외인가 — 업무상 필요, 대체 통제 등")
+        self.reason.setMaximumHeight(90)
+        self.control = QLineEdit(current.control if current else "")
+        self.control.setPlaceholderText("보상통제: AD 정책 중앙관리 + MFA + PAM …")
+        self.approver = QLineEdit(current.approver if current else "")
+        self.expires = QDateEdit()
+        self.expires.setCalendarPopup(True)
+        self.expires.setDisplayFormat("yyyy-MM-dd")
+        self.expires.setDate(QDate.fromString(current.expires_at, "yyyy-MM-dd") if current and current.expires_at
+                             else QDate.currentDate().addMonths(6))
+        form.addRow("사유", self.reason)
+        form.addRow("보상통제", self.control)
+        form.addRow("승인자", self.approver)
+        form.addRow("만료일", self.expires)
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        bb.accepted.connect(self._validate_accept)
+        bb.rejected.connect(self.reject)
+        lay = QVBoxLayout(self)
+        lay.addLayout(form)
+        lay.addWidget(bb)
+
+    def _validate_accept(self) -> None:
+        if not self.reason.toPlainText().strip():
+            self.reason.setStyleSheet("border:1px solid #F85149")
+            return
+        self.accept()
+
+    def exception(self) -> RiskException:
+        return RiskException(host_id=self._host_id, rule_id=self._rule_id,
+                             reason=self.reason.toPlainText().strip(), control=self.control.text().strip(),
+                             approver=self.approver.text().strip(),
+                             expires_at=self.expires.date().toString("yyyy-MM-dd"))

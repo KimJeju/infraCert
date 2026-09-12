@@ -35,6 +35,13 @@ class Host(BaseModel):
     timeout: int = 1800
     use_sudo: bool = False
 
+    # 자산 메타 — 같은 취약도 PROD/CRITICAL 과 DEV/LOW 를 다르게 본다(위험도 축)
+    environment: str = ""                # PROD | DR | TEST | DEV | ""
+    criticality: str = "MEDIUM"          # CRITICAL | HIGH | MEDIUM | LOW
+    owner: str = ""
+    role: str = ""                       # WEB/WAS/DB/AD ... 자유 텍스트
+    tags: list[str] = Field(default_factory=list)
+
     # 마지막 진단 요약 (트리 배지용) — 판정 결과이지 상태가 아니다
     last_summary: dict[str, int] = Field(default_factory=dict)
     last_scan_id: str | None = None
@@ -51,3 +58,8 @@ class Host(BaseModel):
     @property
     def label(self) -> str:
         return self.name or self.address
+
+    def asset_snapshot(self) -> dict[str, str]:
+        """진단 결과에 박아 두는 자산 메타(당시 값). 세션을 다른 PC 로 옮겨도 위험도가 재현된다."""
+        return {"environment": self.environment, "criticality": self.criticality,
+                "owner": self.owner, "role": self.role, "project": self.project, "group": self.group}

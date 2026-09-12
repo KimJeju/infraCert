@@ -29,6 +29,22 @@ from infraguard.rulepack.guide import format_guide
 
 # 분석자가 선택 가능한 최종 판정
 CHOICES = [("양호", Status.PASS), ("취약", Status.FAIL), ("해당없음", Status.SKIPPED)]
+# 판정 사유 템플릿 — 매번 자유롭게 쓰지 않도록. 사유 앞에 "[a, b]" 로 붙는다.
+TEMPLATES = ["설정파일 확인", "운영 정책 확인", "관리자 인터뷰", "실제 운영환경 확인", "예외 승인 확인", "기타"]
+
+
+def compose_note(checked: list[str], text: str) -> str:
+    return (f"[{', '.join(checked)}] " if checked else "") + text.strip()
+
+
+def split_note(note: str) -> tuple[list[str], str]:
+    """'[a, b] 텍스트' → (['a','b'], '텍스트'). 템플릿 밖 항목은 텍스트로 남긴다."""
+    if note.startswith("[") and "]" in note:
+        head, _, rest = note[1:].partition("]")
+        items = [x.strip() for x in head.split(",") if x.strip()]
+        if items and all(i in TEMPLATES for i in items):
+            return items, rest.strip()
+    return [], note
 
 
 class ManualBenchPage(QWidget):
@@ -83,6 +99,15 @@ class ManualBenchPage(QWidget):
         vrow.addWidget(self.batch)
         right.addLayout(vrow)
 
+        right.addWidget(QLabel("확인 방법 (사유 앞에 붙는 템플릿)"))
+        trow = QHBoxLayout()
+        self.templates: list[QCheckBox] = []
+        for t in TEMPLATES:
+            cb = QCheckBox(t)
+            self.templates.append(cb)
+            trow.addWidget(cb)
+        trow.addStretch(1)
+        right.addLayout(trow)
         right.addWidget(QLabel("사유"))
         self.note = QLineEdit()
         right.addWidget(self.note)
@@ -154,7 +179,10 @@ class ManualBenchPage(QWidget):
                     self.meta.setText(f"호스트: {hostname}   중요도: {r.severity.value if r.severity else '-'}")
                     self.evidence.setPlainText(r.evidence or r.reason or "")
                     self.guide.setPlainText(self._guide_text(r.rule_id))
-                    self.note.setText(r.analyst_note or "")
+                    checked, text = split_note(r.analyst_note or "")
+                    self.note.setText(text)
+                    for cb in self.templates:
+                        cb.setChecked(cb.text() in checked)
                     for rb in self.radios:
                         rb.setChecked(False)
                     return
@@ -168,8 +196,8 @@ class ManualBenchPage(QWidget):
             return
         host_id, _hostname, rule_id = data
         status = CHOICES[bid][1].value
-        self.verdict_saved.emit(host_id, rule_id, status, self.note.text().strip(),
-                                self.batch.isChecked())
+        note = compose_note([cb.text() for cb in self.templates if cb.isChecked()], self.note.text())
+        self.verdict_saved.emit(host_id, rule_id, status, note, self.batch.isChecked())
 
     def _step(self, delta: int) -> None:
         row = self.items.currentRow() + delta

@@ -152,6 +152,7 @@ class ScanWorker(QObject):
                 host_id=hid, hostname=self._host.label, address=self._host.address,
                 profiles=self._profiles, progress=prog, should_cancel=self._cancel.is_set,
             )
+            host.asset = self._host.asset_snapshot()
             self.host_finished.emit(hid, host)
         except Exception as e:  # noqa: BLE001 - 워커 예외 격리
             self.failed.emit(hid, f"{type(e).__name__}: {e}")

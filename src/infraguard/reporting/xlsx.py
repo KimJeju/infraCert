@@ -20,7 +20,9 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from infraguard.core.models import ScanResult
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
+from infraguard.assets.exceptions import RiskException
 from infraguard.result import diff as _diff
+from infraguard.result import risk as _risk
 from infraguard.result.engine import provenance_text
 
 FONT = "Arial"
@@ -37,7 +39,7 @@ BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
 RESULT_HEADERS = ["호스트", "항목코드", "점검항목", "중요도", "진단결과",
                   "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법", "판단기준", "판정추적",
-                  "이전결과", "변화"]
+                  "이전결과", "변화", "위험도", "예외"]
 
 
 def _style_header(ws: Worksheet, ncols: int, row: int = 1) -> None:
@@ -64,7 +66,8 @@ def _body_font(ws: Worksheet, first_row: int = 2) -> None:
 
 
 def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None,
-          criteria: dict[str, str] | None = None, *, baseline: ScanResult | None = None) -> Path:
+          criteria: dict[str, str] | None = None, *, baseline: ScanResult | None = None,
+          exceptions: dict[tuple[str, str], RiskException] | None = None) -> Path:
     """remediation/criteria: rule id → 조치방법/판단기준(룰팩 메타·가이드). 없으면 빈 컬럼 — 추측해 채우지 않는다.
     baseline: 전회 진단. 있으면 결과 시트에 이전결과·변화 컬럼, 요약 시트에 조치 현황."""
     wb = Workbook()
@@ -72,7 +75,7 @@ def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None
     ws_res = wb.active
     ws_res.title = "결과"
     d = _diff.diff(scan, baseline)
-    _write_results(ws_res, scan, remediation or {}, criteria or {}, d)
+    _write_results(ws_res, scan, remediation or {}, criteria or {}, d, exceptions or {})
 
     _write_summary(wb.create_sheet("요약", 0), scan, ws_res.title, baseline=baseline, dsum=_diff.summary(d))
     _write_manual(wb.create_sheet("수동확인"), scan)
@@ -87,8 +90,9 @@ def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None
 
 # ------------------------------------------------------------------- 결과
 def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str], criteria: dict[str, str],
-                   d: dict | None = None) -> None:
+                   d: dict | None = None, exceptions: dict | None = None) -> None:
     d = d or {}
+    exceptions = exceptions or {}
     ws.append(RESULT_HEADERS)
     for h in scan.hosts:
         for r in h.results:
@@ -107,9 +111,12 @@ def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str],
                 provenance_text(r),
                 DISPLAY_KO[p] if (p := d.get((h.hostname, r.rule_id), (None, None))[0]) else "",
                 _diff.LABEL_KO[c] if (c := d.get((h.hostname, r.rule_id), (None, None))[1]) else "",
+                _risk.LABEL_KO[_risk.level(r.severity, h.asset.get("criticality"))] if r.status is Status.FAIL else "",
+                (f"{e.label()} / {e.reason}" + (f" / 보상통제: {e.control}" if e.control else "")
+                 if (e := exceptions.get((h.host_id, r.rule_id))) else ""),
             ])
     _style_header(ws, len(RESULT_HEADERS))
-    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40, 48, 10, 10])
+    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40, 48, 10, 10, 8, 40])
     _body_font(ws)
     # 진단결과 컬럼 색상
     for row in ws.iter_rows(min_row=2, min_col=5, max_col=5):
@@ -143,6 +150,8 @@ def _write_summary(ws: Worksheet, scan: ScanResult, result_sheet: str, *, baseli
         meta.append(("전회 진단(기준)", baseline.scan_id))
         meta += [(f"  {_diff.LABEL_KO[k]}", str(dsum.get(k, 0))) for k in _diff.ORDER]
         meta.append(("  조치율", f"{rate:.0%}" if rate is not None else "-"))
+    rs = _risk.summary(scan)
+    meta += [(f"위험도 {_risk.LABEL_KO[k]}", str(rs[k])) for k in _risk.LEVELS]
     for i, (k, v) in enumerate(meta, start=3):
         ws.cell(row=i, column=1, value=k).font = Font(name=FONT, bold=True, size=10)
         ws.cell(row=i, column=2, value=v).font = Font(name=FONT, size=10)

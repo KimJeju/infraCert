@@ -22,7 +22,7 @@ class GateItem:
 
 
 def run(scan: ScanResult, *, pack_sha256: str | None = None, remediation: dict[str, str] | None = None,
-        db_ok: bool | None = None) -> list[GateItem]:
+        db_ok: bool | None = None, exceptions: dict | None = None) -> list[GateItem]:
     rem = remediation or {}
     items: list[GateItem] = []
 
@@ -62,6 +62,15 @@ def run(scan: ScanResult, *, pack_sha256: str | None = None, remediation: dict[s
 
     if db_ok is not None:
         items.append(GateItem(db_ok, "결과 DB 무결성", "" if db_ok else "SQLite quick_check 실패"))
+
+    if exceptions is not None:
+        applied = [(h.hostname, r.rule_id, exceptions[(h.host_id, r.rule_id)])
+                   for h in scan.hosts for r in h.results
+                   if r.status is Status.FAIL and (h.host_id, r.rule_id) in exceptions]
+        expired = [(hn, rid) for hn, rid, e in applied if e.state() == "EXPIRED"]
+        items.append(GateItem(not expired, "만료된 예외 없음",
+                              f"만료 {len(expired)}건: " + ", ".join(f"{h}/{r}" for h, r in expired[:5]) if expired
+                              else f"예외 적용 {len(applied)}건"))
     return items
 
 

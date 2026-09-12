@@ -21,17 +21,22 @@ from PySide6.QtWidgets import (
 
 from infraguard.core.models import CheckResult, ScanResult
 from infraguard.core.status import DISPLAY_KO, Status
+from infraguard.assets.exceptions import RiskException
 from infraguard.result import diff as _diff
+from infraguard.result import risk as _risk
 from infraguard.result.engine import _sort_key, provenance_text
 from infraguard.ui.theme import STATUS_BG, STATUS_TEXT
 
-COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "이전", "변화", "판정근거"]
+COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "위험도", "예외", "이전", "변화", "판정근거"]
+_C_RISK, _C_EXC, _C_PREV, _C_DIFF, _C_EV = 5, 6, 7, 8, 9
 CHANGED_FG = "#F0883E"   # 전회와 달라진 결과
 _DISPLAY_TO_STATUS = {v: k for k, v in DISPLAY_KO.items()}
 
 
 class ResultPage(QWidget):
     export_requested = Signal(str)  # "xlsx" | "html"
+    exception_requested = Signal(str, str, str)   # host_id, rule_id, label — 예외 승인/수정 다이얼로그
+    exception_cleared = Signal(str, str)          # host_id, rule_id
 
     def __init__(self) -> None:
         super().__init__()
@@ -42,6 +47,9 @@ class ResultPage(QWidget):
         self._base_id: str | None = None
         self._base_scan: ScanResult | None = None
         self._diff: dict[tuple[str, str], tuple[Status | None, str | None]] = {}
+        self._host_ids: dict[str, str] = {}            # hostname → host_id
+        self._crit: dict[str, str] = {}                # hostname → 자산 중요도(스냅샷)
+        self._exc: dict[tuple[str, str], RiskException] = {}   # (host_id, rule_id) → 예외
         root = QVBoxLayout(self)
 
         bar = QHBoxLayout()
@@ -79,6 +87,16 @@ class ResultPage(QWidget):
         self.base_label = QLabel("")
         self.base_label.setObjectName("muted")
         bar.addWidget(self.base_label)
+        self.risk_f = QComboBox()
+        self.risk_f.addItem("위험도 전체", "")
+        for k in _risk.LEVELS:
+            self.risk_f.addItem(_risk.LABEL_KO[k], k)
+        self.risk_f.currentIndexChanged.connect(self._apply)
+        bar.addWidget(self.risk_f)
+        self.exc_btn = QPushButton("예외 승인…")
+        self.exc_btn.setToolTip("선택한 취약 항목에 예외/보상통제 승인(만료일 포함)을 단다. 판정은 바뀌지 않는다")
+        self.exc_btn.clicked.connect(self._request_exception)
+        bar.addWidget(self.exc_btn)
         self.matrix_btn = QPushButton("매트릭스 뷰")
         self.matrix_btn.setCheckable(True)
         self.matrix_btn.toggled.connect(self._toggle_matrix)
@@ -94,7 +112,7 @@ class ResultPage(QWidget):
         self.table = QTableWidget(0, len(COLS))
         self.table.setHorizontalHeaderLabels(COLS)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(_C_EV, QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setVisible(False)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.itemSelectionChanged.connect(self._show_detail)
@@ -125,10 +143,38 @@ class ResultPage(QWidget):
     def diff_summary(self) -> dict[str, int]:
         return _diff.summary(self._diff)
 
+    def set_exceptions(self, exc: dict[tuple[str, str], RiskException]) -> None:
+        self._exc = dict(exc)
+        self._apply()
+
+    def _selected(self) -> tuple[str, str, CheckResult] | None:
+        if self._matrix or not self.table.selectedItems():
+            return None
+        data = self.table.selectedItems()[0].data(Qt.ItemDataRole.UserRole)
+        if not data:
+            return None
+        hn, rid = data
+        for h2, r in self._flat:
+            if h2 == hn and r.rule_id == rid:
+                return hn, rid, r
+        return None
+
+    def _request_exception(self) -> None:
+        sel = self._selected()
+        if sel is None:
+            return
+        hn, rid, r = sel
+        self.exception_requested.emit(self._host_ids.get(hn, ""), rid, f"{hn} · {rid} {r.name}")
+
+    def _exc_of(self, hn: str, rid: str) -> RiskException | None:
+        return self._exc.get((self._host_ids.get(hn, ""), rid))
+
     def load(self, scan: ScanResult | None) -> None:
         self._scan = scan
         self._flat = []
         self._diff = _diff.diff(scan, self._base_scan) if scan else {}
+        self._host_ids = {h.hostname: h.host_id for h in (scan.hosts if scan else [])}
+        self._crit = {h.hostname: h.asset.get("criticality", "") for h in (scan.hosts if scan else [])}
         if scan:
             for h in scan.hosts:
                 for r in h.results:
@@ -171,6 +217,9 @@ class ResultPage(QWidget):
             df = self.diff_f.currentData()
             if df and self._diff.get((hn, r.rule_id), (None, None))[1] != df:
                 continue
+            rf = self.risk_f.currentData()
+            if rf and (r.status is not Status.FAIL or _risk.level(r.severity, self._crit.get(hn)) != rf):
+                continue
             out.append((hn, r))
         return out
 
@@ -191,20 +240,29 @@ class ResultPage(QWidget):
             prev = self._base.get((hn, r.rule_id))
             prev_txt = ("" if prev is None else DISPLAY_KO[prev]) if self._base else ""
             cls = self._diff.get((hn, r.rule_id), (None, None))[1]
+            lvl = _risk.level(r.severity, self._crit.get(hn)) if r.status is Status.FAIL else None
+            exc = self._exc_of(hn, r.rule_id)
             vals = [hn, r.rule_id, r.name, r.severity.value if r.severity else "",
-                    DISPLAY_KO[r.status], prev_txt, _diff.LABEL_KO[cls] if cls else "", ev[0] if ev else r.reason]
+                    DISPLAY_KO[r.status], _risk.LABEL_KO[lvl] if lvl else "", exc.label() if exc else "",
+                    prev_txt, _diff.LABEL_KO[cls] if cls else "", ev[0] if ev else r.reason]
             for c, v in enumerate(vals):
                 it = QTableWidgetItem(v)
                 if c == 4:
                     it.setBackground(QColor(STATUS_BG[r.status]))
                     it.setForeground(QColor(STATUS_TEXT[r.status]))
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
-                if c == 5:
+                if c == _C_RISK and lvl:
+                    it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    it.setForeground(QColor(_risk.COLOR[lvl]))
+                if c == _C_EXC and exc:
+                    it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    it.setForeground(QColor("#3FB950" if exc.state() == "APPROVED" else "#F85149"))
+                if c == _C_PREV:
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     if self.changed(hn, r):
                         it.setForeground(QColor(CHANGED_FG))
                         it.setText(f"{prev_txt} →")
-                if c == 6 and cls:
+                if c == _C_DIFF and cls:
                     it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
                     it.setForeground(QColor(_diff.COLOR[cls]))
                 it.setData(Qt.ItemDataRole.UserRole, (hn, r.rule_id))
@@ -258,5 +316,10 @@ class ResultPage(QWidget):
                        + (" → 변경됨" if self.changed(hn, r) else " (동일)")
                        if (hn, rid) in self._base else "")
                     + (f"\n변화: {_diff.LABEL_KO[c2]}" if (c2 := self._diff.get((hn, rid), (None, None))[1]) else "")
+                    + (f"\n위험도: {_risk.LABEL_KO[_risk.level(r.severity, self._crit.get(hn))]}"
+                       f" (자산 중요도 {self._crit.get(hn) or '-'})" if r.status is Status.FAIL else "")
+                    + (f"\n예외: {ex.label()} · 승인자 {ex.approver or '-'} · 만료 {ex.expires_at or '-'}"
+                       f"\n  사유: {ex.reason}" + (f"\n  보상통제: {ex.control}" if ex.control else "")
+                       if (ex := self._exc_of(hn, rid)) else "")
                 )
                 return
