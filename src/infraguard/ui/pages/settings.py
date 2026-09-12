@@ -88,7 +88,15 @@ class SettingsPage(QWidget):
         self.idle_lock.setRange(1, 240)
         self.idle_lock.setSuffix(" 분")
         self.term_rec = QCheckBox("터미널 입력·출력 기록 (비밀번호는 마스킹)")
+        self.keepalive = QSpinBox()
+        self.keepalive.setRange(0, 600)
+        self.keepalive.setSuffix(" 초")
+        self.retries = QSpinBox()
+        self.retries.setRange(0, 5)
+        self.retries.setToolTip("연결 단계 재시도 횟수. 네트워크 순단 대응 — 룰 재실행이 아니다")
         f.addRow("연결 타임아웃(초)", self.connect_timeout)
+        f.addRow("SSH keepalive", self.keepalive)
+        f.addRow("연결 재시도", self.retries)
         f.addRow("크리덴셜 idle 잠금", self.idle_lock)
         f.addRow("", self.term_rec)
         root.addWidget(g_sec)
@@ -103,7 +111,7 @@ class SettingsPage(QWidget):
         f.addRow("회사명", self.company)
         root.addWidget(g_rep)
         for w in (self.concurrency, self.timeout, self.max_out, self.connect_timeout,
-                  self.idle_lock, self.export_fmt):
+                  self.idle_lock, self.export_fmt, self.keepalive, self.retries):
             w.setFixedWidth(160)
         self.company.setFixedWidth(420)
 
@@ -148,6 +156,8 @@ class SettingsPage(QWidget):
         self.max_out.setValue(int(cfg.get("max_output_kb", 1024)))
         self.use_sudo.setChecked(bool(cfg.get("use_sudo", False)))
         self.sanitize_on_exit.setChecked(bool(cfg.get("sanitize_on_exit", True)))
+        self.keepalive.setValue(int(cfg.get("ssh_keepalive", 30)))
+        self.retries.setValue(int(cfg.get("connect_retries", 1)))
         self.connect_timeout.setValue(int(cfg.get("connect_timeout", 15)))
         self.idle_lock.setValue(int(cfg.get("idle_lock_minutes", 15)))
         self.term_rec.setChecked(bool(cfg.get("terminal_recording", True)))
@@ -166,6 +176,8 @@ class SettingsPage(QWidget):
             "max_output_kb": self.max_out.value(),
             "use_sudo": self.use_sudo.isChecked(),
             "sanitize_on_exit": self.sanitize_on_exit.isChecked(),
+            "ssh_keepalive": self.keepalive.value(),
+            "connect_retries": self.retries.value(),
             "connect_timeout": self.connect_timeout.value(),
             "idle_lock_minutes": self.idle_lock.value(),
             "terminal_recording": self.term_rec.isChecked(),

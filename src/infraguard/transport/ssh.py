@@ -21,12 +21,13 @@ import paramiko
 from infraguard.core.models import RemoteEnvironment
 from infraguard.credentials.session import Credential
 from infraguard.transport.base import (
+    HostKeyRejected,
     CleanupReport,
     Connection,
     ExecResult,
     TransportError,
 )
-from infraguard.transport.hostkey import ApprovalCallback, SessionHostKeyPolicy
+from infraguard.transport.hostkey import ApprovalCallback, ChangedCallback, SessionHostKeyPolicy
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +47,8 @@ class SSHTarget:
     host: str
     port: int = DEFAULT_PORT
     credential: Credential | None = None
+    keepalive: int = KEEPALIVE        # 초. 0 이면 끔
+    retries: int = 0                  # 연결 단계 재시도 횟수(네트워크 순단). 룰 재실행과는 무관
 
 
 class SSHConnection(Connection):
@@ -56,10 +59,11 @@ class SSHConnection(Connection):
         bastion: SSHTarget | None = None,
         approve_host_key: ApprovalCallback | None = None,
         policy: SessionHostKeyPolicy | None = None,
+        on_host_key_changed: ChangedCallback | None = None,
     ) -> None:
         self.target = target
         self.bastion = bastion
-        self._policy = policy or SessionHostKeyPolicy(approve_host_key)
+        self._policy = policy or SessionHostKeyPolicy(approve_host_key, on_changed=on_host_key_changed)
         self._client: paramiko.SSHClient | None = None
         self._bastion_client: paramiko.SSHClient | None = None
         self._sftp: paramiko.SFTPClient | None = None
@@ -97,6 +101,25 @@ class SSHConnection(Connection):
         return kw
 
     def connect(self) -> None:
+        """네트워크 순단이면 target.retries 만큼 다시 붙는다. 인증 실패·호스트키 거부는 즉시 올린다."""
+        last: Exception | None = None
+        for attempt in range(self.target.retries + 1):
+            try:
+                self._connect_once()
+                return
+            except (paramiko.AuthenticationException, HostKeyRejected):
+                raise
+            except (OSError, paramiko.SSHException) as e:
+                last = e
+                self.close()
+                if attempt < self.target.retries:
+                    log.warning("ssh connect %s:%s 실패(%s) — 재시도 %d/%d", self.target.host, self.target.port,
+                                e, attempt + 1, self.target.retries)
+                    time.sleep(min(2 * (attempt + 1), 6))
+        assert last is not None
+        raise last
+
+    def _connect_once(self) -> None:
         sock: paramiko.Channel | None = None
 
         if self.bastion is not None:
@@ -108,7 +131,7 @@ class SSHConnection(Connection):
             transport = self._bastion_client.get_transport()
             if transport is None:
                 raise TransportError("bastion transport unavailable")
-            transport.set_keepalive(KEEPALIVE)
+            transport.set_keepalive(self.target.keepalive)
             sock = transport.open_channel(
                 "direct-tcpip",
                 dest_addr=(self.target.host, self.target.port),
@@ -122,7 +145,7 @@ class SSHConnection(Connection):
         )
         t = self._client.get_transport()
         if t is not None:
-            t.set_keepalive(KEEPALIVE)
+            t.set_keepalive(self.target.keepalive)
 
     def _require(self) -> paramiko.SSHClient:
         if self._client is None:
@@ -303,13 +326,19 @@ class SSHConnection(Connection):
         except OSError:
             return []
 
-    def listdir_attr(self, remote: str) -> list[tuple[str, int, bool, int]]:
-        """(이름, 크기, 디렉터리여부, mtime). 파일 브라우저(§8)용."""
+    def listdir_attr(self, remote: str) -> list[tuple[str, int, bool, int, str, str]]:
+        """(이름, 크기, 디렉터리여부, mtime, 권한문자열, 소유자). 파일 브라우저(§8)용.
+
+        소유자 이름은 longname(ls -l 형식)에서 뽑는다 — SFTP 는 uid 만 주고 이름 매핑이 없다.
+        """
         import stat as _st
         out = []
         for a in self._sftp_client().listdir_attr(remote):
             is_dir = bool(a.st_mode and _st.S_ISDIR(a.st_mode))
-            out.append((a.filename, int(a.st_size or 0), is_dir, int(a.st_mtime or 0)))
+            perm = _st.filemode(a.st_mode) if a.st_mode else ""
+            parts = (getattr(a, "longname", "") or "").split()
+            owner = parts[2] if len(parts) > 3 else (str(a.st_uid) if a.st_uid is not None else "")
+            out.append((a.filename, int(a.st_size or 0), is_dir, int(a.st_mtime or 0), perm, owner))
         return sorted(out, key=lambda t: (not t[2], t[0].lower()))
 
     def remove(self, remote: str) -> None:

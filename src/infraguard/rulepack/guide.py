@@ -6,6 +6,10 @@ from __future__ import annotations
 def format_guide(g: dict) -> str:
     j = g.get("judgment") or {}
     out: list[str] = []
+    if g.get("purpose"):
+        out.append(f"점검 목적: {g['purpose']}")
+    if g.get("threat"):
+        out.append(f"위협: {g['threat']}")
     if j:
         out.append(f"양호: {j.get('good', '')}\n취약: {j.get('vuln', '')}")
     if g.get("remediation"):

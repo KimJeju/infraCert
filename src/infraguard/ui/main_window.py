@@ -41,6 +41,7 @@ from infraguard.rulepack import loader as rp_loader
 from infraguard.rulepack.loader import RulePack
 from infraguard.ui.dialogs import AssetEditDialog, CredPromptDialog, HostKeyDialog
 from infraguard.ui.exit_flow import CONFIRM_SCANNING, WARN_UNEXPORTED, ExitState, exit_gate
+from infraguard.ui.host_card import HostCard
 from infraguard.ui.models_qt import HOST_ID_ROLE, AssetTreeModel, StatusDelegate
 from infraguard.ui.pages.dashboard import DashboardPage
 from infraguard.ui.pages.manual import ManualBenchPage
@@ -330,6 +331,10 @@ class MainWindow(QMainWindow):
         self.tree.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self._tree_menu)
         sl.addWidget(self.tree, 1)
+        self.card = HostCard()                       # 세션 매니저: 선택 호스트 요약 + 바로가기
+        self.card.action.connect(self._card_action)
+        sl.addWidget(self.card)
+        self.tree.selectionModel().selectionChanged.connect(lambda *_a: self._update_card())
         brow = QHBoxLayout()
         add = QPushButton("+ 자산")
         imp = QPushButton("가져오기")
@@ -396,6 +401,10 @@ class MainWindow(QMainWindow):
         self.result.export_requested.connect(self._export)
         self.scan.dryrun_requested.connect(self._dry_run)
         self.result.exception_requested.connect(self._edit_exception)
+        self.result.open_terminal.connect(lambda hid: self._open_terminal_by_id(hid))
+        self.result.open_file.connect(self._open_file_by_id)
+        self.result.open_rule.connect(self._open_rule)
+        self.controller.host_key_bridge.changed_request.connect(self._on_host_key_changed)
         self.manual.verdict_saved.connect(self._save_verdict)
 
         self.sb_hosts = QLabel("")
@@ -421,6 +430,7 @@ class MainWindow(QMainWindow):
         self.model.rebuild(hosts, self.filter.text())
         self.tree.expandAll()
         self.sb_hosts.setText(f"자산 {len(hosts)}대")
+        self._update_card()
 
     def _selected_hosts(self) -> list[Host]:
         """선택된 호스트. 고객사/분류 노드를 고르면 그 아래 호스트 전부(다건 진단). 중복 제거, 트리 순서 유지."""
@@ -506,10 +516,21 @@ class MainWindow(QMainWindow):
             dlg = CredPromptDialog(host.cred_id, host.username, parent=self)
             if not dlg.exec():
                 return None
-            self.ctx.creds.put(dlg.credential())
+            self._put_cred(dlg.credential(), host, dlg.apply_project.isChecked())
             cred = self.ctx.creds.get(host.cred_id)
             self._update_cred_label()
         return cred
+
+    def _put_cred(self, cred, host: Host, apply_project: bool) -> None:  # noqa: ANN001
+        """세션에 넣는다. apply_project 면 같은 고객사·같은 계정의 다른 호스트 cred_id 에도 복제(메모리만)."""
+        import dataclasses
+        self.ctx.creds.put(cred)
+        if not apply_project:
+            return
+        for h in self.ctx.assets.all():
+            if h.project == host.project and h.username == host.username and h.cred_id != host.cred_id \
+                    and h.cred_id not in self.ctx.creds.ids():
+                self.ctx.creds.put(dataclasses.replace(cred, cred_id=h.cred_id))
 
     def _open_terminal(self, host: Host) -> None:
         cred = self._ensure_cred(host)
@@ -520,19 +541,39 @@ class MainWindow(QMainWindow):
             self._notice_shown = True
         page = TerminalPage(host, cred, self.controller.host_key_bridge.ask,
                             self.ctx.workspace.layout.logs / "terminal",
-                            record=bool(self.ctx.config.get("terminal_recording", True)))
+                            record=bool(self.ctx.config.get("terminal_recording", True)),
+                            changed=self.controller.host_key_bridge.ask_changed)
         page.broadcast_input.connect(lambda b, src=page: self._broadcast(b, src))
         page.broadcast.toggled.connect(self._update_bcast_label)
         self._terminals.append(page)
-        i = self.tabs.addTab(page, f"터미널 · {host.label}")
+        i = self.tabs.addTab(page, f"● {host.label}")
         self.tabs.setCurrentIndex(i)
+        page.state_changed.connect(lambda st, p=page: self._tab_state(p, st))
+        self._tab_state(page, "connecting")
         self._update_bcast_label()
 
-    def _open_sftp(self, host: Host) -> None:
+    _TAB_STATE = {"connecting": ("●", "#D29922"), "connected": ("●", "#2EA043"), "idle": ("●", "#8B949E"),
+                  "closed": ("○", "#6E7681"), "error": ("●", "#F85149")}
+
+    def _tab_state(self, page: QWidget, state: str) -> None:
+        """터미널 탭에 상태 점(연결 중·연결됨·유휴·종료·오류)."""
+        i = self.tabs.indexOf(page)
+        if i < 0:
+            return
+        dot, color = self._TAB_STATE.get(state, ("●", "#8B949E"))
+        label = getattr(page, "host", None)
+        self.tabs.setTabText(i, f"{dot} {label.label if label else ''}")
+        from PySide6.QtGui import QColor
+        self.tabs.tabBar().setTabTextColor(i, QColor(color))
+
+    def _open_sftp(self, host: Host, start_path: str | None = None, open_file: str | None = None) -> None:
         cred = self._ensure_cred(host)
         if cred is None:
             return
-        page = SftpPage(host, cred, self.controller.host_key_bridge.ask, self.ctx.workspace.layout)
+        page = SftpPage(host, cred, self.controller.host_key_bridge.ask, self.ctx.workspace.layout,
+                        start_path=start_path, changed=self.controller.host_key_bridge.ask_changed)
+        if open_file:
+            page.open_on_connect(open_file)
         self._sftps.append(page)
         i = self.tabs.addTab(page, f"파일 · {host.label}")
         self.tabs.setCurrentIndex(i)
@@ -619,11 +660,13 @@ class MainWindow(QMainWindow):
         if self.ctx.creds.is_locked:
             self.ctx.creds.unlock()
         for cred_id, h in needed.items():
+            if cred_id in self.ctx.creds.ids():        # 앞선 일괄 적용으로 이미 채워졌을 수 있다
+                continue
             dlg = CredPromptDialog(cred_id, h.username, parent=self)
             if not dlg.exec():
                 QMessageBox.information(self, "진단", "크리덴셜 입력이 취소되어 중단합니다.")
                 return
-            self.ctx.creds.put(dlg.credential())
+            self._put_cred(dlg.credential(), h, dlg.apply_project.isChecked())
         self._update_cred_label()
 
         if self.pack is None or not self.pack.runnable:
@@ -698,8 +741,91 @@ class MainWindow(QMainWindow):
 
     def _show_results(self, scan: ScanResult) -> None:
         self.result.set_baseline(self._baseline_for(scan))
+        if self.pack:
+            self.result.set_guide(self.pack.guide)
+            self.result.set_rule_shas(self.pack.rule_shas)
         self.result.load(scan)
         self.result.set_exceptions(self.ctx.assets.exception_map())
+
+    # ------------------------------------------------------------ 호스트 카드 · 링크
+    def _update_card(self) -> None:
+        hosts = self._selected_hosts()
+        if len(hosts) != 1:
+            self.card.clear()
+            return
+        h = hosts[0]
+        os_text = profile = last_at = None
+        summary = None
+        if h.last_scan_id:
+            hr = self.ctx.results.get_host(h.last_scan_id, h.host_id)
+            if hr is not None:
+                env = hr.environment
+                os_text = " ".join(x for x in (env.os, env.os_version) if x) or None
+                summary = {k.value: v for k, v in hr.summary().items()}
+            meta = dict(self.ctx.results.list_scans()).get(h.last_scan_id) or {}
+            profile = meta.get("profile")
+            last_at = (meta.get("started_at") or "")[:16].replace("T", " ") or None
+        self.card.show_host(h, os_text=os_text, profile=profile, last_at=last_at, summary=summary)
+
+    def _card_action(self, action: str, host_id: str) -> None:
+        host = self.ctx.assets.get(host_id)
+        if host is None:
+            return
+        if action == "scan":
+            self._start_scan()
+        elif action == "terminal":
+            self._open_terminal(host)
+        elif action == "sftp":
+            self._open_sftp(host)
+        elif action == "discovery":
+            self._run_discovery(host)
+        elif action == "results" and host.last_scan_id:
+            scan = self.ctx.results.load_scan(host.last_scan_id)
+            if scan:
+                self._scan_id = scan.scan_id
+                self._show_results(scan)
+                self.result.host_f.setCurrentIndex(max(0, self.result.host_f.findData(host.label)))
+                self.tabs.setCurrentWidget(self.result)
+
+    def _run_discovery(self, host: Host) -> None:
+        from infraguard.ui.discovery_dialog import DiscoveryDialog
+        cred = self.ctx.creds.get(host.cred_id) if not self.ctx.creds.is_locked else None
+        dlg = DiscoveryDialog(host, cred, self.pack, self.controller.host_key_bridge, parent=self)
+        if dlg.exec():
+            disc = dlg.result_discovery()
+            if disc is not None:
+                host.discovered = disc
+                self.ctx.assets.upsert(host)
+                self._refresh_assets()
+            pid = dlg.chosen_profile()
+            if pid and self.pack and pid in self.pack.profiles:
+                it = self.model.find_host_item(host.host_id)
+                if it is not None:
+                    self.tree.setCurrentIndex(it.index())
+                self._start_scan()
+                i = self.scan.profile.findData(pid)
+                if i >= 0:
+                    self.scan.profile.setCurrentIndex(i)
+
+    def _open_terminal_by_id(self, host_id: str) -> None:
+        host = self.ctx.assets.get(host_id)
+        if host is None:
+            QMessageBox.information(self, "터미널", "이 결과의 호스트가 자산 목록에 없습니다(삭제됨 또는 가져온 세션).")
+            return
+        self._open_terminal(host)
+
+    def _open_file_by_id(self, host_id: str, path: str) -> None:
+        import posixpath
+        host = self.ctx.assets.get(host_id)
+        if host is None:
+            QMessageBox.information(self, "파일", "이 결과의 호스트가 자산 목록에 없습니다.")
+            return
+        self._open_sftp(host, start_path=posixpath.dirname(path) or "/", open_file=path)
+
+    def _open_rule(self, rule_id: str) -> None:
+        self.tabs.setCurrentWidget(self.rulepack)
+        if not self.rulepack.select_rule(rule_id):
+            QMessageBox.information(self, "룰", f"{rule_id} 는 현재 룰팩의 네이티브 룰이 아닙니다(번들 파싱 항목).")
 
     def _edit_exception(self, host_id: str, rule_id: str, label: str) -> None:
         from infraguard.ui.dialogs import ExceptionDialog
@@ -837,6 +963,10 @@ class MainWindow(QMainWindow):
         dlg = HostKeyDialog(host, key_type, fp, parent=self)
         self.controller.host_key_bridge.answer(bool(dlg.exec()))
 
+    def _on_host_key_changed(self, host: str, key_type: str, old_fp: str, new_fp: str) -> None:
+        dlg = HostKeyDialog(host, key_type, new_fp, changed=True, old_fingerprint=old_fp, parent=self)
+        self.controller.host_key_bridge.answer(bool(dlg.exec()))
+
     # ---------------------------------------------------------------- 수동확인
     def _save_verdict(self, host_id: str, rule_id: str, status: str, note: str, batch: bool) -> None:
         if not self._scan_id:
@@ -870,7 +1000,8 @@ class MainWindow(QMainWindow):
         rem = self.pack.remediation_map() if self.pack else {}
         exc = self.ctx.assets.exception_map()
         items = gate.run(scan, pack_sha256=self.pack.sha256 if self.pack else None, remediation=rem,
-                         db_ok=self.ctx.results.integrity_ok(), exceptions=exc)
+                         db_ok=self.ctx.results.integrity_ok(), exceptions=exc,
+                         rule_shas=self.pack.rule_shas if self.pack else None)
         if not gate.passed(items) and QMessageBox.question(
             self, "리포트 품질 검사", "\n".join(i.line() for i in items) + "\n\n그래도 내보낼까요?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No,
@@ -885,10 +1016,11 @@ class MainWindow(QMainWindow):
         try:
             crit = self.pack.criteria_map() if self.pack else {}
             base = self._baseline_for(scan)
+            purpose = self.pack.purpose_map() if self.pack else {}
             if fmt == "xlsx":
-                xlsx_report.build(scan, Path(path), rem, crit, baseline=base, exceptions=exc)
+                xlsx_report.build(scan, Path(path), rem, crit, baseline=base, exceptions=exc, purpose=purpose)
             else:
-                html_report.build(scan, Path(path), rem, crit, baseline=base, exceptions=exc)
+                html_report.build(scan, Path(path), rem, crit, baseline=base, exceptions=exc, purpose=purpose)
             self._unexported = False
             QMessageBox.information(self, "내보내기", f"저장됨: {path}")
         except Exception as e:  # noqa: BLE001

@@ -88,6 +88,7 @@ class RulePack:
     guide: dict[str, dict] = field(default_factory=dict)   # rule id → 가이드 항목(판단기준·조치·사례). 선택 사항
     sha256: str = ""                   # manifest.yaml 해시 = 룰팩 정체. 결과에 기록해 "당시 기준" 을 재현한다
     specs: dict[str, Any] = field(default_factory=dict)    # rule id → 선언형 RuleSpec (dry-run 명령 열거용)
+    rule_shas: dict[str, str] = field(default_factory=dict) # rule id → rules/<id>.yaml SHA(결과에 박아 룰 변경 감지)
     meta: dict[str, str] = field(default_factory=dict)     # guide_version / author / created_at (manifest 상단)
 
     @property
@@ -96,6 +97,10 @@ class RulePack:
 
     def manual_rules(self) -> set[str]:
         return {r.id for r in self.rules.values() if r.manual}
+
+    def purpose_map(self) -> dict[str, str]:
+        """리포트용 rule id → 점검 목적(왜 점검하는가). 가이드 purpose."""
+        return {rid: str(g["purpose"]) for rid, g in self.guide.items() if g.get("purpose")}
 
     def criteria_map(self) -> dict[str, str]:
         """리포트용 rule id → 판단기준(가이드 양호/취약). 가이드 없는 항목은 없다."""
@@ -265,6 +270,7 @@ def load(pack_dir: Path) -> RulePack:
         root=pack_dir, bundles=bundles, native=native, rules=rules, profiles=profiles,
         integrity_ok=integrity_ok, problems=problems, guide=_load_guide(pack_dir, problems),
         sha256=_sha256(mf), specs=specs,
+        rule_shas={Path(rel).stem: sha for rel, sha in declared.items()},
         meta={k: str(raw[k]) for k in ("guide_version", "author", "created_at") if raw.get(k)},
     )
 

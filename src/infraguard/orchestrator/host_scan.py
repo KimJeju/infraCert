@@ -54,6 +54,7 @@ class HostJob:
     params: dict[str, str] = field(default_factory=dict)   # 호스트 파라미터 → RemoteEnvironment.params
     preflight: bool = True                                  # 연결 사전검증(sqlplus·권한·/tmp·시간 편차)
     missing_params: list[str] = field(default_factory=list) # 번들이 선언했는데 호스트에 없는 파라미터
+    rule_shas: dict[str, str] = field(default_factory=dict) # rule id → YAML SHA(진단 당시). 룰 변경 감지용
 
 
 def _noop(_stage: str) -> None: ...
@@ -200,7 +201,7 @@ def scan_host(
         if job.native and not should_cancel():
             progress(STAGE_NATIVE)
             findings, errors = run_native(
-                conn, host.environment, job.native,
+                conn, host.environment, job.native, rule_shas=job.rule_shas,
                 progress=lambda rid, i, n: progress(f"{STAGE_NATIVE} {rid} ({i}/{n})"),
                 should_cancel=should_cancel,
             )

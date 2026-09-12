@@ -63,6 +63,7 @@ def run_native(
     *,
     progress: Callable[[str, int, int], None] | None = None,
     should_cancel: Callable[[], bool] = lambda: False,
+    rule_shas: dict[str, str] | None = None,
 ) -> tuple[list[RawFinding], list[CheckResult]]:
     """반환: (판정 대상 findings, 실행단계 오류 결과들)."""
     registry = load_all()
@@ -107,7 +108,8 @@ def run_native(
                 verdict_raw=out.verdict_raw, evidence_raw=out.evidence,
                 source=SourceInfo(bundle_id=BUNDLE_ID, artifact="ssh-exec", profile="native"),
                 provenance={"transport": _transport_name(conn), "impl": "yaml" if rule.collects else "python",
-                            "commands": guarded.commands, **out.detail},
+                            "commands": guarded.commands, **out.detail,
+                            **({"rule_sha256": rule_shas[rid]} if rule_shas and rid in rule_shas else {})},
             ))
         except Exception as e:  # noqa: BLE001 - 룰 격리
             log.exception("native rule %s failed", rid)

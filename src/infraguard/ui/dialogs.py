@@ -68,6 +68,9 @@ class CredPromptDialog(QDialog):
         form.addRow("키 경로", self.key_path)
         form.addRow("키 암호", self.key_pass)
         form.addRow("sudo 비밀번호", self.sudo)
+        self.apply_project = QCheckBox("같은 고객사의 같은 계정 호스트에 모두 적용 (세션 메모리에만)")
+        self.apply_project.setChecked(True)
+        form.addRow("", self.apply_project)
 
         self.kind.currentTextChanged.connect(self._on_kind)
         self._on_kind(self.kind.currentText())
@@ -106,25 +109,34 @@ class HostKeyDialog(QDialog):
     """미등록 호스트키 승인. 지문(SHA256)을 크게 보여준다(§5.3)."""
 
     def __init__(self, host: str, key_type: str, fingerprint: str,
-                 changed: bool = False, parent: QWidget | None = None) -> None:
+                 changed: bool = False, old_fingerprint: str = "", parent: QWidget | None = None) -> None:
         super().__init__(parent)
-        self.setWindowTitle("호스트키 확인")
+        self.setWindowTitle("호스트키 변경 감지" if changed else "호스트키 확인")
         lay = QVBoxLayout(self)
         lay.addWidget(QLabel(f"<b>{host}</b> ({key_type})"))
+        mono = "font-family:Consolas,monospace;font-size:14px;padding:6px"
         if changed:
-            warn = QLabel("⚠ 호스트키가 이전과 다릅니다. 중간자 공격 가능성이 있습니다.")
+            warn = QLabel("⚠ HOST KEY CHANGED — 이 세션에서 승인했던 키와 다릅니다.\n"
+                          "서버 재설치가 아니라면 중간자 공격을 의심하십시오.")
             warn.setStyleSheet("color:#F85149;font-weight:bold")
             lay.addWidget(warn)
-        lay.addWidget(QLabel("지문(SHA256):"))
+            lay.addWidget(QLabel("기존:"))
+            old = QLabel(old_fingerprint)
+            old.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+            old.setStyleSheet(mono + ";color:#8B949E")
+            lay.addWidget(old)
+            lay.addWidget(QLabel("현재:"))
+        else:
+            lay.addWidget(QLabel("지문(SHA256):"))
         fp = QLabel(fingerprint)
         fp.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        fp.setStyleSheet("font-family:Consolas,monospace;font-size:14px;padding:6px")
+        fp.setStyleSheet(mono)
         lay.addWidget(fp)
 
         row = QHBoxLayout()
-        reject = QPushButton("거부")
-        approve = QPushButton("승인")
-        approve.setObjectName("primary")
+        reject = QPushButton("접속 중단" if changed else "거부")
+        approve = QPushButton("기존 키 제거 후 재등록" if changed else "승인")
+        approve.setObjectName("danger" if changed else "primary")
         reject.clicked.connect(self.reject)
         approve.clicked.connect(self.accept)
         row.addStretch(1)

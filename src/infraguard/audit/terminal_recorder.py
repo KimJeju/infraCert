@@ -61,6 +61,9 @@ class TerminalRecorder:
         self._secret_by_prompt = False
         self._out_buf = ""                 # 출력 라인 버퍼
         self.masked_inputs = 0
+        self.input_lines = 0
+        self._host_label = host_label
+        self._started = datetime.now()
         self._write(f"### InfraGuard terminal log {host_label} "
                     f"{datetime.now().isoformat(timespec='seconds')}")
         self._write("### 자동 진단(Bundle)은 Read-only 이며 대상을 변경하지 않습니다. "
@@ -138,6 +141,8 @@ class TerminalRecorder:
 
     # --------------------------------------------------------------- 파일
     def _write(self, s: str) -> None:
+        if s.startswith("[IN] "):
+            self.input_lines += 1
         self._fh.write(s + "\n")
         self._fh.flush()
 
@@ -147,6 +152,9 @@ class TerminalRecorder:
         if self._out_buf.strip():
             self._write("[OUT] " + (mask(self._out_buf) or ""))
             self._out_buf = ""
+        ended = datetime.now()
+        self._write(f"### session end {self._host_label} start={self._started.isoformat(timespec='seconds')} "
+                    f"end={ended.isoformat(timespec='seconds')} inputs={self.input_lines} masked={self.masked_inputs}")
         try:
             self._fh.close()
         except OSError:

@@ -22,7 +22,8 @@ class GateItem:
 
 
 def run(scan: ScanResult, *, pack_sha256: str | None = None, remediation: dict[str, str] | None = None,
-        db_ok: bool | None = None, exceptions: dict | None = None) -> list[GateItem]:
+        db_ok: bool | None = None, exceptions: dict | None = None,
+        rule_shas: dict[str, str] | None = None) -> list[GateItem]:
     rem = remediation or {}
     items: list[GateItem] = []
 
@@ -63,6 +64,13 @@ def run(scan: ScanResult, *, pack_sha256: str | None = None, remediation: dict[s
     if db_ok is not None:
         items.append(GateItem(db_ok, "결과 DB 무결성", "" if db_ok else "SQLite quick_check 실패"))
 
+    if rule_shas:
+        stale = sorted({r.rule_id for h in scan.hosts for r in h.results
+                        if (p := r.provenance) and p.get("rule_sha256") and rule_shas.get(r.rule_id)
+                        and p["rule_sha256"] != rule_shas[r.rule_id]})
+        items.append(GateItem(not stale, "룰 변경 후 재평가 필요 없음",
+                              f"진단 이후 룰이 바뀐 항목 {len(stale)}: {', '.join(stale[:8])} — 재진단 권장" if stale else ""))
+
     if exceptions is not None:
         applied = [(h.hostname, r.rule_id, exceptions[(h.host_id, r.rule_id)])
                    for h in scan.hosts for r in h.results
@@ -76,3 +84,10 @@ def run(scan: ScanResult, *, pack_sha256: str | None = None, remediation: dict[s
 
 def passed(items: list[GateItem]) -> bool:
     return all(i.ok for i in items)
+
+
+def stale_rule_ids(scan: ScanResult, rule_shas: dict[str, str]) -> set[str]:
+    """진단 당시 룰 SHA ≠ 현재 룰 SHA 인 룰 id (Wazuh 식 '정책 변경 → 결과 무효')."""
+    return {r.rule_id for h in scan.hosts for r in h.results
+            if (p := r.provenance) and p.get("rule_sha256") and rule_shas.get(r.rule_id)
+            and p["rule_sha256"] != rule_shas[r.rule_id]}

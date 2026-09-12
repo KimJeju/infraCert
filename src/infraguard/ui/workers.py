@@ -57,13 +57,14 @@ def build_job(pack: RulePack, profile: Profile, *, timeout: int | None = None,
     validate_env(hp)                       # 저장 시 검사했지만 실행 직전에 한 번 더
     return HostJob(bundles=bundles, native=list(profile.native),
                    manual_rules=pack.manual_rules(), exclude=set(profile.exclude), params=dict(hp),
-                   preflight=preflight, missing_params=missing)
+                   preflight=preflight, missing_params=missing, rule_shas=dict(pack.rule_shas))
 
 
 class HostKeyBridge(QObject):
     """호스트키 승인을 UI 스레드로 넘겨 blocking 대기한다(§5.3). lock 으로 직렬화."""
 
     request = Signal(str, str, str)  # host, key_type, fingerprint
+    changed_request = Signal(str, str, str, str)   # host, key_type, old_fp, new_fp — 키 변경(중간자 의심)
 
     def __init__(self) -> None:
         super().__init__()
@@ -83,19 +84,34 @@ class HostKeyBridge(QObject):
         self._result = bool(ok)
         self._event.set()
 
+    def ask_changed(self, host: str, key_type: str, old_fp: str, new_fp: str) -> bool:
+        """호스트키가 바뀐 경우. True = 기존 키 제거 후 재등록, False = 접속 중단(기본)."""
+        with self._lock:
+            self._event.clear()
+            self._result = False
+            self.changed_request.emit(host, key_type, old_fp, new_fp)
+            self._event.wait()
+            return self._result
 
-def build_connection(host: Host, cred: Credential, approve) -> Connection:  # noqa: ANN001
+
+def build_connection(host: Host, cred: Credential, approve, changed=None, *,  # noqa: ANN001
+                     keepalive: int | None = None, retries: int | None = None) -> Connection:
     """Host + Credential → 플랫폼별 Connection. reveal() 은 여기서 하지 않는다.
 
     windows/pc → WinRM(포트 22 그대로면 5985 로), network → 장비 셸(SSH invoke_shell), 그 외 → SSH.
+    keepalive/retries 가 None 이면 config(ssh_keepalive/connect_retries).
     """
+    from infraguard import config as _cfg
+    cfg = _cfg.load()
+    ka = int(cfg.get("ssh_keepalive", 30)) if keepalive is None else keepalive
+    rt = int(cfg.get("connect_retries", 1)) if retries is None else retries
     if host.platform in (Platform.WINDOWS, Platform.PC):
         port = 5985 if host.port == 22 else host.port
         return WinRMConnection(WinRMTarget(host=host.address, port=port, credential=cred, use_ssl=port == 5986))
     if host.platform == Platform.NETWORK:
         return NetdevConnection(NetdevTarget(host=host.address, port=host.port, credential=cred),
                                 approve_host_key=approve)
-    target = SSHTarget(host=host.address, port=host.port, credential=cred)
+    target = SSHTarget(host=host.address, port=host.port, credential=cred, keepalive=ka, retries=rt)
     bastion = None
     if host.use_bastion and host.bastion_host:
         b_cred = Credential(
@@ -104,7 +120,7 @@ def build_connection(host: Host, cred: Credential, approve) -> Connection:  # no
             key_passphrase=cred.key_passphrase,
         )
         bastion = SSHTarget(host=host.bastion_host, port=host.bastion_port, credential=b_cred)
-    return SSHConnection(target, bastion=bastion, approve_host_key=approve)
+    return SSHConnection(target, bastion=bastion, approve_host_key=approve, on_host_key_changed=changed)
 
 
 class ScanWorker(QObject):
@@ -136,7 +152,7 @@ class ScanWorker(QObject):
         hid = self._host.host_id
         self.started.emit(hid)
         try:
-            conn = build_connection(self._host, self._cred, self._bridge.ask)
+            conn = build_connection(self._host, self._cred, self._bridge.ask, self._bridge.ask_changed)
 
             def prog(stage: str) -> None:
                 self.stage_changed.emit(hid, stage)

@@ -27,8 +27,10 @@ def _esc(v: object) -> str:
 
 def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None,
           criteria: dict[str, str] | None = None, *, baseline: ScanResult | None = None,
-          exceptions: dict[tuple[str, str], RiskException] | None = None) -> Path:
+          exceptions: dict[tuple[str, str], RiskException] | None = None,
+          purpose: dict[str, str] | None = None) -> Path:
     remediation = remediation or {}
+    purpose = purpose or {}
     criteria = criteria or {}
     exceptions = exceptions or {}
     rs = _risk.summary(scan)
@@ -65,7 +67,8 @@ def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None
                 f"<td>{_esc(DISPLAY_KO[p] if (p := d.get((h.hostname, r.rule_id), (None, None))[0]) else '')}</td>"
                 f"<td>{_esc(_diff.LABEL_KO[c] if (c := d.get((h.hostname, r.rule_id), (None, None))[1]) else '')}</td>"
                 f"<td>{_esc(_risk.LABEL_KO[_risk.level(r.severity, h.asset.get('criticality'))] if r.status is Status.FAIL else '')}</td>"
-                f"<td>{_esc((e.label() + ' / ' + e.reason) if (e := exceptions.get((h.host_id, r.rule_id))) else '')}</td></tr>"
+                f"<td>{_esc((e.label() + ' / ' + e.reason) if (e := exceptions.get((h.host_id, r.rule_id))) else '')}</td>"
+                f"<td>{_esc(purpose.get(r.rule_id, ''))}</td></tr>"
             )
     doc = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <title>InfraGuard 진단결과 {_esc(scan.scan_id)}</title><style>
@@ -84,7 +87,7 @@ th{{background:#d9d9d9}} pre{{margin:0;white-space:pre-wrap;font-family:Consolas
 · 시작 {_esc(scan.started_at.strftime('%Y-%m-%d %H:%M:%S'))}</div>
 <div class="cards">{cards}</div>{risk_cards}{fix_cards}
 <table><thead><tr><th>호스트</th><th>항목코드</th><th>점검항목</th><th>중요도</th>
-<th>진단결과</th><th>판정근거</th><th>점검내용</th><th>조치방법</th><th>판단기준</th><th>판정추적</th><th>이전결과</th><th>변화</th><th>위험도</th><th>예외</th></tr></thead>
+<th>진단결과</th><th>판정근거</th><th>점검내용</th><th>조치방법</th><th>판단기준</th><th>판정추적</th><th>이전결과</th><th>변화</th><th>위험도</th><th>예외</th><th>점검목적</th></tr></thead>
 <tbody>{''.join(rows)}</tbody></table>
 <p class="meta">※ 수동확인은 자동 판정이 불가한 항목이며 실행오류(ERROR)와 구분됩니다.</p>
 </body></html>"""

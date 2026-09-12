@@ -277,6 +277,17 @@ class RulePackPage(QWidget):
                 + (("\n\n— 가이드 —\n" + format_guide(self._pack.guide[rid])) if rid in self._pack.guide else "")
             )
 
+    def select_rule(self, rule_id: str) -> bool:
+        """트리에서 룰을 찾아 선택·상세·테스터를 띄운다(결과 탭 '해당 룰' 링크)."""
+        for it in self._iter_checkable():
+            if it.data(ID_ROLE) == rule_id:
+                idx = it.index()
+                self.tree.scrollTo(idx)
+                self.tree.setCurrentIndex(idx)
+                self._show_detail(idx)
+                return True
+        return False
+
     # ---------------------------------------------------------------- 프로파일
     def _iter_checkable(self):  # noqa: ANN202
         """체크 가능한 말단(번들·룰)만. 그룹 노드는 제외 — 깊이 무관하게 재귀."""

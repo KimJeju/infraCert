@@ -66,11 +66,13 @@ class TerminalSession(QObject):
     closed = Signal(str)
     error = Signal(str)
 
-    def __init__(self, host: Host, cred: Credential, approve, cols: int, rows: int) -> None:  # noqa: ANN001
+    def __init__(self, host: Host, cred: Credential, approve, cols: int, rows: int,  # noqa: ANN001
+                 changed=None) -> None:  # noqa: ANN001
         super().__init__()
         self._host = host
         self._cred = cred
         self._approve = approve
+        self._changed = changed
         self._cols, self._rows = cols, rows
         self._conn: SSHConnection | None = None
         self._chan = None
@@ -80,7 +82,7 @@ class TerminalSession(QObject):
     def run(self) -> None:
         from infraguard.ui.workers import build_connection
         try:
-            self._conn = build_connection(self._host, self._cred, self._approve)
+            self._conn = build_connection(self._host, self._cred, self._approve, self._changed)
             self._conn.connect()
             self._chan = self._conn.open_shell(self._cols, self._rows)
             self.connected.emit()
@@ -393,9 +395,10 @@ class TerminalPage(QWidget):
 
     closed = Signal(object)          # self
     broadcast_input = Signal(bytes)  # 브로드캐스트 허브로
+    state_changed = Signal(str)      # connecting | connected | idle | closed | error — 탭 상태 점
 
     def __init__(self, host: Host, cred: Credential, approve, log_dir: Path,  # noqa: ANN001
-                 record: bool = True) -> None:
+                 record: bool = True, changed=None) -> None:  # noqa: ANN001
         super().__init__()
         self.host = host
         self._recorder: TerminalRecorder | None = None
@@ -423,7 +426,12 @@ class TerminalPage(QWidget):
         lay.addWidget(self.term, 1)
 
         self._thread = QThread()
-        self._session = TerminalSession(host, cred, approve, self.term.cols, self.term.rows)
+        self._session = TerminalSession(host, cred, approve, self.term.cols, self.term.rows, changed)
+        self.state = "connecting"
+        self._idle = QTimer(self)
+        self._idle.setInterval(120_000)          # 2분 입출력 없으면 '유휴'
+        self._idle.setSingleShot(True)
+        self._idle.timeout.connect(lambda: self._set_state("idle"))
         self._session.moveToThread(self._thread)
         self._thread.started.connect(self._session.run)
         self._session.connected.connect(self._on_connected)
@@ -435,13 +443,25 @@ class TerminalPage(QWidget):
         self._thread.start()
 
     # --- 세션 이벤트 (UI 스레드) ---
+    def _set_state(self, st: str) -> None:
+        if st != self.state:
+            self.state = st
+            self.state_changed.emit(st)
+
     def _on_connected(self) -> None:
         self.status.setText("● 연결됨")
         self.status.setStyleSheet(f"color:{BADGE['connected']}")
         self.term.setFocus()
+        self._set_state("connected")
+        self._idle.start()
 
     def _on_data(self, b: bytes) -> None:
         self.term.feed(b)
+        if self.state == "idle":
+            self._set_state("connected")
+            self.status.setText("● 연결됨")
+            self.status.setStyleSheet(f"color:{BADGE['connected']}")
+        self._idle.start()
         if self._recorder:
             self._recorder.on_output(b)
 
@@ -454,15 +474,22 @@ class TerminalPage(QWidget):
         if self._recorder:
             self._recorder.on_input(b)
         self._session.send(b)
+        if self.state == "idle":
+            self._set_state("connected")
+        self._idle.start()
 
     def _on_error(self, msg: str) -> None:
         self.status.setText(f"✕ {msg}")
         self.status.setStyleSheet(f"color:{BADGE['failed']}")
         self.term.feed(f"\r\n\x1b[31m[InfraGuard] {msg}\x1b[0m\r\n".encode())
+        self._set_state("error")
 
     def _on_closed(self, msg: str) -> None:
         self.status.setText(f"○ {msg}")
         self.status.setStyleSheet(f"color:{BADGE['idle']}")
+        if self.state != "error":
+            self._set_state("closed")
+        self._idle.stop()
 
     def shutdown(self) -> None:
         self._session.stop()

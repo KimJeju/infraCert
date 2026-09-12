@@ -34,7 +34,9 @@ DEFAULTS: dict[str, Any] = {
     "export_format": "xlsx",
     "company_name": "",
     "theme": "dark",
-    "sanitize_on_exit": True,     # 고객사 PC 반입 시 켜 둔다. 자기 PC(개발·검토)에서는 꺼서 결과·자산을 유지
+    "sanitize_on_exit": True,
+    "ssh_keepalive": 30,       # 초. SSH 세션 유지 신호
+    "connect_retries": 1,      # 연결 단계 재시도(네트워크 순단). 룰 재실행과 분리     # 고객사 PC 반입 시 켜 둔다. 자기 PC(개발·검토)에서는 꺼서 결과·자산을 유지
 }
 
 

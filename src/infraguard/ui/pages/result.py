@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
@@ -30,6 +32,17 @@ from infraguard.ui.theme import STATUS_BG, STATUS_TEXT
 COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "위험도", "예외", "이전", "변화", "판정근거"]
 _C_RISK, _C_EXC, _C_PREV, _C_DIFF, _C_EV = 5, 6, 7, 8, 9
 CHANGED_FG = "#F0883E"   # 전회와 달라진 결과
+_PATH_RE = re.compile(r"(?<![\w.])(/(?:etc|var|opt|usr|home|root|boot|srv|tmp|u0\d|oracle|app)(?:/[\w.@+-]+)+)")
+
+
+def evidence_paths(text: str) -> list[str]:
+    """근거 텍스트에서 원격 절대경로 후보(중복 제거, 등장 순)."""
+    out: list[str] = []
+    for m in _PATH_RE.finditer(text):
+        p = m.group(1).rstrip(".,:;)")
+        if p not in out:
+            out.append(p)
+    return out[:12]
 _DISPLAY_TO_STATUS = {v: k for k, v in DISPLAY_KO.items()}
 
 
@@ -37,6 +50,9 @@ class ResultPage(QWidget):
     export_requested = Signal(str)  # "xlsx" | "html"
     exception_requested = Signal(str, str, str)   # host_id, rule_id, label — 예외 승인/수정 다이얼로그
     exception_cleared = Signal(str, str)          # host_id, rule_id
+    open_terminal = Signal(str)                   # host_id — 취약 항목에서 바로 SSH
+    open_file = Signal(str, str)                  # host_id, remote path — SFTP 로 근거 파일
+    open_rule = Signal(str)                       # rule_id — 룰팩 탭 해당 룰(테스터)
 
     def __init__(self) -> None:
         super().__init__()
@@ -50,6 +66,8 @@ class ResultPage(QWidget):
         self._host_ids: dict[str, str] = {}            # hostname → host_id
         self._crit: dict[str, str] = {}                # hostname → 자산 중요도(스냅샷)
         self._exc: dict[tuple[str, str], RiskException] = {}   # (host_id, rule_id) → 예외
+        self._guide: dict[str, dict] = {}              # rule id → 가이드(점검 목적)
+        self._rule_shas: dict[str, str] = {}           # 현재 룰팩 rule id → SHA (진단 당시와 다르면 '룰 변경')
         root = QVBoxLayout(self)
 
         bar = QHBoxLayout()
@@ -119,7 +137,24 @@ class ResultPage(QWidget):
         self.table.itemSelectionChanged.connect(self._show_detail)
         root.addWidget(self.table, 3)
 
-        root.addWidget(QLabel("상세"))
+        drow = QHBoxLayout()
+        drow.addWidget(QLabel("상세"))
+        drow.addStretch(1)
+        self.btn_term = QPushButton("터미널 열기")
+        self.btn_file = QComboBox()
+        self.btn_file.setToolTip("근거에 나온 원격 파일 경로 — 고르면 SFTP 로 연다(읽기 전용 보기)")
+        self.btn_file.setMinimumWidth(220)
+        self.btn_rule = QPushButton("해당 룰(테스터)")
+        for b in (self.btn_term, self.btn_rule):
+            b.setEnabled(False)
+        self.btn_file.setEnabled(False)
+        self.btn_term.clicked.connect(self._link_terminal)
+        self.btn_file.activated.connect(self._link_file)
+        self.btn_rule.clicked.connect(self._link_rule)
+        drow.addWidget(self.btn_term)
+        drow.addWidget(self.btn_file)
+        drow.addWidget(self.btn_rule)
+        root.addLayout(drow)
         self.detail = QTextEdit()
         self.detail.setReadOnly(True)
         self.detail.setMaximumHeight(160)
@@ -169,6 +204,34 @@ class ResultPage(QWidget):
 
     def _exc_of(self, hn: str, rid: str) -> RiskException | None:
         return self._exc.get((self._host_ids.get(hn, ""), rid))
+
+    def set_guide(self, guide: dict[str, dict]) -> None:
+        self._guide = guide
+
+    def set_rule_shas(self, shas: dict[str, str]) -> None:
+        self._rule_shas = dict(shas)
+        self._apply()
+
+    def stale(self, r: CheckResult) -> bool:
+        p = r.provenance or {}
+        cur = self._rule_shas.get(r.rule_id)
+        return bool(p.get("rule_sha256") and cur and p["rule_sha256"] != cur)
+
+    def _link_terminal(self) -> None:
+        sel = self._selected()
+        if sel:
+            self.open_terminal.emit(self._host_ids.get(sel[0], ""))
+
+    def _link_rule(self) -> None:
+        sel = self._selected()
+        if sel:
+            self.open_rule.emit(sel[1])
+
+    def _link_file(self, _i: int) -> None:
+        sel = self._selected()
+        path = self.btn_file.currentData()
+        if sel and path:
+            self.open_file.emit(self._host_ids.get(sel[0], ""), path)
 
     def load(self, scan: ScanResult | None) -> None:
         self._scan = scan
@@ -238,6 +301,8 @@ class ResultPage(QWidget):
         for i, (hn, r) in enumerate(rows):
             # 판정근거 컬럼은 수집 근거 첫 줄. 근거가 없으면 엔진 사유(누락·미등록 어휘 등)를 보인다.
             ev = (r.evidence or "").strip().splitlines()
+            if self.stale(r):
+                ev = ["⚠ 룰 변경됨 · " + (ev[0] if ev else "")]
             prev = self._base.get((hn, r.rule_id))
             prev_txt = ("" if prev is None else DISPLAY_KO[prev]) if self._base else ""
             cls = self._diff.get((hn, r.rule_id), (None, None))[1]
@@ -303,12 +368,22 @@ class ResultPage(QWidget):
         hn, rid = data
         for h2, r in self._flat:
             if h2 == hn and r.rule_id == rid:
+                self.btn_term.setEnabled(True)
+                self.btn_rule.setEnabled(True)
+                self.btn_file.clear()
+                paths = evidence_paths(r.evidence or "")
+                self.btn_file.addItem("파일 열기…" if paths else "근거에 파일 경로 없음", None)
+                for p in paths:
+                    self.btn_file.addItem(p, p)
+                self.btn_file.setEnabled(bool(paths))
                 self.detail.setPlainText(
                     f"[{r.rule_id}] {r.name}  ({hn})\n"
                     f"판정: {DISPLAY_KO[r.status]}  (출처: "
                     f"{'분석자' if r.verdict_source == 'analyst' else '스크립트'})\n"
                     f"사유: {r.reason}\n"
-                    f"근거:\n{r.evidence or '-'}\n"
+                    + (f"점검 목적: {self._guide[rid].get('purpose')}\n" if self._guide.get(rid, {}).get("purpose") else "")
+                    + ("⚠ 룰 변경됨 — 진단 이후 이 룰의 판정 조건이 바뀌었습니다. 재진단 권장\n" if self.stale(r) else "")
+                    + f"근거:\n{r.evidence or '-'}\n"
                     f"원본추적: {r.source.artifact or '-'} "
                     f"line {r.source.line or '-'} / profile {r.source.profile or '-'}"
                     + (f"\n경고: {'; '.join(r.warnings)}" if r.warnings else "")

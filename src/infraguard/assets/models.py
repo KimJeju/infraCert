@@ -7,6 +7,8 @@ cred_id 로 세션 크리덴셜과 연결한다. 같은 계정을 여러 호스�
 
 from __future__ import annotations
 
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 from infraguard.core.models import Platform
@@ -41,6 +43,7 @@ class Host(BaseModel):
     owner: str = ""
     role: str = ""                       # WEB/WAS/DB/AD ... 자유 텍스트
     tags: list[str] = Field(default_factory=list)
+    discovered: dict[str, Any] = Field(default_factory=dict)   # Discovery 결과(ports/services/os) — 프로파일 추천 근거
 
     # 마지막 진단 요약 (트리 배지용) — 판정 결과이지 상태가 아니다
     last_summary: dict[str, int] = Field(default_factory=dict)
