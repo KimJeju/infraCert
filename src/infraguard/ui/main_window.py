@@ -989,7 +989,7 @@ class MainWindow(QMainWindow):
                 event.ignore()
                 return
             self.controller.cancel()
-        wipe = bool(self.ctx.config.get("wipe_on_exit", True))
+        wipe = bool(self.ctx.config.get("sanitize_on_exit", True))
         if gate == WARN_UNEXPORTED and wipe:
             resp = QMessageBox.question(
                 self, "종료", "아직 내보내지 않은 결과가 있습니다.\n"

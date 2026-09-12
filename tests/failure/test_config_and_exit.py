@@ -39,3 +39,12 @@ def test_host_model_holds_no_secret():
     dumped = Host(host_id="H1", name="w", address="10.0.0.1").model_dump()
     for bad in ("password", "secret", "passphrase", "token"):
         assert bad not in dumped
+
+
+def test_every_default_key_survives_save(tmp_path, monkeypatch):
+    """DEFAULTS 의 키가 금지 부분문자열(ip·key·host…)에 걸리면 조용히 안 저장된다(09-12 wipe_on_exit 가 'ip' 에 걸림)."""
+    from infraguard import config
+    monkeypatch.setattr(config, "config_path", lambda: tmp_path / "config.json")
+    config.save(dict(config.DEFAULTS))
+    saved = config.load()
+    assert set(config.DEFAULTS) <= set(saved), sorted(set(config.DEFAULTS) - set(saved))

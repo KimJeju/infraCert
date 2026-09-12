@@ -34,7 +34,7 @@ DEFAULTS: dict[str, Any] = {
     "export_format": "xlsx",
     "company_name": "",
     "theme": "dark",
-    "wipe_on_exit": True,     # 고객사 PC 반입 시 켜 둔다. 자기 PC(개발·검토)에서는 꺼서 결과·자산을 유지
+    "sanitize_on_exit": True,     # 고객사 PC 반입 시 켜 둔다. 자기 PC(개발·검토)에서는 꺼서 결과·자산을 유지
 }
 
 

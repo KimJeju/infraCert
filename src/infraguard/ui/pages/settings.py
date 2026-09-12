@@ -115,10 +115,10 @@ class SettingsPage(QWidget):
         wipe.setObjectName("danger")
         wipe.setFixedWidth(160)
         wipe.clicked.connect(self.sanitize_requested)
-        self.wipe_on_exit = QCheckBox("종료 시 작업공간 완전삭제 (고객사 PC 반입 시 켜 두세요 — 끄면 결과·자산이 남습니다)")
+        self.sanitize_on_exit = QCheckBox("종료 시 작업공간 완전삭제 (고객사 PC 반입 시 켜 두세요 — 끄면 결과·자산이 남습니다)")
         f.addRow("경로", self.ws_path)
         f.addRow("사용량", self.ws_size)
-        f.addRow("", self.wipe_on_exit)
+        f.addRow("", self.sanitize_on_exit)
         f.addRow("", wipe)
         root.addWidget(g_ws)
 
@@ -147,7 +147,7 @@ class SettingsPage(QWidget):
         self.timeout.setValue(int(cfg.get("default_timeout", 1800)))
         self.max_out.setValue(int(cfg.get("max_output_kb", 1024)))
         self.use_sudo.setChecked(bool(cfg.get("use_sudo", False)))
-        self.wipe_on_exit.setChecked(bool(cfg.get("wipe_on_exit", True)))
+        self.sanitize_on_exit.setChecked(bool(cfg.get("sanitize_on_exit", True)))
         self.connect_timeout.setValue(int(cfg.get("connect_timeout", 15)))
         self.idle_lock.setValue(int(cfg.get("idle_lock_minutes", 15)))
         self.term_rec.setChecked(bool(cfg.get("terminal_recording", True)))
@@ -165,7 +165,7 @@ class SettingsPage(QWidget):
             "default_timeout": self.timeout.value(),
             "max_output_kb": self.max_out.value(),
             "use_sudo": self.use_sudo.isChecked(),
-            "wipe_on_exit": self.wipe_on_exit.isChecked(),
+            "sanitize_on_exit": self.sanitize_on_exit.isChecked(),
             "connect_timeout": self.connect_timeout.value(),
             "idle_lock_minutes": self.idle_lock.value(),
             "terminal_recording": self.term_rec.isChecked(),
