@@ -84,9 +84,9 @@ bundles:
 - id: oracle-db
   description: Oracle 19c D-01~D-26 (sqlplus / as sysdba)
   script: scripts/oracle_infra_script_2026.sh
-  sha256: 3d3198e5eb5b8ed1c9f7c6f537c1111fcf1fd032df8334e8b3c994004848c591
+  sha256: 448988226ac84a8042c2b535d3d482f594d0a341df3fe75f038b69b9370fa1d3
   extra_files:
-  - scripts/oracle_infra_script_2026.sql
+  - scripts/kisa_oracle_check.sql
   interpreter: ksh
   platforms:
   - linux

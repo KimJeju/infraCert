@@ -148,7 +148,11 @@ def _run_bundle(
                                  execution=execu, manual_rules=manual_rules)
     host.orphan_findings += orphans
     if not findings:
-        return fail("산출물에서 판정 결과를 찾지 못했습니다" + (f" ({'; '.join(warns[:3])})" if warns else ""))
+        tail = (res.stderr or "").strip().splitlines()
+        why = [f"exit {res.exit_code}"] if res.exit_code not in (None, 0) else []
+        why += [f"stderr: {' | '.join(tail[-3:])}"] if tail else []
+        why += warns[:3]
+        return fail("산출물에서 판정 결과를 찾지 못했습니다" + (f" ({'; '.join(why)})" if why else ""))
     return results
 
 
@@ -182,7 +186,8 @@ def scan_host(
         if job.preflight and not should_cancel():
             progress(STAGE_PREFLIGHT)
             host.preflight = _preflight.run(conn, host.environment, native=job.native,
-                                            has_bundles=bool(job.bundles), missing_params=job.missing_params)
+                                            has_bundles=bool(job.bundles), missing_params=job.missing_params,
+                                            interpreters=[s.interpreter for s, _ in job.bundles if s.interpreter])
 
         for spec, provides in job.bundles:
             if should_cancel():

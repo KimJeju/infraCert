@@ -151,11 +151,18 @@ class RemoteRunner:
 
     def _launch(self, spec: RunSpec, remote_dir: str) -> ExecResult:
         script_path = posixpath.join(remote_dir, spec.script.name)
-        parts = [spec.interpreter, script_path] if spec.interpreter else [script_path]
-        cmd_argv = [p for p in parts if p] + spec.args
         validate_env(spec.env)                       # 허용 문자만 통과했으므로 인용 없이 안전
         env_prefix = "".join(f"{k}={v} " for k, v in spec.env.items())
-        inner = env_prefix + " ".join(shlex.quote(a) for a in cmd_argv)
+        tail = " ".join(shlex.quote(a) for a in [script_path, *spec.args])
+        it = spec.interpreter
+        if it and it != "sh" and "/" not in it:
+            # 선언한 인터프리터(ksh 등)가 대상에 없으면 exit 127 로 빈 산출물이 된다(09-12 Oracle 컨테이너).
+            # 스크립트가 POSIX 라면 sh 로도 돈다 — 대체 실행하되 사유를 stderr 에 남겨 결과에서 보이게 한다.
+            inner = (f"if command -v {it} >/dev/null 2>&1; then {env_prefix}{it} {tail}; "
+                     f"else echo \"[infraguard] interpreter {it} not found - falling back to sh\" >&2; "
+                     f"{env_prefix}sh {tail}; fi")
+        else:
+            inner = env_prefix + (f"{it} " if it else "") + tail
 
         # nohup 백그라운드 + 완료 마커. 세션이 끊겨도 계속 실행된다.
         runner = (

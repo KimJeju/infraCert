@@ -25,7 +25,7 @@ def _sh(conn: Connection, cmd: str) -> str | None:
 
 
 def run(conn: Connection, env: RemoteEnvironment, *, native: Iterable[str], has_bundles: bool,
-        missing_params: Iterable[str] = ()) -> list[str]:
+        missing_params: Iterable[str] = (), interpreters: Iterable[str] = ()) -> list[str]:
     notes: list[str] = []
     if env.incomplete:
         notes.append("환경 식별 불완전(probe 실패) — 플랫폼 불일치 SKIPPED 가 많을 수 있음")
@@ -45,6 +45,9 @@ def run(conn: Connection, env: RemoteEnvironment, *, native: Iterable[str], has_
         found = _sh(conn, f'test -x "{oh}/bin/sqlplus" && echo OK || command -v sqlplus') if oh else _sh(conn, "command -v sqlplus")
         if not found:
             notes.append("sqlplus 없음 — Oracle 룰 전부 실행 실패(ORACLE_HOME 파라미터 확인)")
+    for it in sorted({i for i in interpreters if i and i != "sh" and "/" not in i}):
+        if not _sh(conn, f"command -v {it}"):
+            notes.append(f"{it} 없음 — 번들 스크립트는 sh 로 대체 실행됨(ksh 전용 문법이면 실패)")
     if has_bundles:
         df = _sh(conn, "df -kP /tmp 2>/dev/null | awk 'NR==2{print $4}'")
         if df and df.isdigit() and int(df) < MIN_TMP_KB:
