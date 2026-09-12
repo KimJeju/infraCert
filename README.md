@@ -4,25 +4,17 @@
 
 ## 현재 상태
 
-UI 명세 U-1~U-9 구현, WSL sshd 상대 E2E(스크립트 번들·네이티브 룰) 검증, 테스트 96개 통과.
+기능 전체 목록은 [docs/기능목록.md](docs/기능목록.md). 테스트 839개, CI(GitHub Actions)에서 manifest 드리프트·전체 테스트·룰 fixture 커버리지(195/195) 검사.
 
-| 계층 | 상태 |
+| 영역 | 상태 |
 |---|---|
-| core (status·decision·models·ids) | 완료 |
-| credentials (Secret·session) | 완료 |
-| workspace (layout·sanitizer) | 완료 |
-| transport.ssh (+hostkey·shell·sftp) | 완료 |
-| orchestrator (remote_runner·host_scan·native_runner·results_store) | 완료 |
-| assets (models·store, assets.db) | 완료 |
-| rulepack (manifest 로더: 번들·네이티브·프로파일·무결성·조치형 거부) | 완료 |
-| rules (네이티브 Unix 룰 67종 = KISA 2026 U-01~U-67 전부: YAML 61 + 파이썬 6) | 완료 (실 AIX 검증 대기) |
-| parsing (legacy_csv 4종 · report_txt 브래킷/파이프 · dispatch) | 완료 |
-| result (masking·engine) | 완료 |
-| reporting.xlsx / html | 완료 |
-| audit.terminal_recorder (입출력 기록·비밀번호 마스킹) | 완료 |
-| ui — 대시보드·진단·결과·수동확인·룰팩·설정·터미널(pyte)·SFTP | 완료 |
-| 패키징(PyInstaller onedir, U-10) | 미착수 |
-| transport.winrm / netdev / db | 미착수 |
+| 접속: SSH(+bastion·keepalive·재시도·호스트키 변경 감지) · SFTP(뷰어·드래그앤드롭) · WinRM(배치) · 네트워크 장비(Cisco/Junos) · 로컬 | 완료 |
+| 진단: 번들 스크립트 + 선언형 YAML 네이티브 룰 221종(U67·W64·D26·N38·WEB26), 명령 안전 정책(로더+엔진), 판정 추적(provenance) | 완료 |
+| 룰팩: manifest SHA·framework 메타, 부분 룰팩 zip, 가져오기/비교/Rule Tester, fixture 484케이스 | 완료 |
+| 현장 흐름: dry-run · 연결 사전검증 · 재진단 · 조치 분류/조치율 · 위험도 · 예외 승인 · 품질 게이트 · 세션 패키지 | 완료 |
+| 세션 매니저: 호스트 카드 · 자산 쿼리/동적 그룹 · Discovery · 결과↔터미널/파일/룰 · 멀티실행(읽기전용) | 완료 |
+| 패키징: PyInstaller onedir(116 MB), 코드 서명 스크립트(인증서는 구매 필요) | 완료 |
+| 실장비 검증: AIX · Cisco/Junos 실장비 · Oracle 19c | 대기(테스트 환경 없음) |
 
 ## 실행 방식 두 가지 (프로파일로 선택)
 
