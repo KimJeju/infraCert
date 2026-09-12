@@ -20,6 +20,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from infraguard.core.models import ScanResult
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
+from infraguard.result import diff as _diff
 from infraguard.result.engine import provenance_text
 
 FONT = "Arial"
@@ -35,7 +36,8 @@ THIN = Side(style="thin", color="BFBFBF")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
 RESULT_HEADERS = ["호스트", "항목코드", "점검항목", "중요도", "진단결과",
-                  "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법", "판단기준", "판정추적"]
+                  "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법", "판단기준", "판정추적",
+                  "이전결과", "변화"]
 
 
 def _style_header(ws: Worksheet, ncols: int, row: int = 1) -> None:
@@ -62,15 +64,17 @@ def _body_font(ws: Worksheet, first_row: int = 2) -> None:
 
 
 def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None,
-          criteria: dict[str, str] | None = None) -> Path:
-    """remediation/criteria: rule id → 조치방법/판단기준(룰팩 메타·가이드). 없으면 빈 컬럼 — 추측해 채우지 않는다."""
+          criteria: dict[str, str] | None = None, *, baseline: ScanResult | None = None) -> Path:
+    """remediation/criteria: rule id → 조치방법/판단기준(룰팩 메타·가이드). 없으면 빈 컬럼 — 추측해 채우지 않는다.
+    baseline: 전회 진단. 있으면 결과 시트에 이전결과·변화 컬럼, 요약 시트에 조치 현황."""
     wb = Workbook()
 
     ws_res = wb.active
     ws_res.title = "결과"
-    _write_results(ws_res, scan, remediation or {}, criteria or {})
+    d = _diff.diff(scan, baseline)
+    _write_results(ws_res, scan, remediation or {}, criteria or {}, d)
 
-    _write_summary(wb.create_sheet("요약", 0), scan, ws_res.title)
+    _write_summary(wb.create_sheet("요약", 0), scan, ws_res.title, baseline=baseline, dsum=_diff.summary(d))
     _write_manual(wb.create_sheet("수동확인"), scan)
     _write_issues(wb.create_sheet("실행이슈"), scan)
     _write_env(wb.create_sheet("환경"), scan)
@@ -82,7 +86,9 @@ def build(scan: ScanResult, out: Path, remediation: dict[str, str] | None = None
 
 
 # ------------------------------------------------------------------- 결과
-def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str], criteria: dict[str, str]) -> None:
+def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str], criteria: dict[str, str],
+                   d: dict | None = None) -> None:
+    d = d or {}
     ws.append(RESULT_HEADERS)
     for h in scan.hosts:
         for r in h.results:
@@ -99,9 +105,11 @@ def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str],
                 remediation.get(r.rule_id, "") if r.status is Status.FAIL or r.status is Status.UNKNOWN else "",
                 criteria.get(r.rule_id, ""),
                 provenance_text(r),
+                DISPLAY_KO[p] if (p := d.get((h.hostname, r.rule_id), (None, None))[0]) else "",
+                _diff.LABEL_KO[c] if (c := d.get((h.hostname, r.rule_id), (None, None))[1]) else "",
             ])
     _style_header(ws, len(RESULT_HEADERS))
-    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40, 48])
+    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40, 48, 10, 10])
     _body_font(ws)
     # 진단결과 컬럼 색상
     for row in ws.iter_rows(min_row=2, min_col=5, max_col=5):
@@ -115,7 +123,8 @@ def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str],
 
 
 # ------------------------------------------------------------------- 요약
-def _write_summary(ws: Worksheet, scan: ScanResult, result_sheet: str) -> None:
+def _write_summary(ws: Worksheet, scan: ScanResult, result_sheet: str, *, baseline: ScanResult | None = None,
+                   dsum: dict[str, int] | None = None) -> None:
     ws["A1"] = "InfraGuard 진단 결과 요약"
     ws["A1"].font = Font(name=FONT, bold=True, size=14)
 
@@ -129,6 +138,11 @@ def _write_summary(ws: Worksheet, scan: ScanResult, result_sheet: str) -> None:
         ("종료", scan.finished_at.strftime("%Y-%m-%d %H:%M:%S") if scan.finished_at else "-"),
         ("대상 호스트", str(len(scan.hosts))),
     ]
+    if baseline is not None and dsum is not None:
+        rate = _diff.fix_rate(dsum)
+        meta.append(("전회 진단(기준)", baseline.scan_id))
+        meta += [(f"  {_diff.LABEL_KO[k]}", str(dsum.get(k, 0))) for k in _diff.ORDER]
+        meta.append(("  조치율", f"{rate:.0%}" if rate is not None else "-"))
     for i, (k, v) in enumerate(meta, start=3):
         ws.cell(row=i, column=1, value=k).font = Font(name=FONT, bold=True, size=10)
         ws.cell(row=i, column=2, value=v).font = Font(name=FONT, size=10)

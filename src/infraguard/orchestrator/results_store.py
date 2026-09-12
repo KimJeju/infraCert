@@ -113,6 +113,12 @@ class ResultsStore:
         out.sort(key=lambda x: x[1].get("started_at", ""), reverse=True)
         return out
 
+    def integrity_ok(self) -> bool:
+        try:
+            return self._conn.execute("PRAGMA quick_check").fetchone()[0] == "ok"
+        except sqlite3.Error:
+            return False
+
     def close(self) -> None:
         try:
             self._conn.close()

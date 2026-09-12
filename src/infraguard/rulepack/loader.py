@@ -13,6 +13,7 @@ import hashlib
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import yaml
 
@@ -86,6 +87,7 @@ class RulePack:
     problems: list[str]                # 로드는 됐지만 실행을 막아야 하는 사유
     guide: dict[str, dict] = field(default_factory=dict)   # rule id → 가이드 항목(판단기준·조치·사례). 선택 사항
     sha256: str = ""                   # manifest.yaml 해시 = 룰팩 정체. 결과에 기록해 "당시 기준" 을 재현한다
+    specs: dict[str, Any] = field(default_factory=dict)    # rule id → 선언형 RuleSpec (dry-run 명령 열거용)
     meta: dict[str, str] = field(default_factory=dict)     # guide_version / author / created_at (manifest 상단)
 
     @property
@@ -188,6 +190,7 @@ def load(pack_dir: Path) -> RulePack:
                 for r in (raw.get("rule_files") or [])}
     rules_dir = pack_dir / RULES_DIRNAME
     declarative_kind: dict[str, str] = {}
+    specs: dict[str, Any] = {}
     if rules_dir.exists():
         for f in sorted(rules_dir.glob("*.yaml")):
             rel = f"{RULES_DIRNAME}/{f.name}"
@@ -261,7 +264,7 @@ def load(pack_dir: Path) -> RulePack:
         name=str(raw.get("name") or pack_dir.name), version=str(raw.get("version") or ""),
         root=pack_dir, bundles=bundles, native=native, rules=rules, profiles=profiles,
         integrity_ok=integrity_ok, problems=problems, guide=_load_guide(pack_dir, problems),
-        sha256=_sha256(mf),
+        sha256=_sha256(mf), specs=specs,
         meta={k: str(raw[k]) for k in ("guide_version", "author", "created_at") if raw.get(k)},
     )
 

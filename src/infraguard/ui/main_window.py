@@ -32,6 +32,7 @@ from infraguard.core.models import HostResult, ScanResult
 from infraguard.core.status import Severity, Status
 from infraguard.credentials.session import CredentialSession
 from infraguard.orchestrator.results_store import ResultsStore
+from infraguard.result import diff as _diff
 from infraguard.reporting import html as html_report
 from infraguard.reporting import xlsx as xlsx_report
 from infraguard.rulepack import loader as rp_loader
@@ -357,6 +358,7 @@ class MainWindow(QMainWindow):
         self.scan.cancel_requested.connect(self.controller.cancel)
         self.scan.retry_requested.connect(self._retry_failed)
         self.result.export_requested.connect(self._export)
+        self.scan.dryrun_requested.connect(self._dry_run)
         self.manual.verdict_saved.connect(self._save_verdict)
 
         self.sb_hosts = QLabel("")
@@ -601,7 +603,8 @@ class MainWindow(QMainWindow):
             if cred is None:
                 continue
             # 호스트별 파라미터(TOMCAT_HOME 등)가 다르므로 job 도 호스트별로 만든다
-            jobs.append((h, cred, build_job(self.pack, profile, timeout=timeout, host_params=h.params)))
+            jobs.append((h, cred, build_job(self.pack, profile, timeout=timeout, host_params=h.params,
+                                            preflight=self.scan.preflight.isChecked())))
 
         self._scan_id = new_scan_id()
         self.ctx.results.start_scan(ScanResult(
@@ -659,6 +662,35 @@ class MainWindow(QMainWindow):
     def _show_results(self, scan: ScanResult) -> None:
         self.result.set_baseline(self._baseline_for(scan))
         self.result.load(scan)
+
+    def _dry_run(self) -> None:
+        hosts = getattr(self, "_pending_hosts", None) or self._selected_hosts()
+        if self.pack is None:
+            return
+        profile = self.pack.profiles.get(self.scan.current_profile() or "")
+        if profile is None:
+            QMessageBox.information(self, "실행 계획", "프로파일을 선택하세요.")
+            return
+        from collections import Counter
+        from infraguard.orchestrator import dryrun
+        counts = Counter(h.platform for h in hosts) or Counter({"linux": 0})
+        text = dryrun.render([dryrun.plan(self.pack, profile, p) for p in counts], hosts_by_platform=dict(counts))
+        self._show_text("실행 계획 (dry-run) — " + profile.name, text)
+
+    def _show_text(self, title: str, text: str) -> None:
+        from PySide6.QtWidgets import QDialog, QDialogButtonBox, QPlainTextEdit, QVBoxLayout
+        d = QDialog(self)
+        d.setWindowTitle(title)
+        d.resize(900, 600)
+        lay = QVBoxLayout(d)
+        ed = QPlainTextEdit(text)
+        ed.setReadOnly(True)
+        ed.setStyleSheet("font-family: Consolas, 'Malgun Gothic', monospace;")
+        lay.addWidget(ed)
+        bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        bb.rejected.connect(d.reject)
+        lay.addWidget(bb)
+        d.exec()
 
     def _retry_failed(self) -> None:
         """실패·미완료 호스트만 같은 scan_id 로 다시. 완료된 호스트의 체크포인트는 그대로."""
@@ -737,9 +769,14 @@ class MainWindow(QMainWindow):
         scan = self.ctx.results.load_scan(self._scan_id)
         if not scan:
             return
-        pending = sum(1 for h in scan.hosts for r in h.results if r.status is Status.UNKNOWN)
-        if pending and QMessageBox.question(
-            self, "미판정 항목", f"수동확인 미판정 {pending}건이 남았습니다. 그래도 내보낼까요?"
+        # 리포트 품질 게이트 — 통과 못 해도 막지 않는다. 사실을 보여주고 사용자가 고른다.
+        from infraguard.result import gate
+        rem = self.pack.remediation_map() if self.pack else {}
+        items = gate.run(scan, pack_sha256=self.pack.sha256 if self.pack else None, remediation=rem,
+                         db_ok=self.ctx.results.integrity_ok())
+        if not gate.passed(items) and QMessageBox.question(
+            self, "리포트 품질 검사", "\n".join(i.line() for i in items) + "\n\n그래도 내보낼까요?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No, QMessageBox.StandardButton.No,
         ) != QMessageBox.StandardButton.Yes:
             return
         ext = "xlsx" if fmt == "xlsx" else "html"
@@ -749,12 +786,12 @@ class MainWindow(QMainWindow):
             return
         from pathlib import Path
         try:
-            rem = self.pack.remediation_map() if self.pack else {}
             crit = self.pack.criteria_map() if self.pack else {}
+            base = self._baseline_for(scan)
             if fmt == "xlsx":
-                xlsx_report.build(scan, Path(path), rem, crit)
+                xlsx_report.build(scan, Path(path), rem, crit, baseline=base)
             else:
-                html_report.build(scan, Path(path), rem, crit)
+                html_report.build(scan, Path(path), rem, crit, baseline=base)
             self._unexported = False
             QMessageBox.information(self, "내보내기", f"저장됨: {path}")
         except Exception as e:  # noqa: BLE001
@@ -780,6 +817,9 @@ class MainWindow(QMainWindow):
                         sev[r.severity] += 1
         self.dashboard.update_severity(sev[Severity.HIGH], sev[Severity.MEDIUM], sev[Severity.LOW])
         self.dashboard.update_hosts(host_rows)
+        base = self._baseline_for(scan) if scan else None
+        self.dashboard.update_fix(_diff.summary(_diff.diff(scan, base)) if scan and base else None,
+                                  base.scan_id if base else None)
         self.dashboard.set_progress([])
         self.dashboard.set_recent(self.ctx.results.list_scans())
 

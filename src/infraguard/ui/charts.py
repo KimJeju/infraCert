@@ -13,9 +13,10 @@ from infraguard.ui.theme import BG1, BG3, FG0, FG1, STATUS_FG
 class BarChart(QWidget):
     """가로 막대. rows: [(라벨, 값, 색)]."""
 
-    def __init__(self) -> None:
+    def __init__(self, label_w: int = 40) -> None:
         super().__init__()
         self._rows: list[tuple[str, int, str]] = []
+        self._label_w = label_w
         self.setMinimumHeight(90)
 
     def set_rows(self, rows: list[tuple[str, int, str]]) -> None:
@@ -32,7 +33,7 @@ class BarChart(QWidget):
             p.drawText(self.rect(), Qt.AlignmentFlag.AlignCenter, "데이터 없음")
             return
         mx = max((v for _, v, _ in self._rows), default=0) or 1
-        label_w = 40
+        label_w = self._label_w
         val_w = 36
         bar_x = 12 + label_w
         bar_w = max(10, self.width() - bar_x - val_w - 12)

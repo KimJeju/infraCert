@@ -110,6 +110,7 @@ class HostResult(BaseModel):
     cleanup_ok: bool | None = None
     cleanup_leftovers: list[str] = Field(default_factory=list)
     error: str | None = None
+    preflight: list[str] = Field(default_factory=list)   # 사전검증 발견 사항(진단은 계속 진행됨)
 
     def summary(self) -> dict[Status, int]:
         out: dict[Status, int] = {s: 0 for s in Status}

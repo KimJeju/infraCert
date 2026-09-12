@@ -21,6 +21,7 @@ from PySide6.QtWidgets import (
 )
 
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
+from infraguard.result import diff as _diff
 from infraguard.ui.charts import BarChart, HostHeatmap
 from infraguard.ui.theme import BG1, BG3, FG1, STATUS_FG
 
@@ -120,6 +121,18 @@ class DashboardPage(QWidget):
         grid.setColumnStretch(0, 2)
         grid.setColumnStretch(1, 3)
         grid.setColumnStretch(2, 2)
+        # 조치 현황: 전회(같은 호스트가 있는 직전 진단) 대비 조치됨/재발/취약 유지/신규 취약
+        self.fix_chart = BarChart(label_w=64)
+        fix_body = QWidget()
+        fl = QVBoxLayout(fix_body)
+        fl.setContentsMargins(0, 0, 0, 0)
+        self.fix_label = QLabel("전회 진단 없음")
+        self.fix_label.setObjectName("muted")
+        fl.addWidget(self.fix_label)
+        fl.addWidget(self.fix_chart, 1)
+        fix_panel = _panel("조치 현황", fix_body)
+        fix_panel.setMaximumHeight(190)
+        grid.addWidget(fix_panel, 1, 0, 1, 3)
         root.addLayout(grid, 1)
 
     def update_counts(self, summary: dict[Status, int]) -> None:
@@ -127,6 +140,15 @@ class DashboardPage(QWidget):
             c.set_value(summary.get(s, 0))
         total = sum(summary.values())
         self.subtitle.setText(f"항목 {total}건" if total else "아직 진단 결과가 없습니다")
+
+    def update_fix(self, summary: dict[str, int] | None, base_id: str | None) -> None:
+        if not summary or base_id is None:
+            self.fix_chart.set_rows([])
+            self.fix_label.setText("전회 진단 없음 — 같은 호스트를 다시 진단하면 조치 현황이 나온다")
+            return
+        rate = _diff.fix_rate(summary)
+        self.fix_label.setText(f"기준 {base_id} · 조치율 " + (f"{rate:.0%}" if rate is not None else "-(전회 취약 없음)"))
+        self.fix_chart.set_rows([(_diff.LABEL_KO[k], summary.get(k, 0), _diff.COLOR[k]) for k in _diff.ORDER])
 
     def update_severity(self, high: int, mid: int, low: int) -> None:
         self.sev_chart.set_rows([("상", high, "#F85149"), ("중", mid, "#D29922"), ("하", low, "#8B949E")])

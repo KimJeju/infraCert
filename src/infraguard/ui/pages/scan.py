@@ -33,6 +33,7 @@ class ScanPage(QWidget):
     start_requested = Signal(int, int)   # concurrency, timeout
     cancel_requested = Signal()
     retry_requested = Signal()           # 실패·미완료 호스트만 같은 scan 으로 다시
+    dryrun_requested = Signal()          # 실행 계획(어떤 명령이 나가는지) 정적 열거
 
     def __init__(self) -> None:
         super().__init__()
@@ -77,10 +78,15 @@ class ScanPage(QWidget):
         form.addRow("동시 실행", self.concurrency)
         form.addRow("타임아웃(초)", self.timeout)
         right.addLayout(form)
-        self.preflight = QCheckBox("실행 전 환경점검")
+        self.preflight = QCheckBox("연결 사전검증")
+        self.preflight.setToolTip("probe 직후 sqlplus 유무·권한(sudo -n)·/tmp 여유·시간 편차를 확인해 진행 표에 표시한다(진단은 계속)")
         self.preflight.setChecked(True)
         right.addWidget(self.preflight)
         right.addStretch(1)
+        self.dryrun = QPushButton("실행 계획(dry-run)")
+        self.dryrun.setToolTip("원격에 붙지 않고 이 프로파일이 실행할 명령·번들·예상 잔류물을 나열한다")
+        self.dryrun.clicked.connect(self.dryrun_requested)
+        right.addWidget(self.dryrun)
         self.start = QPushButton("진단 시작")
         self.start.setObjectName("primary")
         self.start.clicked.connect(
@@ -185,7 +191,8 @@ class ScanPage(QWidget):
         self.table.setItem(r, 1, QTableWidgetItem("완료" if not host.error else "오류"))
         self._state[host_id] = "error" if host.error else "done"
         self.table.setItem(r, 4, QTableWidgetItem(res))
-        self.table.setItem(r, 5, QTableWidgetItem(host.error or ""))
+        self.table.setItem(r, 5, QTableWidgetItem(host.error or (
+            "⚠ 사전검증: " + "; ".join(host.preflight) if host.preflight else "")))
         if host.cleanup_ok is False:
             self.table.setItem(r, 5, QTableWidgetItem("⚠ 정리 미완료: " + "; ".join(host.cleanup_leftovers)))
 

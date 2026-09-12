@@ -21,10 +21,11 @@ from PySide6.QtWidgets import (
 
 from infraguard.core.models import CheckResult, ScanResult
 from infraguard.core.status import DISPLAY_KO, Status
+from infraguard.result import diff as _diff
 from infraguard.result.engine import _sort_key, provenance_text
 from infraguard.ui.theme import STATUS_BG, STATUS_TEXT
 
-COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "이전", "판정근거"]
+COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "이전", "변화", "판정근거"]
 CHANGED_FG = "#F0883E"   # 전회와 달라진 결과
 _DISPLAY_TO_STATUS = {v: k for k, v in DISPLAY_KO.items()}
 
@@ -39,6 +40,8 @@ class ResultPage(QWidget):
         self._matrix = False
         self._base: dict[tuple[str, str], Status] = {}   # (hostname, rule_id) → 전회 결과
         self._base_id: str | None = None
+        self._base_scan: ScanResult | None = None
+        self._diff: dict[tuple[str, str], tuple[Status | None, str | None]] = {}
         root = QVBoxLayout(self)
 
         bar = QHBoxLayout()
@@ -66,6 +69,13 @@ class ResultPage(QWidget):
         self.changed_only.setEnabled(False)
         self.changed_only.toggled.connect(self._apply)
         bar.addWidget(self.changed_only)
+        self.diff_f = QComboBox()
+        self.diff_f.addItem("변화 전체", "")
+        for k in _diff.ORDER:
+            self.diff_f.addItem(_diff.LABEL_KO[k], k)
+        self.diff_f.setEnabled(False)
+        self.diff_f.currentIndexChanged.connect(self._apply)
+        bar.addWidget(self.diff_f)
         self.base_label = QLabel("")
         self.base_label.setObjectName("muted")
         bar.addWidget(self.base_label)
@@ -84,7 +94,7 @@ class ResultPage(QWidget):
         self.table = QTableWidget(0, len(COLS))
         self.table.setHorizontalHeaderLabels(COLS)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
-        self.table.horizontalHeader().setSectionResizeMode(6, QHeaderView.ResizeMode.Stretch)
+        self.table.horizontalHeader().setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)
         self.table.verticalHeader().setVisible(False)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.itemSelectionChanged.connect(self._show_detail)
@@ -100,18 +110,25 @@ class ResultPage(QWidget):
         """전회 결과. load() 전에 부른다. 없으면 '이전' 컬럼은 비고 '변경만' 은 꺼진다."""
         self._base = {(h.hostname, r.rule_id): r.status for h in (prev.hosts if prev else []) for r in h.results}
         self._base_id = prev.scan_id if prev else None
+        self._base_scan = prev
         self.changed_only.setEnabled(bool(self._base))
+        self.diff_f.setEnabled(bool(self._base))
         if not self._base:
             self.changed_only.setChecked(False)
+            self.diff_f.setCurrentIndex(0)
         self.base_label.setText(f"기준 {self._base_id}" if self._base_id else "")
 
     def changed(self, hn: str, r: CheckResult) -> bool:
         prev = self._base.get((hn, r.rule_id))
         return prev is not None and prev is not r.status
 
+    def diff_summary(self) -> dict[str, int]:
+        return _diff.summary(self._diff)
+
     def load(self, scan: ScanResult | None) -> None:
         self._scan = scan
         self._flat = []
+        self._diff = _diff.diff(scan, self._base_scan) if scan else {}
         if scan:
             for h in scan.hosts:
                 for r in h.results:
@@ -151,6 +168,9 @@ class ResultPage(QWidget):
                 continue
             if self.changed_only.isChecked() and not self.changed(hn, r):
                 continue
+            df = self.diff_f.currentData()
+            if df and self._diff.get((hn, r.rule_id), (None, None))[1] != df:
+                continue
             out.append((hn, r))
         return out
 
@@ -170,8 +190,9 @@ class ResultPage(QWidget):
             ev = (r.evidence or "").strip().splitlines()
             prev = self._base.get((hn, r.rule_id))
             prev_txt = ("" if prev is None else DISPLAY_KO[prev]) if self._base else ""
+            cls = self._diff.get((hn, r.rule_id), (None, None))[1]
             vals = [hn, r.rule_id, r.name, r.severity.value if r.severity else "",
-                    DISPLAY_KO[r.status], prev_txt, ev[0] if ev else r.reason]
+                    DISPLAY_KO[r.status], prev_txt, _diff.LABEL_KO[cls] if cls else "", ev[0] if ev else r.reason]
             for c, v in enumerate(vals):
                 it = QTableWidgetItem(v)
                 if c == 4:
@@ -183,6 +204,9 @@ class ResultPage(QWidget):
                     if self.changed(hn, r):
                         it.setForeground(QColor(CHANGED_FG))
                         it.setText(f"{prev_txt} →")
+                if c == 6 and cls:
+                    it.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                    it.setForeground(QColor(_diff.COLOR[cls]))
                 it.setData(Qt.ItemDataRole.UserRole, (hn, r.rule_id))
                 self.table.setItem(i, c, it)
 
@@ -233,5 +257,6 @@ class ResultPage(QWidget):
                     + (f"\n전회({self._base_id}): {DISPLAY_KO[self._base[(hn, rid)]]}"
                        + (" → 변경됨" if self.changed(hn, r) else " (동일)")
                        if (hn, rid) in self._base else "")
+                    + (f"\n변화: {_diff.LABEL_KO[c2]}" if (c2 := self._diff.get((hn, rid), (None, None))[1]) else "")
                 )
                 return

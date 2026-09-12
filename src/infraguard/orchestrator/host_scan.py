@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from infraguard.core.models import CheckResult, ExecutionInfo, HostResult, RemoteEnvironment
+from infraguard.orchestrator import preflight as _preflight
 from infraguard.orchestrator.native_runner import run_native
 from infraguard.orchestrator.remote_runner import RemoteRunner, RunSpec
 from infraguard.parsing.dispatch import parse_artifact
@@ -33,6 +34,7 @@ Progress = Callable[[str], None]
 # §5.1 단계 문자열
 STAGE_CONNECT = "연결 중"
 STAGE_PROBE = "환경 점검"
+STAGE_PREFLIGHT = "사전검증"
 STAGE_RUN = "실행 중"
 STAGE_COLLECT = "산출물 회수"
 STAGE_PARSE = "파싱"
@@ -50,6 +52,8 @@ class HostJob:
     manual_rules: set[str] = field(default_factory=set)
     exclude: set[str] = field(default_factory=set)
     params: dict[str, str] = field(default_factory=dict)   # 호스트 파라미터 → RemoteEnvironment.params
+    preflight: bool = True                                  # 연결 사전검증(sqlplus·권한·/tmp·시간 편차)
+    missing_params: list[str] = field(default_factory=list) # 번들이 선언했는데 호스트에 없는 파라미터
 
 
 def _noop(_stage: str) -> None: ...
@@ -175,6 +179,10 @@ def scan_host(
             host.environment = RemoteEnvironment(incomplete=True, notes=[f"probe 실패: {e}"])
         if job.params:
             host.environment = host.environment.model_copy(update={"params": dict(job.params)})
+        if job.preflight and not should_cancel():
+            progress(STAGE_PREFLIGHT)
+            host.preflight = _preflight.run(conn, host.environment, native=job.native,
+                                            has_bundles=bool(job.bundles), missing_params=job.missing_params)
 
         for spec, provides in job.bundles:
             if should_cancel():
