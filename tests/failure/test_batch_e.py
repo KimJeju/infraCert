@@ -129,9 +129,12 @@ def test_gate_flags_stale_rules() -> None:
 def test_pack_exposes_rule_shas_and_purpose() -> None:
     pack = loader.load(PACK)
     assert pack.rule_shas["U-16"] and len(pack.rule_shas["U-16"]) == 64
-    pm = pack.purpose_map()
-    assert "U-01" in pm and pm["U-01"]
-    assert format_guide(pack.guide["U-01"]).startswith("점검 목적:")
+    if pack.guide:                                   # guide/ 는 파생물이라 저장소에 없다(CI) — 있을 때만
+        pm = pack.purpose_map()
+        assert "U-01" in pm and pm["U-01"]
+    g = {"purpose": "왜", "threat": "무엇", "judgment": {"good": "g", "vuln": "v"}}
+    assert format_guide(g).startswith("점검 목적: 왜\n위협: 무엇")
+    assert loader.RulePack.purpose_map(type("P", (), {"guide": {"X-1": g}})()) == {"X-1": "왜"}
 
 
 def test_rulepack_page_select_rule(qtbot) -> None:  # noqa: ANN001
