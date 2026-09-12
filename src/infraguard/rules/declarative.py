@@ -223,6 +223,12 @@ def evaluate(spec: RuleSpec, conn: Connection, env: RemoteEnvironment) -> Native
             parts.append(spec.note)
         return "\n".join(parts) or "(수집값 없음)"
 
+    def out(verdict: str, matched: str) -> NativeOutcome:
+        # 판정 추적: 추출 변수(그대로)와 어느 절에 걸렸는지. native_runner 가 실행 명령 기록과 합친다.
+        extracted = {k: (v if v is None or isinstance(v, int | float) else str(v)[:200])
+                     for k, v in vars_.items() if not k.endswith("_ok")}
+        return NativeOutcome(verdict, evidence(), detail={"extracted": extracted, "matched": matched})
+
     for e in spec.extract:
         src = raw.get(e.from_, "")
         if e.lines:
@@ -232,21 +238,23 @@ def evaluate(spec: RuleSpec, conn: Connection, env: RemoteEnvironment) -> Native
             if m:
                 vars_.update({k: v for k, v in m.groupdict().items() if v is not None})
             elif e.missing:
-                return NativeOutcome(e.missing, evidence())
+                return out(e.missing, f"extract {e.from_} 미매치 → missing: {e.missing}")
             else:
                 for name in re.compile(e.regex).groupindex:
                     vars_.setdefault(name, None)
 
-    for step in spec.verdict:
+    for n, step in enumerate(spec.verdict, start=1):
         if step.when is None:
             if step.else_:
-                return NativeOutcome(step.else_, evidence())
+                return out(step.else_, f"#{n} else → {step.else_}")
             continue
         if all(OPERATORS[op](vars_.get(var), val)
                for var, conds in step.when.items() for op, val in conds.items()):
-            return NativeOutcome(step.then or "MANUAL", evidence())
+            return out(step.then or "MANUAL", f"#{n} when {step.when} → {step.then or 'MANUAL'}")
     # 어느 단계에도 안 걸리면 추측하지 않는다
-    return NativeOutcome("MANUAL", evidence() + "\n※ 판정 규칙 미해당 — 확인 필요")
+    o = out("MANUAL", "판정 규칙 미해당")
+    o.evidence += "\n※ 판정 규칙 미해당 — 확인 필요"
+    return o
 
 
 def load_file(path: Path) -> RuleSpec:

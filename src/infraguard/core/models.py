@@ -71,6 +71,7 @@ class RawFinding(BaseModel):
     evidence_raw: str | None = None
     extra: dict[str, str] = Field(default_factory=dict)
     source: SourceInfo = Field(default_factory=SourceInfo)
+    provenance: dict[str, Any] | None = None   # 네이티브 룰: 실행 명령·추출값·매치 절 (CheckResult 로 그대로 전달)
 
 
 class CheckResult(BaseModel):
@@ -93,6 +94,10 @@ class CheckResult(BaseModel):
     source: SourceInfo = Field(default_factory=SourceInfo)
     execution: ExecutionInfo = Field(default_factory=ExecutionInfo)
     warnings: list[str] = Field(default_factory=list)
+    # 판정 추적(§provenance): "왜 취약인가" 에 판정→명령→출력 해시→추출값→매치 절 로 답한다.
+    # 키: transport, impl(yaml|python), commands[{argv, exit_code, stdout_sha256, duration_ms, collected_at}],
+    #     extracted{var: value}, matched(매치된 verdict 절 설명). 파서(번들) 결과는 None.
+    provenance: dict[str, Any] | None = None
 
 
 class HostResult(BaseModel):
@@ -117,6 +122,7 @@ class ScanResult(BaseModel):
     scan_id: str
     engine_version: str
     rule_pack_version: str | None = None
+    rule_pack_sha256: str | None = None   # manifest.yaml 해시 = 룰팩 정체(스크립트·룰 SHA 가 manifest 안에 있다). 재현성.
     profile: str | None = None
     started_at: datetime
     finished_at: datetime | None = None

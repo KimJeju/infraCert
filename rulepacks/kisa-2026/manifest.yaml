@@ -2415,3 +2415,6 @@ profiles:
   - N-37
   - N-38
   description: 자산 플랫폼 network. 장비 셸 SSH, set 문법 정규식. N-xx 룰의 variants 블록
+guide_version: '2026'
+author: InfraGuard
+created_at: '2026-09-12'

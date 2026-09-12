@@ -21,7 +21,7 @@ from PySide6.QtWidgets import (
 
 from infraguard.core.models import CheckResult, ScanResult
 from infraguard.core.status import DISPLAY_KO, Status
-from infraguard.result.engine import _sort_key
+from infraguard.result.engine import _sort_key, provenance_text
 from infraguard.ui.theme import STATUS_BG, STATUS_TEXT
 
 COLS = ["호스트", "항목코드", "점검항목", "중요도", "결과", "이전", "판정근거"]
@@ -229,6 +229,7 @@ class ResultPage(QWidget):
                     f"원본추적: {r.source.artifact or '-'} "
                     f"line {r.source.line or '-'} / profile {r.source.profile or '-'}"
                     + (f"\n경고: {'; '.join(r.warnings)}" if r.warnings else "")
+                    + (f"\n판정추적:\n{provenance_text(r)}" if r.provenance else "")
                     + (f"\n전회({self._base_id}): {DISPLAY_KO[self._base[(hn, rid)]]}"
                        + (" → 변경됨" if self.changed(hn, r) else " (동일)")
                        if (hn, rid) in self._base else "")

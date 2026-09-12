@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from typing import Any
 
 from infraguard.core.models import RemoteEnvironment
 from infraguard.transport.base import Connection
@@ -21,6 +22,7 @@ class NativeOutcome:
     verdict_raw: str            # GOOD | VULN | MANUAL | NA  (verdict_map 이 매핑)
     evidence: str = ""
     warnings: list[str] = field(default_factory=list)
+    detail: dict[str, Any] = field(default_factory=dict)   # 선언형: extracted / matched — provenance 에 합쳐진다
 
 
 @dataclass(frozen=True, slots=True)

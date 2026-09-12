@@ -58,6 +58,7 @@ def to_check_result(
         source=f.source,
         execution=execution or ExecutionInfo(),
         warnings=warnings,
+        provenance=f.provenance,
     )
 
 
@@ -133,6 +134,24 @@ def _sort_key(rule_id: str) -> tuple[str, int, str]:
         num = "".join(c for c in rest if c.isdigit())
         return (prefix, int(num) if num else 0, rest)
     return (rule_id, 0, "")
+
+
+def provenance_text(r: CheckResult) -> str:
+    """판정 추적을 사람이 읽는 한 덩어리로. 판정 → 명령(종료코드·출력해시) → 추출값 → 매치 절."""
+    p = r.provenance
+    if not p:
+        return ""
+    lines = [f"transport={p.get('transport', '-')} impl={p.get('impl', '-')}"]
+    for c in p.get("commands") or []:
+        argv = c.get("argv") or []
+        cmd = argv[-1] if argv else ""
+        tail = f" rc={c.get('exit_code')} sha={str(c.get('stdout_sha256', ''))[:12]} {c.get('duration_ms', 0)}ms"
+        lines.append(f"$ {cmd}{tail}" + (f" ERROR={c['error']}" if c.get("error") else ""))
+    if p.get("extracted"):
+        lines.append("추출: " + ", ".join(f"{k}={v!r}" for k, v in p["extracted"].items()))
+    if p.get("matched"):
+        lines.append("판정식: " + str(p["matched"]))
+    return "\n".join(lines)
 
 
 def summarize(results: list[CheckResult]) -> dict[Status, int]:

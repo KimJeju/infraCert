@@ -606,8 +606,8 @@ class MainWindow(QMainWindow):
         self._scan_id = new_scan_id()
         self.ctx.results.start_scan(ScanResult(
             scan_id=self._scan_id, engine_version=self._engine_version(),
-            rule_pack_version=f"{self.pack.name} {self.pack.version}", profile=profile.id,
-            started_at=datetime.now(),
+            rule_pack_version=f"{self.pack.name} {self.pack.version}", rule_pack_sha256=self.pack.sha256,
+            profile=profile.id, started_at=datetime.now(),
         ))
         self.scan.begin([h for h, _, _ in jobs])
         self._stages.clear()

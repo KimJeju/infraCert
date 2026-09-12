@@ -33,6 +33,7 @@ class ResultsStore:
         meta = {
             "engine_version": scan.engine_version,
             "rule_pack_version": scan.rule_pack_version,
+            "rule_pack_sha256": scan.rule_pack_sha256,
             "profile": scan.profile,
             "started_at": scan.started_at.isoformat(),
             "finished_at": scan.finished_at.isoformat() if scan.finished_at else None,
@@ -99,6 +100,7 @@ class ResultsStore:
             scan_id=scan_id,
             engine_version=meta.get("engine_version", ""),
             rule_pack_version=meta.get("rule_pack_version"),
+            rule_pack_sha256=meta.get("rule_pack_sha256"),
             profile=meta.get("profile"),
             started_at=datetime.fromisoformat(meta["started_at"]),
             finished_at=datetime.fromisoformat(meta["finished_at"]) if meta.get("finished_at") else None,

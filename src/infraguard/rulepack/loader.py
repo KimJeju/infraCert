@@ -85,6 +85,8 @@ class RulePack:
     integrity_ok: bool
     problems: list[str]                # 로드는 됐지만 실행을 막아야 하는 사유
     guide: dict[str, dict] = field(default_factory=dict)   # rule id → 가이드 항목(판단기준·조치·사례). 선택 사항
+    sha256: str = ""                   # manifest.yaml 해시 = 룰팩 정체. 결과에 기록해 "당시 기준" 을 재현한다
+    meta: dict[str, str] = field(default_factory=dict)     # guide_version / author / created_at (manifest 상단)
 
     @property
     def runnable(self) -> bool:
@@ -198,8 +200,15 @@ def load(pack_dir: Path) -> RulePack:
                 problems.append(f"rule {f.name}: SHA-256 불일치")
                 integrity_ok = False
         from infraguard.rules.declarative import register_dir
+        from infraguard.rules.policy import check as policy_check
         specs, rp = register_dir(rules_dir)
         problems.extend(rp)
+        # 명령 안전 정책: 변경 명령이 든 룰이 하나라도 있으면 룰팩 실행을 막는다(실행 엔진이 한 번 더 본다)
+        for spec in specs.values():
+            for blk in (spec, *spec.variants):
+                for c in blk.collect:
+                    for why in policy_check(blk.shell, c.cmd):
+                        problems.append(f"rule {spec.id} [{blk.shell}]: {why}")
         declarative_kind = {rid: "yaml" for rid in specs}
         for rel in declared:
             if not (pack_dir / rel).exists():
@@ -252,6 +261,8 @@ def load(pack_dir: Path) -> RulePack:
         name=str(raw.get("name") or pack_dir.name), version=str(raw.get("version") or ""),
         root=pack_dir, bundles=bundles, native=native, rules=rules, profiles=profiles,
         integrity_ok=integrity_ok, problems=problems, guide=_load_guide(pack_dir, problems),
+        sha256=_sha256(mf),
+        meta={k: str(raw[k]) for k in ("guide_version", "author", "created_at") if raw.get(k)},
     )
 
 

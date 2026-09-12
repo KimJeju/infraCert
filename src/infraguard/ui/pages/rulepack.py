@@ -152,7 +152,8 @@ class RulePackPage(QWidget):
         self.title.setText(f"룰팩: {pack.name} ({pack.version})"
                            + (f" · 가이드 {len(pack.guide)}항목" if pack.guide else ""))
         if pack.runnable:
-            self.integrity.setText("무결성 ✓ 검증됨")
+            self.integrity.setText(f"무결성 ✓ 검증됨 · sha256 {pack.sha256[:12]}"
+                                   + (f" · 가이드 {pack.meta['guide_version']}" if pack.meta.get("guide_version") else ""))
             self.integrity.setStyleSheet("color:#3FB950")
         else:
             self.integrity.setText(f"⚠ 문제 {len(pack.problems)}건 — 실행 차단")

@@ -20,6 +20,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 from infraguard.core.models import ScanResult
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
+from infraguard.result.engine import provenance_text
 
 FONT = "Arial"
 HDR_FILL = PatternFill("solid", fgColor="D9D9D9")
@@ -34,7 +35,7 @@ THIN = Side(style="thin", color="BFBFBF")
 BORDER = Border(left=THIN, right=THIN, top=THIN, bottom=THIN)
 
 RESULT_HEADERS = ["호스트", "항목코드", "점검항목", "중요도", "진단결과",
-                  "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법", "판단기준"]
+                  "판정근거", "점검내용", "판정출처", "분석자메모", "조치방법", "판단기준", "판정추적"]
 
 
 def _style_header(ws: Worksheet, ncols: int, row: int = 1) -> None:
@@ -97,9 +98,10 @@ def _write_results(ws: Worksheet, scan: ScanResult, remediation: dict[str, str],
                 r.analyst_note or "",
                 remediation.get(r.rule_id, "") if r.status is Status.FAIL or r.status is Status.UNKNOWN else "",
                 criteria.get(r.rule_id, ""),
+                provenance_text(r),
             ])
     _style_header(ws, len(RESULT_HEADERS))
-    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40])
+    _widths(ws, [16, 10, 34, 8, 12, 34, 56, 10, 24, 40, 40, 48])
     _body_font(ws)
     # 진단결과 컬럼 색상
     for row in ws.iter_rows(min_row=2, min_col=5, max_col=5):
@@ -121,6 +123,7 @@ def _write_summary(ws: Worksheet, scan: ScanResult, result_sheet: str) -> None:
         ("Scan ID", scan.scan_id),
         ("엔진 버전", scan.engine_version),
         ("룰팩 버전", scan.rule_pack_version or "-"),
+        ("룰팩 SHA-256", scan.rule_pack_sha256 or "-"),
         ("프로파일", scan.profile or "-"),
         ("시작", scan.started_at.strftime("%Y-%m-%d %H:%M:%S")),
         ("종료", scan.finished_at.strftime("%Y-%m-%d %H:%M:%S") if scan.finished_at else "-"),
