@@ -9,9 +9,9 @@ from __future__ import annotations
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
-    QHeaderView,
     QComboBox,
     QHBoxLayout,
+    QHeaderView,
     QInputDialog,
     QLabel,
     QMessageBox,
@@ -24,8 +24,8 @@ from PySide6.QtWidgets import (
 )
 
 from infraguard.rulepack.guide import format_guide
-from infraguard.ui.pages.rule_tester import RuleTesterPanel
 from infraguard.rulepack.loader import Profile, RulePack, save_profile
+from infraguard.ui.pages.rule_tester import RuleTesterPanel
 
 ID_ROLE = int(Qt.ItemDataRole.UserRole) + 1
 KIND_ROLE = int(Qt.ItemDataRole.UserRole) + 2   # "bundle" | "native" | "group"

@@ -366,7 +366,7 @@ class SSHConnection(Connection):
 
 
 # ---------------------------------------------------------------------- helpers
-_DANGEROUS = {"/", "/etc", "/usr", "/var", "/bin", "/sbin", "/lib", "/home", "/root", "/opt", "/tmp"}
+_DANGEROUS = {"/", "/etc", "/usr", "/var", "/bin", "/sbin", "/lib", "/home", "/root", "/opt", "/tmp"}  # noqa: S108 - 원격 경로(로컬 임시파일 아님)
 
 
 def _safe_remote_path(p: str) -> bool:

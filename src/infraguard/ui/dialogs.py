@@ -8,9 +8,9 @@ from __future__ import annotations
 
 from PySide6.QtCore import QDate, Qt
 from PySide6.QtWidgets import (
-    QDateEdit,
     QCheckBox,
     QComboBox,
+    QDateEdit,
     QDialog,
     QDialogButtonBox,
     QFormLayout,
@@ -19,6 +19,7 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPlainTextEdit,
     QPushButton,
+    QScrollArea,
     QSpinBox,
     QVBoxLayout,
     QWidget,
@@ -215,9 +216,16 @@ class AssetEditDialog(QDialog):
         bb = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         bb.accepted.connect(self._validate_accept)
         bb.rejected.connect(self.reject)
+        body = QWidget()
+        body.setLayout(form)
+        scroll = QScrollArea()                       # 폼이 길다(메타·파라미터·bastion) — 작은 화면에서 잘리지 않게
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setWidget(body)
         lay = QVBoxLayout(self)
-        lay.addLayout(form)
+        lay.addWidget(scroll, 1)
         lay.addWidget(bb)
+        self.resize(560, 640)
 
     def _parse_params(self) -> dict[str, str]:
         out: dict[str, str] = {}

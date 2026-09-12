@@ -8,10 +8,10 @@ from datetime import datetime
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
-    QHeaderView,
     QCheckBox,
     QFileDialog,
     QHBoxLayout,
+    QHeaderView,
     QInputDialog,
     QLabel,
     QLineEdit,
@@ -33,10 +33,10 @@ from infraguard.core.models import HostResult, ScanResult
 from infraguard.core.status import Severity, Status
 from infraguard.credentials.session import CredentialSession
 from infraguard.orchestrator.results_store import ResultsStore
-from infraguard.result import diff as _diff
-from infraguard.result import risk as _risk
 from infraguard.reporting import html as html_report
 from infraguard.reporting import xlsx as xlsx_report
+from infraguard.result import diff as _diff
+from infraguard.result import risk as _risk
 from infraguard.rulepack import loader as rp_loader
 from infraguard.rulepack.loader import RulePack
 from infraguard.ui.dialogs import AssetEditDialog, CredPromptDialog, HostKeyDialog
@@ -52,14 +52,13 @@ from infraguard.ui.pages.sftp import SftpPage
 from infraguard.ui.terminal import TerminalPage
 from infraguard.ui.titlebar import CURSORS, TitleBar, edges_at
 from infraguard.ui.workers import ScanController, build_job
+from infraguard.workspace.manager import Workspace
 
 TERMINAL_NOTICE = (
     "자동 진단(Bundle 실행)은 Read-only 이며 대상 시스템을 변경하지 않습니다.\n\n"
     "터미널 탭에서 사용자가 직접 입력하는 명령은 이 보장의 대상이 아니며 사용자 책임입니다.\n"
     "입력·출력은 workspace/logs/terminal/ 에 기록되며(비밀번호는 마스킹) 종료 시 삭제됩니다."
 )
-from infraguard.workspace.manager import Workspace
-
 log = logging.getLogger(__name__)
 
 
@@ -207,6 +206,7 @@ class MainWindow(QMainWindow):
         if self.pack is None:
             return
         from PySide6.QtWidgets import QInputDialog
+
         from infraguard.rulepack import diff as rp_diff
         others = [p.name for p in rp_loader.list_packs() if p.name != self.pack.name]
         choices = [*others, "zip 파일 선택…"]
@@ -766,6 +766,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(self, "실행 계획", "프로파일을 선택하세요.")
             return
         from collections import Counter
+
         from infraguard.orchestrator import dryrun
         counts = Counter(h.platform for h in hosts) or Counter({"linux": 0})
         text = dryrun.render([dryrun.plan(self.pack, profile, p) for p in counts], hosts_by_platform=dict(counts))

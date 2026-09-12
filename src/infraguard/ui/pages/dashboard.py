@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QListWidgetItem,
     QProgressBar,
     QPushButton,
+    QScrollArea,
     QVBoxLayout,
     QWidget,
 )
@@ -74,9 +75,18 @@ class DashboardPage(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
-        root = QVBoxLayout(self)
+        # 패널 5개의 최소 높이(~750px)가 노트북 창을 넘는다 → 스크롤 영역 안에 쌓는다(런타임 감사 09-12)
+        outer = QVBoxLayout(self)
+        outer.setContentsMargins(0, 0, 0, 0)
+        body = QWidget()
+        root = QVBoxLayout(body)
         root.setContentsMargins(20, 16, 20, 16)
         root.setSpacing(14)
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QScrollArea.Shape.NoFrame)
+        scroll.setWidget(body)
+        outer.addWidget(scroll, 1)
 
         top = QHBoxLayout()
         title = QLabel("진단 현황")

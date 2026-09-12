@@ -131,7 +131,7 @@ class RemoteRunner:
     def _make_workdir(self) -> str | None:
         # mktemp -d 우선. 없거나 실패하면 PID+시각 기반 fallback (AIX/HP-UX 대응)
         script = (
-            'd=$(mktemp -d /tmp/infraguard-XXXXXX 2>/dev/null) || '
+            'd=$(mktemp -d /tmp/infraguard-XXXXXX 2>/dev/null) || '  # noqa: S108 - 원격 경로(로컬 임시파일 아님)
             'd=/tmp/infraguard-$$-$(date +%Y%m%d%H%M%S); '
             'mkdir -p "$d" 2>/dev/null; chmod 700 "$d" 2>/dev/null; printf %s "$d"'
         )

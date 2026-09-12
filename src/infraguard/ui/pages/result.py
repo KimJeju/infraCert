@@ -19,9 +19,9 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from infraguard.assets.exceptions import RiskException
 from infraguard.core.models import CheckResult, ScanResult
 from infraguard.core.status import DISPLAY_KO, Status
-from infraguard.assets.exceptions import RiskException
 from infraguard.result import diff as _diff
 from infraguard.result import risk as _risk
 from infraguard.result.engine import _sort_key, provenance_text

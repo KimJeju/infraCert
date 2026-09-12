@@ -8,9 +8,9 @@ from __future__ import annotations
 import html
 from pathlib import Path
 
+from infraguard.assets.exceptions import RiskException
 from infraguard.core.models import ScanResult
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
-from infraguard.assets.exceptions import RiskException
 from infraguard.result import diff as _diff
 from infraguard.result import risk as _risk
 from infraguard.result.engine import provenance_text

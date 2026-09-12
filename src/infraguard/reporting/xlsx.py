@@ -18,9 +18,9 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.worksheet import Worksheet
 
+from infraguard.assets.exceptions import RiskException
 from infraguard.core.models import ScanResult
 from infraguard.core.status import DISPLAY_KO, ORDER, Status
-from infraguard.assets.exceptions import RiskException
 from infraguard.result import diff as _diff
 from infraguard.result import risk as _risk
 from infraguard.result.engine import provenance_text
@@ -172,7 +172,7 @@ def _write_summary(ws: Worksheet, scan: ScanResult, result_sheet: str, *, baseli
     for i, h in enumerate(scan.hosts, start=1):
         r = start + i
         ws.cell(row=r, column=1, value=h.hostname)
-        for j, st in enumerate(ORDER, start=2):
+        for j in range(2, len(ORDER) + 2):
             col = get_column_letter(j)
             ws.cell(
                 row=r, column=j,

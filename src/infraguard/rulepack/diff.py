@@ -37,7 +37,6 @@ def load_manifest(src: Path) -> dict:
     if src.is_dir():
         return yaml.safe_load((src / "manifest.yaml").read_text(encoding="utf-8")) or {}
     with zipfile.ZipFile(src) as zf:
-        names = [n for n in zf.namelist() if n.endswith("manifest.yaml") and "/" not in n.strip("/").rstrip("manifest.yaml").rstrip("/")[:0]]
         # zip 루트 또는 <pack>/manifest.yaml 한 단계까지
         cands = [n for n in zf.namelist() if n == "manifest.yaml" or (n.count("/") == 1 and n.endswith("/manifest.yaml"))]
         if not cands:
