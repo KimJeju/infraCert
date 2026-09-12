@@ -1,0 +1,233 @@
+# Windows W-xx fixture — 플랫폼 windows(powershell). _rc 는 명령 실패(x_ok=False) 흉내.
+W-01:
+  MANUAL: {adm: "", _rc: {adm: 1}}
+  VULN: {adm: "Administrator"}
+  GOOD: {adm: "SrvAdmin"}
+  MANUAL_2: {adm: ""}
+W-03:
+  MANUAL: {users: "Name          Enabled LastLogon\nAdministrator True"}
+W-05:
+  MANUAL: {acc: "Minimum password length:                              8"}
+W-06:
+  MANUAL: {adm: "", _rc: {adm: 1}}
+  GOOD: {adm: "MAIN\\Administrator"}
+  MANUAL_2: {adm: "MAIN\\Administrator\nMAIN\\igwinrm"}
+W-07:
+  VULN: {v: "1"}
+  GOOD: {v: "0"}
+  GOOD_2: {v: ""}
+W-08:
+  GOOD: {acc: "Lockout duration (minutes):                           60\nLockout observation window (minutes):                 60"}
+  MANUAL: {acc: "Lockout duration (minutes):                           60\nLockout observation window (minutes):                 30"}
+  VULN: {acc: "Lockout duration (minutes):                           30\nLockout observation window (minutes):                 30"}
+  MANUAL_2: {acc: "Minimum password length:                              8"}
+W-09:
+  GOOD: {acc: "Minimum password length:                              8\nMaximum password age (days):                          90\nMinimum password age (days):                          1\nLength of password history maintained:                5"}
+  VULN: {acc: "Minimum password length:                              6\nMaximum password age (days):                          Unlimited\nMinimum password age (days):                          0\nLength of password history maintained:                None"}
+  MANUAL: {acc: ""}
+W-10:
+  GOOD: {v: "1"}
+  VULN: {v: "0"}
+W-11:
+  MANUAL: {adm: "MAIN\\Administrator", usr: "MAIN\\igtest"}
+W-12:
+  VULN: {v: "1"}
+  MANUAL: {v: "0"}
+W-13:
+  GOOD: {v: "1"}
+  VULN: {v: "0"}
+  GOOD_2: {v: ""}
+W-14:
+  NA: {deny: "1"}
+  MANUAL: {deny: "0", rdu: "MAIN\\bob"}
+W-15:
+  GOOD: {v: "2"}
+  VULN: {v: "0"}
+W-16:
+  MANUAL: {sh: "", _rc: {sh: 1}}
+  GOOD: {sh: ""}
+  VULN: {sh: "Data", acl: "Name AccountName AccessRight\nData Everyone    Full"}
+  GOOD_2: {sh: "Data", acl: "Name AccountName AccessRight\nData MAIN\\Users  Read"}
+W-17:
+  MANUAL: {sh: "", _rc: {sh: 1}}
+  GOOD: {sh: "", reg: "AutoShareServer=0\nAutoShareWks=0"}
+  VULN: {sh: "C$\nADMIN$", reg: "AutoShareServer=\nAutoShareWks="}
+W-18:
+  GOOD: {svc: ""}
+  MANUAL: {svc: "Spooler"}
+W-19:
+  GOOD: {svc: ""}
+  MANUAL: {svc: "W3SVC"}
+W-20:
+  MANUAL: {nb: "", _rc: {nb: 1}}
+  MANUAL_2: {nb: ""}
+  VULN: {nb: "0\n1"}
+  GOOD: {nb: "2\n2"}
+W-21:
+  GOOD: {svc: ""}
+  MANUAL: {svc: "ftpsvc"}
+W-22:
+  NA: {svc: ""}
+  MANUAL: {svc: "ftpsvc"}
+W-23:
+  GOOD: {svc: "", v: "1"}
+  MANUAL: {svc: "", v: "0"}
+  MANUAL_2: {svc: "ftpsvc", v: "1"}
+W-24:
+  NA: {svc: ""}
+  MANUAL: {svc: "ftpsvc"}
+W-25:
+  GOOD: {svc: ""}
+  VULN: {svc: "DNS", zones: "ZoneName   SecureSecondaries\ncorp.local TransferAnyServer"}
+  GOOD_2: {svc: "DNS", zones: "ZoneName   SecureSecondaries\ncorp.local NoTransfer"}
+  MANUAL: {svc: "DNS", zones: ""}
+W-26:
+  GOOD: {iis: ""}
+  GOOD_2: {iis: "W3SVC", major: "10"}
+  MANUAL: {iis: "W3SVC", major: "5"}
+W-27:
+  MANUAL: {os: "Microsoft Windows 11 Pro 10.0.26200 build 26200", hf: "KB5001 2026-01-01"}
+W-28:
+  GOOD: {deny: "1"}
+  GOOD_2: {deny: "0", lvl: "3"}
+  VULN: {deny: "0", lvl: "1"}
+  MANUAL: {deny: "0", lvl: ""}
+W-29:
+  GOOD: {svc: ""}
+  MANUAL: {svc: "SNMP"}
+W-30:
+  GOOD: {svc: ""}
+  VULN: {svc: "SNMP", comm: "public"}
+  GOOD_2: {svc: "SNMP", comm: "s3cr3tc0mm"}
+  MANUAL: {svc: "SNMP", comm: ""}
+W-31:
+  GOOD: {svc: ""}
+  GOOD_2: {svc: "SNMP", mgr: "1\n2"}
+  VULN: {svc: "SNMP", mgr: ""}
+W-32:
+  GOOD: {svc: ""}
+  VULN: {svc: "DNS", dyn: "ZoneName   DynamicUpdate\ncorp.local NonsecureAndSecure"}
+  GOOD_2: {svc: "DNS", dyn: "ZoneName   DynamicUpdate\ncorp.local Secure"}
+  MANUAL: {svc: "DNS", dyn: ""}
+W-33:
+  NA: {svc: ""}
+  MANUAL: {svc: "W3SVC"}
+W-34:
+  GOOD: {svc: ""}
+  GOOD_2: {svc: "TlntSvr", auth: "2"}
+  VULN: {svc: "TlntSvr", auth: "0"}
+W-35:
+  GOOD: {dsn: ""}
+  MANUAL: {dsn: "Name  DriverName\nMyDSN SQL Server"}
+W-36:
+  GOOD: {deny: "1"}
+  GOOD_2: {deny: "0", pol: "900000"}
+  GOOD_3: {deny: "0", pol: "", tcp: "600000"}
+  VULN: {deny: "0", pol: "0", tcp: "0"}
+W-37:
+  MANUAL: {tasks: "TaskPath TaskName State\n\\        Backup   Ready"}
+W-38:
+  MANUAL: {hf: "HotFixID  InstalledOn\nKB5001    2026-01-01"}
+W-39:
+  GOOD: {age: "1", av: "Windows Defender"}
+  VULN: {age: "30", av: "Windows Defender"}
+  MANUAL: {age: "", av: ""}
+W-40:
+  MANUAL: {audit: "", _rc: {audit: 1}}
+  VULN: {audit: "System audit policy\nCategory/Subcategory                      Setting\nLogon/Logoff\n  Logon                                   No Auditing"}
+  MANUAL_2: {audit: "System audit policy\nLogon/Logoff\n  Logon                                   Success and Failure"}
+W-41:
+  VULN: {ntp: "Leap Indicator: 0(no warning)\nSource: Local CMOS Clock"}
+  GOOD: {ntp: "Leap Indicator: 0(no warning)\nSource: time.windows.com,0x9"}
+  MANUAL: {ntp: ""}
+W-42:
+  GOOD: {small: "0"}
+  VULN: {small: "2"}
+  MANUAL: {small: ""}
+W-43:
+  MANUAL: {acl: "", _rc: {acl: 1}}
+  VULN: {acl: "C:\\Windows\\System32\\winevt\\Logs Everyone:(OI)(CI)(F)"}
+  GOOD: {acl: "C:\\Windows\\System32\\winevt\\Logs NT AUTHORITY\\SYSTEM:(OI)(CI)(F)"}
+W-44:
+  VULN: {svc: "Running"}
+  GOOD: {svc: "Stopped"}
+  GOOD_2: {svc: ""}
+W-45:
+  GOOD: {mp: "True"}
+  GOOD_2: {mp: "", av: "Norton Security"}
+  VULN: {mp: "False", av: ""}
+  MANUAL: {mp: "", av: ""}
+W-46:
+  MANUAL: {acl: "", _rc: {acl: 1}}
+  GOOD: {acl: "C:\\Windows\\System32\\config\\SAM BUILTIN\\Administrators:(I)(F)\n                                   NT AUTHORITY\\SYSTEM:(I)(F)\n\nSuccessfully processed 1 files; Failed processing 0 files"}
+  VULN: {acl: "C:\\Windows\\System32\\config\\SAM BUILTIN\\Administrators:(I)(F)\n                                   Everyone:(I)(F)\n\nSuccessfully processed 1 files; Failed processing 0 files"}
+W-47:
+  GOOD: {ss: "ScreenSaveActive=1\nScreenSaveTimeOut=600\nScreenSaverIsSecure=1"}
+  VULN: {ss: "ScreenSaveActive=0\nScreenSaveTimeOut=\nScreenSaverIsSecure="}
+W-48:
+  GOOD: {v: "0"}
+  VULN: {v: "1"}
+  MANUAL: {v: ""}
+W-49:
+  MANUAL: {adm: "MAIN\\Administrator"}
+W-50:
+  VULN: {v: "1"}
+  GOOD: {v: "0"}
+  GOOD_2: {v: ""}
+W-51:
+  GOOD: {v: "1"}
+  VULN: {v: "0"}
+  MANUAL: {v: ""}
+W-52:
+  VULN: {v: "1"}
+  GOOD: {v: "0"}
+W-53:
+  VULN: {v: "1"}
+  GOOD: {v: ""}
+W-54:
+  GOOD: {t: "SynAttackProtect=1\nEnableDeadGWDetect=0\nEnableICMPRedirect=0\nKeepAliveTime=300000"}
+  VULN: {t: "SynAttackProtect=\nEnableDeadGWDetect=\nEnableICMPRedirect=\nKeepAliveTime=7200000"}
+W-55:
+  GOOD: {v: "1"}
+  VULN: {v: "0"}
+W-56:
+  GOOD: {t: "EnableForcedLogoff=1\nAutoDisconnect=15"}
+  VULN: {t: "EnableForcedLogoff=0\nAutoDisconnect=15"}
+W-57:
+  GOOD: {t: "LegalNoticeCaption=경고\nLegalNoticeText=인가된 사용자만 접근할 수 있습니다"}
+  VULN: {t: "LegalNoticeCaption=\nLegalNoticeText="}
+W-58:
+  MANUAL: {acl: "", _rc: {acl: 1}}
+  VULN: {acl: "C:\\Users\\bob Everyone:(OI)(CI)(F)"}
+  GOOD: {acl: "C:\\Users\\bob MAIN\\bob:(OI)(CI)(F)"}
+W-59:
+  GOOD: {v: "5"}
+  VULN: {v: "1"}
+  MANUAL: {v: ""}
+W-60:
+  GOOD: {t: "RequireSignOrSeal=1\nSealSecureChannel=1\nSignSecureChannel=1"}
+  VULN: {t: "RequireSignOrSeal=0\nSealSecureChannel=1\nSignSecureChannel=1"}
+W-61:
+  MANUAL: {all: "", _rc: {all: 1}}
+  GOOD: {fs: "", all: "DriveLetter FileSystemType DriveType\nC           NTFS           Fixed"}
+  VULN: {fs: "D", all: "DriveLetter FileSystemType DriveType\nD           FAT32          Fixed"}
+W-62:
+  MANUAL: {st: "Name  Command  Location\nOneDrive C:\\x.exe HKCU"}
+W-63:
+  GOOD: {t: "MaxPosPhaseCorrection=300\nMaxNegPhaseCorrection=300"}
+  VULN: {t: "MaxPosPhaseCorrection=4294967295\nMaxNegPhaseCorrection=4294967295"}
+W-64:
+  MANUAL: {fw: "", _rc: {fw: 1}}
+  MANUAL_2: {fw: ""}
+  VULN: {fw: "Name    Enabled\nDomain  True\nPublic  False"}
+  GOOD: {fw: "Name    Enabled\nDomain  True\nPrivate True\nPublic  True"}
+# --- 나머지 선언 판정 ---
+W-02:
+  GOOD: {g: "False"}
+  VULN: {g: "True"}
+  MANUAL: {g: ""}
+W-04:
+  VULN: {acc: "Lockout threshold:                                    Never"}
+  GOOD: {acc: "Lockout threshold:                                    5"}
+  VULN_2: {acc: "Lockout threshold:                                    20"}
+  MANUAL: {acc: "Minimum password length:                              8"}

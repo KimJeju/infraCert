@@ -1,0 +1,213 @@
+# Unix U-xx fixture — 기본 플랫폼 linux. 파이썬 룰(U-01~06, U-30)은 키가 명령 부분문자열이다.
+U-01:
+  GOOD: {"PermitRootLogin": "/etc/ssh/sshd_config:PermitRootLogin no"}
+  VULN: {"PermitRootLogin": "/etc/ssh/sshd_config:PermitRootLogin yes"}
+  MANUAL: {}
+  GOOD@aix: {"lssec": "root rlogin=false"}
+  VULN@aix: {"lssec": "root rlogin=true"}
+  MANUAL@aix: {}
+U-02:
+  GOOD: {"PASS_MIN_LEN": "minlen = 8"}
+  VULN: {"PASS_MIN_LEN": "PASS_MIN_LEN 6"}
+  MANUAL: {"PASS_MIN_LEN": ""}
+  GOOD@aix: {"lssec": "default minlen=8 minalpha=2 minother=1"}
+  VULN@aix: {"lssec": "default minlen=6 minalpha=1 minother=0"}
+  MANUAL@aix: {}
+U-03:
+  GOOD: {"pam_faillock": "auth required pam_faillock.so preauth deny=5 unlock_time=900"}
+  VULN: {"pam_faillock": "deny = 0"}
+  VULN_2: {"pam_faillock": ""}
+  MANUAL: {"pam_faillock": "auth required pam_tally2.so"}
+  GOOD@aix: {"lssec": "default loginretries=5"}
+  VULN@aix: {"lssec": "default loginretries=0"}
+  MANUAL@aix: {}
+U-04:
+  VULN: {'$2 != "x"': "root:$6$abc$hash"}
+  GOOD: {'$2 != "x"': "", "ls -ld /etc/shadow": "-rw-r----- 1 root shadow 900 Jan 1 12:00 /etc/shadow"}
+  MANUAL: {'$2 != "x"': ""}
+  GOOD@aix: {"ls -ld /etc/security/passwd": "-rw------- 1 root security 900 Jan 1 12:00 /etc/security/passwd"}
+  VULN@aix: {"ls -ld /etc/security/passwd": "-rw-r----- 1 root security 900 Jan 1 12:00 /etc/security/passwd"}
+  MANUAL@aix: {}
+U-06:
+  GOOD: {"pam_wheel": "auth required pam_wheel.so use_uid"}
+  VULN: {"pam_wheel": "-rwsr-xr-x 1 root root 55528 Jan 1 12:00 /usr/bin/su"}
+  GOOD@aix: {"lssec": "root sugroups=system"}
+  VULN@aix: {"lssec": "root sugroups=ALL"}
+  MANUAL@aix: {}
+U-07:
+  GOOD: {unused: ""}
+  MANUAL: {unused: "lp:4:/sbin/nologin\ngames:12:/bin/sh"}
+U-09:
+  GOOD: {orphan: ""}
+  MANUAL: {orphan: "testuser:1005"}
+U-11:
+  GOOD: {bad: ""}
+  VULN: {bad: "daemon:/bin/bash"}
+U-19:
+  GOOD: {ls: "-rw-r--r-- 1 root root 220 Jan 1 12:00 /etc/hosts"}
+  VULN: {ls: "-rw-rw-rw- 1 root root 220 Jan 1 12:00 /etc/hosts"}
+  VULN_2: {ls: "-rw-r--r-- 1 admin root 220 Jan 1 12:00 /etc/hosts"}
+  NA: {}
+U-20:
+  GOOD: {ls: "-rw------- 1 root root 1200 Jan 1 12:00 /etc/xinetd.conf"}
+  VULN: {ls: "-rw-r--r-- 1 root root 1200 Jan 1 12:00 /etc/xinetd.conf"}
+  NA: {}
+U-21:
+  GOOD: {ls: "-rw-r--r-- 1 root root 1200 Jan 1 12:00 /etc/rsyslog.conf"}
+  VULN: {ls: "-rw-rw-r-- 1 root root 1200 Jan 1 12:00 /etc/rsyslog.conf"}
+  NA: {}
+U-22:
+  GOOD: {ls: "-rw-r--r-- 1 root root 19000 Jan 1 12:00 /etc/services"}
+  VULN: {ls: "-rw-r--rw- 1 root root 19000 Jan 1 12:00 /etc/services"}
+  NA: {}
+U-23:
+  MANUAL: {found: "", _rc: {found: 1}}
+  GOOD: {found: ""}
+  MANUAL_2: {found: "/usr/bin/passwd\n/usr/bin/sudo"}
+U-25:
+  MANUAL: {ww: "", _rc: {ww: 1}}
+  GOOD: {ww: ""}
+  VULN: {ww: "/tmp/x.txt"}
+U-28:
+  MANUAL: {wrap: "", fw: "", listen: "LISTEN 0 128 0.0.0.0:22"}
+U-29:
+  GOOD: {ls: ""}
+  VULN: {ls: "-rw-r--r-- 1 lp lp 10 Jan 1 12:00 /etc/hosts.lpd"}
+  GOOD_2: {ls: "-rw------- 1 root root 10 Jan 1 12:00 /etc/hosts.lpd"}
+  VULN_2: {ls: "-rw-r--r-- 1 root root 10 Jan 1 12:00 /etc/hosts.lpd"}
+U-30:
+  GOOD: {"umask": "/etc/profile:umask 022\n/etc/login.defs:UMASK 027"}
+  VULN: {"umask": "/etc/profile:umask 002"}
+  MANUAL: {"umask": ""}
+U-31:
+  GOOD: {found: ""}
+  VULN: {found: "/home/test owner=root"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-32:
+  GOOD: {found: ""}
+  VULN: {found: "bob:/home/bob"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-33:
+  GOOD: {found: ""}
+  MANUAL: {found: "/var/tmp/.hidden"}
+  MANUAL_2: {found: "", _rc: {found: 1}}
+U-35:
+  GOOD: {shares: ""}
+  VULN: {shares: "nfs: /export *(rw)", anon: "/export *(rw)"}
+  MANUAL: {shares: "nfs: /export 10.1.1.0/24(rw)", anon: ""}
+U-37:
+  VULN: {found: "/etc/crontab", ls: "-rw-rw-rw- 1 root root 1 Jan 1 /etc/crontab", unreadable: ""}
+  MANUAL: {found: "", unreadable: "/var/spool/cron", ls: "drwx------ 2 root root 4096 Jan 1 /var/spool/cron"}
+  GOOD: {found: "", unreadable: "", ls: "drwx------ 2 root root 4096 Jan 1 /var/spool/cron"}
+U-39:
+  GOOD: {found: ""}
+  VULN: {found: "systemd: nfs-server active"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-41:
+  GOOD: {found: ""}
+  VULN: {found: "systemd: autofs active"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-42:
+  GOOD: {found: ""}
+  VULN: {found: "inetd: rstatd stream tcp nowait root /usr/sbin/rpc.rstatd"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-43:
+  GOOD: {found: ""}
+  VULN: {found: "systemd: ypserv active"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-45:
+  NA: {mta: ""}
+  MANUAL: {mta: "postfix\nmaster", ver: "postfix 3.6.4"}
+U-49:
+  NA: {named: ""}
+  MANUAL: {named: "named", ver: "BIND 9.18.1"}
+U-53:
+  NA: {ftp: ""}
+  MANUAL: {ftp: "systemd: vsftpd active", banner: "ftpd_banner=Welcome to FTP"}
+  VULN: {ftp: "systemd: vsftpd active", banner: ""}
+U-54:
+  GOOD: {found: ""}
+  VULN: {found: "systemd: vsftpd active"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-56:
+  NA: {ftp: ""}
+  MANUAL: {ftp: "systemd: vsftpd active", acl: ""}
+U-58:
+  GOOD: {found: ""}
+  VULN: {found: "systemd: snmpd active"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-60:
+  NA: {snmp: ""}
+  NA_2: {snmp: "systemd: snmpd active", com: ""}
+  VULN: {snmp: "systemd: snmpd active", com: "rocommunity public"}
+  MANUAL: {snmp: "systemd: snmpd active", com: "rocommunity s3cr3t-c0mm 10.1.1.0/24"}
+U-63:
+  NA: {ls: ""}
+  VULN: {ls: "-r--r----- 1 root root 1 Jan 1 /etc/sudoers", perm: "/etc/sudoers.d/99-custom"}
+  MANUAL: {ls: "-r--r----- 1 root root 1 Jan 1 /etc/sudoers", perm: "", grants: "root ALL=(ALL) ALL"}
+U-64:
+  MANUAL: {ver: "Linux 5.15.0 x86_64\nPRETTY_NAME=\"Ubuntu 24.04\"", recent: "bash-5.1 Mon 01 Jan 2026"}
+# --- 나머지 선언 판정(명령 실패 → MANUAL, NA) ---
+U-05:
+  MANUAL: {uid0: "", _rc: {uid0: 1}}
+  GOOD: {uid0: "root", extra: ""}
+  VULN: {uid0: "root\nhacker", extra: "hacker"}
+U-08:
+  MANUAL: {grp: ""}
+  GOOD: {grp: "root:x:0:", members: ""}
+  VULN: {grp: "root:x:0:bob", members: "bob"}
+U-18:
+  GOOD: {ls: "-rw-r----- 1 root shadow 900 Jan 1 12:00 /etc/shadow"}
+  VULN: {ls: "-rw-r--r-- 1 root root 900 Jan 1 12:00 /etc/shadow"}
+  NA: {}
+U-34:
+  GOOD: {found: ""}
+  VULN: {found: "inetd: finger stream tcp nowait nobody /usr/sbin/in.fingerd"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-36:
+  GOOD: {found: ""}
+  VULN: {found: "inetd: shell stream tcp nowait root /usr/sbin/in.rshd"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-38:
+  GOOD: {found: ""}
+  VULN: {found: "inetd: echo stream tcp nowait root internal"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-44:
+  GOOD: {found: ""}
+  VULN: {found: "xinetd: tftp enabled"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-46:
+  NA: {mta: ""}
+  NA_2: {mta: "postfix", sm: ""}
+  GOOD: {mta: "sendmail", sm: "sendmail", priv: "O PrivacyOptions=authwarnings,novrfy,noexpn,restrictqrun"}
+  VULN: {mta: "sendmail", sm: "sendmail", priv: "O PrivacyOptions=authwarnings"}
+  MANUAL: {mta: "sendmail", sm: "sendmail", priv: ""}
+U-47:
+  NA: {mta: ""}
+  VULN: {mta: "sendmail", cfg: "FEATURE(promiscuous_relay)"}
+  GOOD: {mta: "postfix", cfg: "permit_mynetworks, reject_unauth_destination"}
+  MANUAL: {mta: "postfix", cfg: ""}
+U-48:
+  NA: {mta: ""}
+  GOOD: {mta: "sendmail", priv: "O PrivacyOptions=goaway"}
+  VULN: {mta: "sendmail", priv: "O PrivacyOptions=authwarnings"}
+  GOOD_2: {mta: "postfix", priv: "", pf: "yes"}
+  VULN_2: {mta: "postfix", priv: "", pf: "no"}
+  MANUAL: {mta: "postfix", priv: "", pf: ""}
+U-52:
+  GOOD: {found: ""}
+  VULN: {found: "systemd: telnet.socket active"}
+  MANUAL: {found: "", _rc: {found: 1}}
+U-59:
+  NA: {snmp: ""}
+  VULN: {snmp: "systemd: snmpd active", v12: "rocommunity public", v3: ""}
+  GOOD: {snmp: "systemd: snmpd active", v12: "", v3: "rouser monitor authpriv"}
+  MANUAL: {snmp: "systemd: snmpd active", v12: "", v3: ""}
+U-66:
+  VULN: {daemon: ""}
+  GOOD: {daemon: "rsyslogd", conf: "authpriv.*  /var/log/secure\n*.info;mail.none  /var/log/messages"}
+  MANUAL: {daemon: "rsyslogd", conf: ""}
+U-67:
+  GOOD: {found: "", ls: "drwxr-xr-x 10 root root 4096 Jan 1 /var/log"}
+  VULN: {found: "/var/log/app.log", ls: "drwxr-xr-x 10 root root 4096 Jan 1 /var/log"}
+  MANUAL: {found: "", _rc: {found: 1}}

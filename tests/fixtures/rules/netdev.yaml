@@ -1,0 +1,111 @@
+# 네트워크 N-xx fixture — 기본 플랫폼 cisco-ios, @junos 는 variant.
+N-02:
+  GOOD: {cfg: "security passwords min-length 8"}
+  MANUAL: {cfg: "security passwords min-length 4"}
+  MANUAL_2: {cfg: "hostname r1"}
+  GOOD@junos: {cfg: "set system login password minimum-length 10"}
+  MANUAL@junos: {cfg: "set system host-name r1"}
+N-05:
+  MANUAL: {cfg: "username admin privilege 15 secret 5 $1$abcd"}
+  MANUAL@junos: {cfg: "set system login user admin class super-user"}
+N-09:
+  GOOD: {cfg: "line aux 0\n no exec\n transport input none\n!\nline vty 0 4\n login\n"}
+  VULN: {cfg: "line aux 0\n login\n!\nline vty 0 4\n login\n"}
+  MANUAL: {cfg: "line vty 0 4\n login\n"}
+  GOOD@junos: {cfg: "set system ports auxiliary disable"}
+  MANUAL@junos: {cfg: "set system host-name r1"}
+N-12:
+  MANUAL: {ver: "Cisco IOS Software, C2900 Software (C2900-UNIVERSALK9-M), Version 15.2(4)M7"}
+  MANUAL@junos: {ver: "Junos: 20.4R3.8"}
+N-14:
+  MANUAL: {cfg: "logging buffered 64000\nlogging host 10.1.1.1"}
+  VULN: {cfg: "hostname r1"}
+  MANUAL@junos: {cfg: "set system syslog host 10.1.1.1 any any"}
+  VULN@junos: {cfg: "set system host-name r1"}
+N-17:
+  MANUAL: {cfg: "snmp-server community public RO"}
+  GOOD: {cfg: "hostname r1"}
+  MANUAL@junos: {cfg: "set snmp community public authorization read-only"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-21:
+  VULN: {cfg: "tftp-server flash:c2900-universalk9-mz.bin"}
+  GOOD: {cfg: "hostname r1"}
+  VULN@junos: {cfg: "set system services tftp"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-22:
+  GOOD: {cfg: "interface GigabitEthernet0/0\n ip verify unicast source reachable-via rx"}
+  GOOD_2: {cfg: "ip access-list extended ANTISPOOF\n deny ip 10.0.0.0 0.255.255.255 any"}
+  MANUAL: {cfg: "hostname r1"}
+  GOOD@junos: {cfg: "set interfaces ge-0/0/0 unit 0 family inet rpf-check"}
+  MANUAL@junos: {cfg: "set system host-name r1"}
+N-23:
+  MANUAL: {cfg: "hostname r1"}
+  MANUAL@junos: {cfg: "set system host-name r1"}
+N-24:
+  VULN: {br: "Interface              IP-Address      OK? Method Status                Protocol\nGigabitEthernet0/0     10.1.1.1        YES NVRAM  up                    up\nGigabitEthernet0/1     unassigned      YES unset  down                  down"}
+  GOOD: {br: "Interface              IP-Address      OK? Method Status                Protocol\nGigabitEthernet0/0     10.1.1.1        YES NVRAM  up                    up"}
+  MANUAL: {br: ""}
+  VULN@junos: {br: "Interface               Admin Link Proto    Local\nge-0/0/1                up    down"}
+  GOOD@junos: {br: "Interface               Admin Link Proto    Local\nge-0/0/0                up    up   inet     10.1.1.1/24"}
+N-26:
+  VULN: {cfg: "ip finger"}
+  GOOD: {cfg: "hostname r1"}
+  VULN@junos: {cfg: "set system services finger"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-31:
+  VULN: {cfg: "interface GigabitEthernet0/0\n ip directed-broadcast"}
+  GOOD: {cfg: "interface GigabitEthernet0/0\n no ip directed-broadcast"}
+  VULN@junos: {cfg: "set interfaces ge-0/0/0 unit 0 family inet targeted-broadcast"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-35:
+  VULN: {cfg: "ip identd"}
+  GOOD: {cfg: "hostname r1"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-38:
+  VULN: {cfg: "interface GigabitEthernet0/0\n ip mask-reply"}
+  GOOD: {cfg: "hostname r1"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+# --- 나머지 선언 판정(vty 절 없음 등 → MANUAL) ---
+N-06:
+  GOOD: {cfg: "line vty 0 4\n access-class 10 in\n transport input ssh\n!"}
+  VULN: {cfg: "line vty 0 4\n transport input ssh\n!"}
+  MANUAL: {cfg: "hostname r1"}
+  GOOD@junos: {cfg: "set interfaces lo0 unit 0 family inet filter input PROTECT-RE"}
+  VULN@junos: {cfg: "set system host-name r1"}
+N-07:
+  VULN: {cfg: "line vty 0 4\n exec-timeout 0 0\n!"}
+  GOOD: {cfg: "line vty 0 4\n exec-timeout 5 0\n!"}
+  MANUAL: {cfg: "hostname r1"}
+  GOOD@junos: {cfg: "set system login class admin idle-timeout 5"}
+  VULN@junos: {cfg: "set system login class admin idle-timeout 30"}
+N-08:
+  VULN: {cfg: "line vty 0 4\n transport input telnet\n!"}
+  GOOD: {cfg: "line vty 0 4\n transport input ssh\n!"}
+  MANUAL: {cfg: "hostname r1"}
+  VULN@junos: {cfg: "set system services telnet"}
+  GOOD@junos: {cfg: "set system services ssh"}
+  MANUAL@junos: {cfg: "set system host-name r1"}
+N-13:
+  GOOD: {cfg: "logging buffered 64000"}
+  MANUAL: {cfg: "logging buffered 4096"}
+  VULN: {cfg: "hostname r1"}
+  MANUAL@junos: {cfg: "set system syslog file messages any notice"}
+  VULN@junos: {cfg: "set system host-name r1"}
+N-27:
+  VULN: {cfg: "ip http server"}
+  GOOD: {cfg: "no ip http server\nno ip http secure-server"}
+  MANUAL: {cfg: "hostname r1"}
+  VULN@junos: {cfg: "set system services web-management http"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-30:
+  GOOD: {cfg: "no cdp run"}
+  MANUAL: {cfg: "interface GigabitEthernet0/0\n no cdp enable"}
+  VULN: {cfg: "hostname r1"}
+  VULN@junos: {cfg: "set protocols lldp interface all"}
+  MANUAL@junos: {cfg: "set protocols lldp interface ge-0/0/0"}
+  GOOD@junos: {cfg: "set system host-name r1"}
+N-36:
+  GOOD: {cfg: "no ip domain-lookup"}
+  VULN: {cfg: "hostname r1"}
+  MANUAL@junos: {cfg: "set system name-server 8.8.8.8"}
+  GOOD@junos: {cfg: "set system host-name r1"}

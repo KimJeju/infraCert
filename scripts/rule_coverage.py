@@ -48,8 +48,29 @@ def main() -> int:
     for v in VERDICTS:
         n = sum(1 for r in native if cov.get(r, {}).get(v, 0) > 0)
         print(f"  {v:<7} fixture  {n:>4}/{len(native)}")
-    lacking = [r for r in native if not (cov.get(r, {}).get("GOOD") and cov.get(r, {}).get("VULN"))]
-    print(f"\nGOOD·VULN 둘 다 없는 룰 {len(lacking)}: " + ", ".join(lacking[:40]) + ("…" if len(lacking) > 40 else ""))
+    # 룰이 선언한 판정(then/else/missing) 전부를 fixture 가 만들어 봤는가 — 도달 불가능한 판정은 요구하지 않는다
+    sys.path.insert(0, str(ROOT / "src"))
+    from infraguard.rules.declarative import load_file
+    gaps: dict[str, list[str]] = {}
+    for r in native:
+        f = a.pack / "rules" / f"{r}.yaml"
+        if f.exists():
+            spec = load_file(f)
+            declared: set[str] = set()
+            for blk in (spec, *spec.variants):
+                declared |= {st.then or "MANUAL" for st in blk.verdict if st.when is not None}
+                declared |= {st.else_ for st in blk.verdict if st.when is None and st.else_}
+                declared |= {e.missing for e in blk.extract if e.missing}
+                if not any(st.when is None for st in blk.verdict):
+                    declared.add("MANUAL")          # 어느 절에도 안 걸리면 MANUAL
+        else:
+            declared = {"GOOD", "VULN", "MANUAL"}   # 파이썬 룰: 세 갈래는 있다고 본다
+        miss = sorted(v for v in declared if not cov.get(r, {}).get(v))
+        if miss:
+            gaps[r] = miss
+    print(f"\n선언한 판정 전부 fixture 보유: {len(native) - len(gaps)}/{len(native)}")
+    if gaps:
+        print("부족: " + ", ".join(f"{r}({'/'.join(v)})" for r, v in list(gaps.items())[:40]) + ("…" if len(gaps) > 40 else ""))
     return 0
 
 

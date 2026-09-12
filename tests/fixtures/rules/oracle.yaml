@@ -1,0 +1,98 @@
+# Oracle D-xx fixture — key 는 collect.key, 값은 그 명령의 stdout. 키를 빼면 "명령 실패(exit 1, 출력 없음)".
+# 케이스 이름: <판정>[_<n>][@<platform>].  _rc: {key: exit_code}
+D-01:
+  GOOD: {q: ""}
+  VULN: {q: "SCOTT\nHR\n"}
+  MANUAL: {q: "ORA-01017: invalid username/password; logon denied"}
+D-03:
+  VULN: {q: "PASSWORD_LIFE_TIME=UNLIMITED\nPASSWORD_VERIFY_FUNCTION=NULL"}
+  GOOD: {q: "PASSWORD_LIFE_TIME=90\nPASSWORD_VERIFY_FUNCTION=ORA12C_VERIFY_FUNCTION"}
+  MANUAL: {q: ""}
+  MANUAL_2: {q: "SP2-0640: Not connected"}
+D-04:
+  GOOD: {q: ""}
+  MANUAL: {q: "APPADMIN"}
+D-05:
+  VULN: {q: "PASSWORD_REUSE_MAX=UNLIMITED\nPASSWORD_REUSE_TIME=UNLIMITED"}
+  GOOD: {q: "PASSWORD_REUSE_MAX=10\nPASSWORD_REUSE_TIME=365"}
+  MANUAL: {q: ""}
+D-06:
+  MANUAL: {q: "SCOTT:OPEN\nHR:LOCKED"}
+D-07:
+  MANUAL: {ps: ""}
+  VULN: {ps: "root     ora_pmon_FREE\noracle   tnslsnr"}
+  GOOD: {ps: "oracle   ora_pmon_FREE\noracle   tnslsnr"}
+D-08:
+  GOOD: {q: "11G 12C"}
+  VULN: {q: "10G"}
+  MANUAL: {q: ""}
+D-10:
+  GOOD: {sqlnet: "tcp.validnode_checking = yes\ntcp.invited_nodes = (10.1.1.5, 10.1.1.6)"}
+  VULN: {sqlnet: ""}
+  VULN_2: {sqlnet: "tcp.validnode_checking = yes"}
+D-11:
+  VULN: {q: "TRUE", pub: "0"}
+  VULN_2: {q: "FALSE", pub: "3"}
+  GOOD: {q: "FALSE", pub: "0"}
+  GOOD_2: {q: "", pub: "0"}
+  MANUAL: {q: "", pub: ""}
+D-12:
+  GOOD: {lsn: "PASSWORDS_LISTENER = <마스킹>"}
+  NA: {ver: "19.0"}
+  VULN: {ver: "11.2"}
+  MANUAL: {}
+D-13:
+  NA: {x: ""}
+D-14:
+  MANUAL: {ls: ""}
+  VULN: {ls: "-rw-rw-rw- 1 oracle dba 120 Jan 1 12:00 /opt/oracle/network/admin/sqlnet.ora", w: "/opt/oracle/network/admin/sqlnet.ora"}
+  GOOD: {ls: "-rw-r----- 1 oracle dba 120 Jan 1 12:00 /opt/oracle/network/admin/sqlnet.ora", w: ""}
+D-15:
+  GOOD: {lsn: "ADMIN_RESTRICTIONS_LISTENER = ON"}
+  VULN: {lsn: ""}
+  VULN_2: {lsn: "ADMIN_RESTRICTIONS_LISTENER = OFF"}
+D-16:
+  NA: {x: ""}
+D-17:
+  GOOD: {q: ""}
+  VULN: {q: "SCOTT:SELECT"}
+  MANUAL: {q: "ORA-00942: table or view does not exist"}
+D-18:
+  GOOD: {q: ""}
+  VULN: {q: "DBA"}
+  MANUAL: {q: "sqlplus: not found"}
+D-20:
+  GOOD: {q: ""}
+  MANUAL: {q: "APPUSER"}
+D-21:
+  GOOD: {q: ""}
+  VULN: {q: "SCOTT:HR.EMPLOYEES"}
+  MANUAL: {q: "TNS-12541: TNS:no listener"}
+D-22:
+  GOOD: {q: "TRUE"}
+  VULN: {q: "FALSE"}
+  MANUAL: {q: ""}
+D-23:
+  NA: {x: ""}
+D-24:
+  NA: {x: ""}
+D-25:
+  MANUAL: {q: "Oracle Database 19c Enterprise Edition Release 19.0.0.0.0 - Production Version 19.3.0.0.0", patch: "29517242;Database Release Update : 19.3.0.0.190416"}
+  MANUAL_2: {q: "TNS-12541: TNS:no listener"}
+D-26:
+  VULN: {q: "NONE", uni: "0"}
+  GOOD: {q: "DB", uni: "0"}
+  GOOD_2: {q: "NONE", uni: "5"}
+  MANUAL: {q: "", uni: ""}
+# --- 나머지 선언 판정(오류/미해당 → MANUAL) ---
+D-09:
+  VULN: {q: "UNLIMITED"}
+  GOOD: {q: "5"}
+  VULN_2: {q: "30"}
+  MANUAL: {q: ""}
+  MANUAL_2: {q: "ORA-01034: ORACLE not available"}
+D-19:
+  VULN: {q: "remote_os_authent=TRUE"}
+  GOOD: {q: "remote_os_authent=FALSE\nremote_login_passwordfile=EXCLUSIVE"}
+  MANUAL: {q: ""}
+  MANUAL_2: {q: "Permission denied"}
