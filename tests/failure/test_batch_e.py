@@ -110,7 +110,8 @@ def test_evidence_paths_and_link_signals(qtbot) -> None:  # noqa: ANN001
     page.load(_scan("a" * 64))
     page.table.selectRow(0)
     assert page.btn_term.isEnabled() and page.btn_rule.isEnabled() and page.btn_file.isEnabled()
-    assert "점검 목적: 홈 디렉터리" in page.detail.toPlainText() and "룰 변경됨" in page.detail.toPlainText()
+    txt = page.detail.toPlainText()
+    assert "점검 목적" in txt and "홈 디렉터리" in txt and "룰 변경됨" in txt
     page.btn_term.click()
     page.btn_rule.click()
     page.btn_file.setCurrentIndex(1)
@@ -220,8 +221,8 @@ def test_sftp_pane_columns_and_viewer_masks(qtbot, tmp_path: Path) -> None:  # n
 
 def test_host_card_shows_summary_and_actions(qtbot) -> None:  # noqa: ANN001
     from infraguard.assets.models import Host
-    from infraguard.ui.host_card import HostCard
-    card = HostCard()
+    from infraguard.ui.pages.assets import HostDetail
+    card = HostDetail()
     qtbot.addWidget(card)
     got = []
     card.action.connect(lambda a, h: got.append((a, h)))
@@ -229,7 +230,7 @@ def test_host_card_shows_summary_and_actions(qtbot) -> None:  # noqa: ANN001
              last_summary={"PASS": 61, "FAIL": 3, "UNKNOWN": 2, "ERROR": 0}, last_scan_id="s1")
     card.show_host(h, os_text="Linux 5.15", profile="linux-native", last_at="2026-09-12 21:32")
     assert "VULN 3" in card.summary.text() and "GOOD 61" in card.summary.text()
-    assert card._rows["Profile"].text() == "linux-native" and "PROD" in card._rows["메타"].text()
+    assert card._rows["Profile"].text() == "linux-native" and "PROD" in card._rows["환경 / 중요도"].text()
     assert all(b.isEnabled() for b in card._btns.values())
     card._btns["terminal"].click()
     assert got == [("terminal", "h1")]

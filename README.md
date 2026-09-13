@@ -4,7 +4,7 @@
 
 ## 현재 상태
 
-기능 전체 목록은 [docs/기능목록.md](docs/기능목록.md). 테스트 839개, CI(GitHub Actions)에서 manifest 드리프트·전체 테스트·룰 fixture 커버리지(195/195) 검사.
+기능 전체 목록은 [docs/기능목록.md](docs/기능목록.md). 테스트 846개, CI(GitHub Actions)에서 manifest 드리프트·전체 테스트·룰 fixture 커버리지(195/195) 검사.
 
 | 영역 | 상태 |
 |---|---|

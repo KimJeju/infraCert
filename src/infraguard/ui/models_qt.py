@@ -133,4 +133,8 @@ class StatusDelegate(QStyledItemDelegate):
     def sizeHint(self, option, index):  # noqa: N802
         s = super().sizeHint(option, index)
         s.setHeight(max(s.height(), 24))
+        if index.data(STATE_ROLE) is not None:      # 배지 + 이름 + 요약이 겹치지 않게 폭에 요약도 포함
+            fm = option.fontMetrics
+            summary = index.data(SUMMARY_ROLE) or ""
+            s.setWidth(s.width() + self.DOT + 6 + (fm.horizontalAdvance(summary) + 14 if summary else 0))
         return s

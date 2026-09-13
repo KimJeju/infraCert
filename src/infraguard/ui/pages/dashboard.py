@@ -1,10 +1,13 @@
-"""대시보드(§4) — 카운트 카드 + 진행 중 작업 + 중요도별 취약 막대 + 호스트 히트맵 + 최근 진단.
+"""개요(Overview) — "다음에 무엇을 해야 하는가".
 
-실행오류(ERROR)를 취약(FAIL)과 별도 카드로 분리한다. 제품 절대 원칙의 UI 표현.
-차트는 외부 라이브러리 없이 QPainter(ui/charts.py).
+결과가 없으면 빈 차트 대신 Empty State + [첫 진단 시작]. 있으면 KPI 4개(자산·마지막 진단·취약점·조치율),
+위험 현황, 조치 필요(위험도 높은 취약부터), 최근 진단. 그 아래(스크롤) 조치 현황·호스트별 분포·Top Findings.
+실행오류(ERROR)는 취약(FAIL)과 항상 구분한다. 차트는 QPainter(ui/charts.py), 외부 라이브러리 없음.
 """
 
 from __future__ import annotations
+
+from collections import Counter
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
@@ -17,6 +20,7 @@ from PySide6.QtWidgets import (
     QProgressBar,
     QPushButton,
     QScrollArea,
+    QStackedWidget,
     QVBoxLayout,
     QWidget,
 )
@@ -25,7 +29,7 @@ from infraguard.core.status import DISPLAY_KO, ORDER, Status
 from infraguard.result import diff as _diff
 from infraguard.result import risk as _risk
 from infraguard.ui.charts import BarChart, HostHeatmap
-from infraguard.ui.theme import BG1, BG3, FG1, STATUS_FG
+from infraguard.ui.theme import BG1, BG3, FG1, STATUS_FG, STATUS_ICON
 
 
 class _Card(QFrame):
@@ -34,7 +38,7 @@ class _Card(QFrame):
     def __init__(self, status: Status) -> None:
         super().__init__()
         self._status = status
-        self.setFixedSize(150, 92)
+        self.setFixedSize(150, 84)
         self.setCursor(Qt.CursorShape.PointingHandCursor)
         c = STATUS_FG[status]
         self.setStyleSheet(
@@ -42,11 +46,11 @@ class _Card(QFrame):
             f" QFrame:hover {{ border-color:{c}; }}"
         )
         lay = QVBoxLayout(self)
-        lay.setContentsMargins(14, 10, 12, 10)
-        lbl = QLabel(DISPLAY_KO[status])
+        lay.setContentsMargins(14, 8, 12, 8)
+        lbl = QLabel(f"{STATUS_ICON[status]} {DISPLAY_KO[status]}")
         lbl.setStyleSheet(f"color:{FG1};font-size:12px;font-weight:600;border:none;background:transparent")
         self.n = QLabel("0")
-        self.n.setStyleSheet(f"color:{c};font-size:28px;font-weight:700;border:none;background:transparent")
+        self.n.setStyleSheet(f"color:{c};font-size:26px;font-weight:700;border:none;background:transparent")
         lay.addWidget(lbl)
         lay.addWidget(self.n)
 
@@ -69,28 +73,83 @@ def _panel(title: str, body: QWidget) -> QWidget:
     return w
 
 
+def _kpi(label: str) -> tuple[QWidget, QLabel]:
+    w = QWidget()
+    w.setObjectName("card")
+    lay = QVBoxLayout(w)
+    lay.setContentsMargins(16, 10, 16, 10)
+    n = QLabel("-")
+    n.setObjectName("kpi-n")
+    lab = QLabel(label)
+    lab.setObjectName("kpi-l")
+    lay.addWidget(n)
+    lay.addWidget(lab)
+    return w, n
+
+
 class DashboardPage(QWidget):
     start_scan_requested = Signal()
     filter_by_status = Signal(object)  # Status
-    filter_by_rule = Signal(str)       # rule id — 결과 탭 검색
+    filter_by_rule = Signal(str)       # rule id — 결과 검색
+    open_finding = Signal(str, str)    # hostname, rule id — 조치 필요 항목 클릭
 
     def __init__(self) -> None:
         super().__init__()
-        # 패널 5개의 최소 높이(~750px)가 노트북 창을 넘는다 → 스크롤 영역 안에 쌓는다(런타임 감사 09-12)
         outer = QVBoxLayout(self)
         outer.setContentsMargins(0, 0, 0, 0)
+        self.stack = QStackedWidget()
+        outer.addWidget(self.stack, 1)
+
+        # ---- Empty State ----
+        empty = QWidget()
+        el = QVBoxLayout(empty)
+        el.setContentsMargins(20, 16, 20, 16)
+        top = QHBoxLayout()
+        t0 = QLabel("개요")
+        t0.setObjectName("h1")
+        top.addWidget(t0)
+        top.addStretch(1)
+        b0 = QPushButton("▶  새 진단 시작")
+        b0.setObjectName("primary")
+        b0.clicked.connect(self.start_scan_requested)
+        top.addWidget(b0)
+        el.addLayout(top)
+        el.addStretch(2)
+        et = QLabel("아직 진단 결과가 없습니다.")
+        et.setObjectName("empty-title")
+        et.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        el.addWidget(et)
+        es = QLabel("자산을 선택하고 첫 번째 진단을 시작하세요. 자산이 없으면 [자산] 화면에서 추가하거나 JSON 으로 가져옵니다.")
+        es.setObjectName("muted")
+        es.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        es.setWordWrap(True)
+        el.addWidget(es)
+        el.addSpacing(12)
+        brow = QHBoxLayout()
+        brow.addStretch(1)
+        self.first_btn = QPushButton("첫 진단 시작")
+        self.first_btn.setObjectName("primary")
+        self.first_btn.setMinimumWidth(180)
+        self.first_btn.clicked.connect(self.start_scan_requested)
+        brow.addWidget(self.first_btn)
+        brow.addStretch(1)
+        el.addLayout(brow)
+        el.addStretch(3)
+        self.stack.addWidget(empty)
+
+        # ---- 데이터 있음 ----
         body = QWidget()
         root = QVBoxLayout(body)
         root.setContentsMargins(20, 16, 20, 16)
-        root.setSpacing(14)
+        root.setSpacing(12)
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
         scroll.setFrameShape(QScrollArea.Shape.NoFrame)
         scroll.setWidget(body)
-        outer.addWidget(scroll, 1)
+        self.stack.addWidget(scroll)
 
         top = QHBoxLayout()
-        title = QLabel("진단 현황")
+        title = QLabel("개요")
         title.setObjectName("h1")
         top.addWidget(title)
         self.subtitle = QLabel("")
@@ -103,8 +162,17 @@ class DashboardPage(QWidget):
         top.addWidget(start)
         root.addLayout(top)
 
+        kpis = QHBoxLayout()
+        kpis.setSpacing(10)
+        self.kpi: dict[str, QLabel] = {}
+        for key, label in (("assets", "자산"), ("last", "마지막 진단"), ("vulns", "취약점"), ("fix", "조치율")):
+            w, n = _kpi(label)
+            self.kpi[key] = n
+            kpis.addWidget(w, 1)
+        root.addLayout(kpis)
+
         cards = QHBoxLayout()
-        cards.setSpacing(10)
+        cards.setSpacing(8)
         self._cards: dict[Status, _Card] = {}
         for s in ORDER:
             c = _Card(s)
@@ -114,35 +182,26 @@ class DashboardPage(QWidget):
         cards.addStretch(1)
         root.addLayout(cards)
 
-        self.running = QListWidget()
-        self.running.setMaximumHeight(110)
-        self.running.setStyleSheet("QListWidget{border:none;background:transparent}")
-        run_panel = _panel("진행 중 작업", self.running)
-        run_panel.setMaximumHeight(160)
-        root.addWidget(run_panel)
-
         grid = QGridLayout()
         grid.setSpacing(12)
-        self.sev_chart = BarChart()
         self.risk_chart = BarChart(label_w=44)
-        sev_body = QWidget()
-        sl = QVBoxLayout(sev_body)
-        sl.setContentsMargins(0, 0, 0, 0)
-        sl.addWidget(QLabel("가이드 중요도"))
-        sl.addWidget(self.sev_chart)
-        sl.addWidget(QLabel("위험도(중요도 × 자산 중요도)"))
-        sl.addWidget(self.risk_chart)
-        sl.addStretch(1)
-        grid.addWidget(_panel("취약 분포", sev_body), 0, 0)
-        self.heat = HostHeatmap()
-        grid.addWidget(_panel("호스트별 분포", self.heat), 0, 1)
+        grid.addWidget(_panel("위험 현황 (가이드 중요도 × 자산 중요도)", self.risk_chart), 0, 0)
+        self.todo = QListWidget()
+        self.todo.setStyleSheet("QListWidget{border:none;background:transparent}")
+        self.todo.itemActivated.connect(self._todo_activated)
+        grid.addWidget(_panel("조치 필요 — 위험도 높은 취약부터 (더블클릭 → 결과)", self.todo), 0, 1)
         self.recent = QListWidget()
         self.recent.setStyleSheet("QListWidget{border:none;background:transparent}")
-        grid.addWidget(_panel("최근 진단", self.recent), 0, 2)
-        grid.setColumnStretch(0, 2)
-        grid.setColumnStretch(1, 3)
-        grid.setColumnStretch(2, 2)
-        # 조치 현황: 전회(같은 호스트가 있는 직전 진단) 대비 조치됨/재발/취약 유지/신규 취약
+        self.recent.setMaximumHeight(150)
+        grid.addWidget(_panel("최근 진단", self.recent), 1, 0, 1, 2)
+        # 진행 중 작업: 진단 중일 때만 보인다
+        self.running = QListWidget()
+        self.running.setStyleSheet("QListWidget{border:none;background:transparent}")
+        self.run_panel = _panel("진행 중 작업", self.running)
+        self.run_panel.setMaximumHeight(150)
+        self.run_panel.hide()
+        grid.addWidget(self.run_panel, 2, 0, 1, 2)
+        # 2차 정보(아래로 스크롤)
         self.fix_chart = BarChart(label_w=64)
         fix_body = QWidget()
         fl = QVBoxLayout(fix_body)
@@ -151,31 +210,87 @@ class DashboardPage(QWidget):
         self.fix_label.setObjectName("muted")
         fl.addWidget(self.fix_label)
         fl.addWidget(self.fix_chart, 1)
-        fix_panel = _panel("조치 현황", fix_body)
-        fix_panel.setMaximumHeight(190)
-        grid.addWidget(fix_panel, 1, 0, 1, 3)
-        # 취약점 중심(Greenbone 식): 호스트별이 아니라 "어느 취약점이 몇 대에" · "어느 자산이 가장 많이"
-        self.top_assets = QListWidget()
-        self.top_assets.setStyleSheet("QListWidget{border:none;background:transparent}")
+        grid.addWidget(_panel("조치 현황 (전회 대비)", fix_body), 3, 0)
+        self.heat = HostHeatmap()
+        grid.addWidget(_panel("호스트별 분포", self.heat), 3, 1)
+        self.sev_chart = BarChart()
+        grid.addWidget(_panel("가이드 중요도별 취약", self.sev_chart), 4, 0)
         self.top_findings = QListWidget()
         self.top_findings.setStyleSheet("QListWidget{border:none;background:transparent}")
         self.top_findings.itemActivated.connect(lambda it: self.filter_by_rule.emit(it.data(Qt.ItemDataRole.UserRole) or ""))
-        ta = _panel("Top Affected Assets (취약 수)", self.top_assets)
-        tf = _panel("Top Findings (영향 호스트 수) — 더블클릭하면 결과 탭 검색", self.top_findings)
-        ta.setMaximumHeight(220)
-        tf.setMaximumHeight(220)
-        grid.addWidget(ta, 2, 0, 1, 1)
-        grid.addWidget(tf, 2, 1, 1, 2)
+        grid.addWidget(_panel("Top Findings (영향 호스트 수)", self.top_findings), 4, 1)
+        self.top_assets = QListWidget()
+        self.top_assets.setStyleSheet("QListWidget{border:none;background:transparent}")
+        grid.addWidget(_panel("Top Affected Assets", self.top_assets), 5, 0)
+        for r in range(6):
+            grid.setRowMinimumHeight(r, 150)
+        grid.setColumnStretch(0, 1)
+        grid.setColumnStretch(1, 1)
         root.addLayout(grid, 1)
+        self.stack.setCurrentIndex(0)
+
+    # ---------------------------------------------------------------- 데이터
+    def set_empty(self, empty: bool) -> None:
+        self.stack.setCurrentIndex(0 if empty else 1)
+
+    def set_kpi(self, assets: int, last: str | None, vulns: int, fix_rate: float | None) -> None:
+        self.kpi["assets"].setText(str(assets))
+        self.kpi["last"].setText(last or "-")
+        self.kpi["vulns"].setText(str(vulns))
+        self.kpi["fix"].setText(f"{fix_rate:.0%}" if fix_rate is not None else "-")
 
     def update_counts(self, summary: dict[Status, int]) -> None:
         for s, c in self._cards.items():
             c.set_value(summary.get(s, 0))
         total = sum(summary.values())
-        self.subtitle.setText(f"항목 {total}건" if total else "아직 진단 결과가 없습니다")
+        self.subtitle.setText(f"항목 {total}건" if total else "")
+
+    def update_risk(self, counts: dict[str, int]) -> None:
+        self.risk_chart.set_rows([(_risk.LABEL_KO[k], counts.get(k, 0), _risk.COLOR[k]) for k in _risk.LEVELS])
+
+    def update_severity(self, high: int, mid: int, low: int) -> None:
+        self.sev_chart.set_rows([("상", high, "#F85149"), ("중", mid, "#D29922"), ("하", low, "#8B949E")])
+
+    def update_hosts(self, rows: list[tuple[str, dict[Status, int]]]) -> None:
+        self.heat.set_rows(rows)
+
+    def update_fix(self, summary: dict[str, int] | None, base_id: str | None) -> None:
+        if not summary or base_id is None:
+            self.fix_chart.set_rows([])
+            self.fix_label.setText("전회 진단 없음 — 같은 호스트를 다시 진단하면 조치 현황이 나온다")
+            return
+        rate = _diff.fix_rate(summary)
+        self.fix_label.setText(f"기준 {base_id} · 조치율 " + (f"{rate:.0%}" if rate is not None else "-(전회 취약 없음)"))
+        self.fix_chart.set_rows([(_diff.LABEL_KO[k], summary.get(k, 0), _diff.COLOR[k]) for k in _diff.ORDER])
+
+    def update_todo(self, scan) -> None:  # noqa: ANN001
+        """조치 필요: 취약 항목을 위험도 순으로. (rule, host, 위험도)."""
+        self.todo.clear()
+        if scan is None:
+            return
+        order = {k: i for i, k in enumerate(_risk.LEVELS)}
+        rows = []
+        for h in scan.hosts:
+            crit = h.asset.get("criticality")
+            for r in h.results:
+                if r.status is Status.FAIL:
+                    lvl = _risk.level(r.severity, crit)
+                    rows.append((order[lvl], r.rule_id, h.hostname, lvl, r.name))
+        rows.sort()
+        for _o, rid, hn, lvl, name in rows[:12]:
+            it = QListWidgetItem(f"{STATUS_ICON[Status.FAIL]} {rid:<7} {hn:<18} {_risk.LABEL_KO[lvl]:<4} {name[:34]}")
+            it.setForeground(Qt.GlobalColor.white)
+            it.setData(Qt.ItemDataRole.UserRole, (hn, rid))
+            self.todo.addItem(it)
+        if not rows:
+            self.todo.addItem("취약 없음 — 조치할 항목이 없습니다")
+
+    def _todo_activated(self, it: QListWidgetItem) -> None:
+        data = it.data(Qt.ItemDataRole.UserRole)
+        if data:
+            self.open_finding.emit(*data)
 
     def update_top(self, scan) -> None:  # noqa: ANN001
-        from collections import Counter
         self.top_assets.clear()
         self.top_findings.clear()
         if scan is None:
@@ -199,32 +314,10 @@ class DashboardPage(QWidget):
             self.top_assets.addItem("취약 없음")
             self.top_findings.addItem("취약 없음")
 
-    def update_fix(self, summary: dict[str, int] | None, base_id: str | None) -> None:
-        if not summary or base_id is None:
-            self.fix_chart.set_rows([])
-            self.fix_label.setText("전회 진단 없음 — 같은 호스트를 다시 진단하면 조치 현황이 나온다")
-            return
-        rate = _diff.fix_rate(summary)
-        self.fix_label.setText(f"기준 {base_id} · 조치율 " + (f"{rate:.0%}" if rate is not None else "-(전회 취약 없음)"))
-        self.fix_chart.set_rows([(_diff.LABEL_KO[k], summary.get(k, 0), _diff.COLOR[k]) for k in _diff.ORDER])
-
-    def update_risk(self, counts: dict[str, int]) -> None:
-        self.risk_chart.set_rows([(_risk.LABEL_KO[k], counts.get(k, 0), _risk.COLOR[k]) for k in _risk.LEVELS])
-
-    def update_severity(self, high: int, mid: int, low: int) -> None:
-        self.sev_chart.set_rows([("상", high, "#F85149"), ("중", mid, "#D29922"), ("하", low, "#8B949E")])
-
-    def update_hosts(self, rows: list[tuple[str, dict[Status, int]]]) -> None:
-        self.heat.set_rows(rows)
-
     def set_progress(self, rows: list[tuple[str, str, int]]) -> None:
-        """rows: (hostname, stage, percent)."""
+        """rows: (hostname, stage, percent). 비어 있으면 패널 숨김."""
         self.running.clear()
-        if not rows:
-            it = QListWidgetItem("진행 중인 작업 없음")
-            it.setForeground(Qt.GlobalColor.gray)
-            self.running.addItem(it)
-            return
+        self.run_panel.setVisible(bool(rows))
         for name, stage, pct in rows:
             it = QListWidgetItem()
             w = QWidget()
@@ -244,13 +337,15 @@ class DashboardPage(QWidget):
             self.running.addItem(it)
             self.running.setItemWidget(it, w)
 
-    def set_recent(self, scans: list[tuple[str, dict]]) -> None:
+    def set_recent(self, scans: list[tuple[str, dict]], details: dict[str, str] | None = None) -> None:
+        """details: scan_id → '3대 · 64 rules · 3 VULN · 완료' 같은 요약."""
         self.recent.clear()
         if not scans:
             it = QListWidgetItem("기록 없음")
             it.setForeground(Qt.GlobalColor.gray)
             self.recent.addItem(it)
-        for sid, meta in scans[:10]:
+        for sid, meta in scans[:8]:
             started = (meta.get("started_at") or "")[:16].replace("T", " ")
             prof = meta.get("profile") or ""
-            self.recent.addItem(f"{started}   {sid}   {prof}")
+            extra = (details or {}).get(sid, "")
+            self.recent.addItem(f"{started}   {prof:<16} {extra}   {sid}")

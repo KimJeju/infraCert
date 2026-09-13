@@ -33,13 +33,15 @@ def test_baseline_column_and_changed_filter(qtbot) -> None:  # noqa: ANN001
     page.load(cur)
     assert page.changed_only.isEnabled() and "s0" in page.base_label.text()
     assert page.table.rowCount() == 3
-    assert _col(page, 0, 1) == "U-01" and _col(page, 0, 7).startswith("양호") and _col(page, 0, 7).endswith("→")   # 양호→취약 변경
-    assert _col(page, 1, 1) == "U-02" and _col(page, 1, 7) == "취약"                                              # 동일
-    assert _col(page, 2, 1) == "U-04" and _col(page, 2, 7) == ""                                                  # 전회에 없음
+    assert _col(page, 0, 1) == "U-01" and _col(page, 0, 5) == "재발"        # 양호→취약
+    assert _col(page, 1, 1) == "U-02" and _col(page, 1, 5) == "취약 유지"   # 동일
+    assert _col(page, 2, 1) == "U-04" and _col(page, 2, 5) == ""           # 전회에 없음·양호
+    assert _col(page, 0, 0) == "✗ 취약" and _col(page, 2, 0) == "✓ 양호"    # 상태 = 아이콘 + 텍스트
     page.changed_only.setChecked(True)
     assert page.table.rowCount() == 1 and _col(page, 0, 1) == "U-01"
     page.table.selectRow(0)
-    assert "전회(s0): 양호" in page.detail.toPlainText() and "변경됨" in page.detail.toPlainText()
+    txt = page.detail.toPlainText()
+    assert "전회(s0)" in txt and "양호" in txt and "재발" in txt
 
     page.set_baseline(None)                       # 기준 없으면 필터 꺼지고 비활성
     page.load(cur)

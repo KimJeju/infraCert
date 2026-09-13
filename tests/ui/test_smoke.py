@@ -31,14 +31,14 @@ def ctx(tmp_path):
                       creds=CredentialSession(), config={})
 
 
-def test_mainwindow_builds_and_shows_tabs(qtbot, ctx):
+def test_mainwindow_builds_and_shows_nav(qtbot, ctx):
     win = MainWindow(ctx)
     qtbot.addWidget(win)
-    # 고정 탭 6 (대시보드/진단/결과/수동확인/룰팩/설정). 터미널·파일은 호스트별 동적 탭.
-    titles = [win.tabs.tabText(i) for i in range(win.tabs.count())]
-    for key in ("대시보드", "진단", "결과", "수동확인", "룰팩", "설정"):
-        assert any(key in t for t in titles), key
-    assert win.tabs.count() == win.FIXED_TABS == 7          # 대시보드·진단·결과·수동확인·룰팩·멀티실행·설정
+    # 단일 좌측 Nav: 업무 5 + 도구 5 + 설정 1. 터미널·SFTP 는 각 페이지 안의 세션 탭.
+    assert list(win.nav.keys()) == list(win.PAGES) and win.stack.count() == 11
+    assert win.current_page() == "overview"
+    win.show_page("findings")
+    assert win.current_page() == "findings" and win.stack.currentWidget() is win.result
     assert win.pack is not None and win.pack.runnable, win.pack and win.pack.problems
 
 

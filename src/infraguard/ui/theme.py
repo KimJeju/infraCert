@@ -50,6 +50,21 @@ STATUS_TEXT = {
     Status.SKIPPED: "#9CA3AF",
     Status.ERROR: "#C084FC",
 }
+# 상태 = 색 + 아이콘 + 텍스트 (색만으로 구분하지 않는다 — 접근성)
+STATUS_ICON = {
+    Status.PASS: "✓",
+    Status.FAIL: "✗",
+    Status.UNKNOWN: "?",
+    Status.SKIPPED: "–",
+    Status.ERROR: "!",
+}
+
+
+def status_label(st: Status) -> str:
+    from infraguard.core.status import DISPLAY_KO
+    return f"{STATUS_ICON[st]} {DISPLAY_KO[st]}"
+
+
 # 다크 배경 위 상태 텍스트/막대 색
 STATUS_FG = {
     Status.PASS: "#3FB950",
@@ -176,6 +191,21 @@ QLabel#h2 {{ font-size: 13px; font-weight: 600; color: {FG0}; }}
 QLabel#muted {{ color: {FG1}; }}
 QLabel#sidebar-title {{ color: {FG1}; font-weight: 700; font-size: 12px; letter-spacing: 1px; }}
 QWidget#sidebar {{ background: {BG1}; border-right: 1px solid {BG3}; }}
+/* ---- Nav Rail ---- */
+QWidget#nav {{ background: {BG1}; border-right: 1px solid {BG3}; }}
+QLabel#nav-group {{ color: {FG1}; font-size: 10px; letter-spacing: 2px; padding: 4px 8px 2px 8px; }}
+QFrame#nav-sep {{ color: {BG3}; background: {BG3}; max-height: 1px; border: none; }}
+QPushButton#nav-btn {{ text-align: left; padding: 7px 12px; border: none; background: transparent; color: {FG1};
+                       border-left: 2px solid transparent; min-height: 20px; }}
+QPushButton#nav-btn:hover {{ background: {BG2}; color: {FG0}; }}
+QPushButton#nav-btn:checked {{ background: {BG2}; color: {FG0}; border-left: 2px solid {ACCENT}; font-weight: 600; }}
+/* ---- Command Palette ---- */
+QDialog#palette {{ background: {BG1}; border: 1px solid {ACCENT_DIM}; }}
+QDialog#palette QLineEdit {{ font-size: 14px; padding: 8px 10px; min-height: 30px; }}
+QDialog#palette QListWidget::item {{ padding: 6px 8px; }}
+QLabel#kpi-n {{ font-size: 26px; font-weight: 700; color: {FG0}; }}
+QLabel#kpi-l {{ color: {FG1}; font-size: 11px; letter-spacing: 1px; }}
+QLabel#empty-title {{ font-size: 16px; font-weight: 600; color: {FG0}; }}
 QWidget#sidebar QLineEdit {{ background: {BG0}; }}
 QWidget#card {{ background: {BG1}; border: 1px solid {BG3}; }}
 """

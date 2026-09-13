@@ -36,7 +36,9 @@ def test_every_module_imports() -> None:
 def _builders():
     pack = loader.load(PACK)
     from infraguard.ui.dialogs import AssetEditDialog, CredPromptDialog, ExceptionDialog, HostKeyDialog
+    from infraguard.ui.pages.assets import AssetsPage
     from infraguard.ui.pages.dashboard import DashboardPage
+    from infraguard.ui.pages.reports import ReportsPage
     from infraguard.ui.pages.manual import ManualBenchPage
     from infraguard.ui.pages.result import ResultPage
     from infraguard.ui.pages.rulepack import RulePackPage
@@ -58,7 +60,7 @@ def _builders():
         return p
 
     return {
-        "dashboard": DashboardPage, "scan": scan, "result": ResultPage, "manual": ManualBenchPage,
+        "dashboard": DashboardPage, "assets": AssetsPage, "reports": ReportsPage, "scan": scan, "result": ResultPage, "manual": ManualBenchPage,
         "rulepack": rulepack, "settings": lambda: SettingsPage(config.load(), Layout(), "0.1", "kisa-2026"),
         "dlg.asset": lambda: AssetEditDialog(Host(host_id="h", name="n", address="a")),
         "dlg.cred": lambda: CredPromptDialog("root@x:22", "root"),
